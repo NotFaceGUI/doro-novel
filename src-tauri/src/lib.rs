@@ -23,21 +23,21 @@ fn check_path_is_file(path: String) -> Result<bool, String> {
 
     if path.exists() {
         if path.is_file() {
-            Ok(true)  // 文件
+            Ok(true) // 文件
         } else if path.is_dir() {
-            Ok(false)  // 目录
+            Ok(false) // 目录
         } else {
-            Err(format!("路径 {} 既不是文件也不是目录", path.display()))  // 非文件或目录
+            Err(format!("路径 {} 既不是文件也不是目录", path.display())) // 非文件或目录
         }
     } else {
-        Err(format!("路径 {} 不存在", path.display()))  // 路径不存在
+        Err(format!("路径 {} 不存在", path.display())) // 路径不存在
     }
 }
-
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
+        .plugin(tauri_plugin_updater::Builder::new().build())
         .plugin(tauri_plugin_fs::init())
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_opener::init())

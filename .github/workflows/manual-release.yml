@@ -1,0 +1,94 @@
+name: 'manual-release'
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Release version (e.g., v1.0.0)'
+        required: true
+        type: string
+      prerelease:
+        description: 'Is this a prerelease?'
+        required: false
+        default: false
+        type: boolean
+      draft:
+        description: 'Create as draft release?'
+        required: false
+        default: false
+        type: boolean
+
+# This workflow allows manual release creation with custom parameters
+
+jobs:
+  manual-publish-tauri:
+    permissions:
+      contents: write
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - platform: 'macos-latest'
+            args: '--target aarch64-apple-darwin'
+          - platform: 'macos-latest'
+            args: '--target x86_64-apple-darwin'
+          - platform: 'ubuntu-22.04'
+            args: ''
+          - platform: 'windows-latest'
+            args: ''
+
+    runs-on: ${{ matrix.platform }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: setup node
+        uses: actions/setup-node@v4
+        with:
+          node-version: lts/*
+
+      - name: install Rust stable
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.platform == 'macos-latest' && 'aarch64-apple-darwin,x86_64-apple-darwin' || '' }}
+
+      - name: install dependencies (ubuntu only)
+        if: matrix.platform == 'ubuntu-22.04'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf
+
+      - name: install frontend dependencies
+        run: pnpm install
+
+      - name: Cache pnpm store
+        uses: actions/cache@v3
+        with:
+          path: ~/.pnpm-store
+          key: ${{ runner.os }}-pnpm-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-
+
+      - uses: tauri-apps/tauri-action@v0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tagName: ${{ github.event.inputs.version }}
+          releaseName: 'Doro Novel ${{ github.event.inputs.version }}'
+          releaseBody: |
+            ## Manual Release ${{ github.event.inputs.version }}
+            
+            This release was created manually.
+            
+            ### Installation
+            - **Windows**: Download the `.msi` installer
+            - **macOS**: Download the `.dmg` file
+            - **Linux**: Download the `.AppImage` or `.deb` file
+            
+            ### Auto Update
+            The app supports automatic updates. You'll be notified when a new version is available.
+          releaseDraft: ${{ github.event.inputs.draft }}
+          prerelease: ${{ github.event.inputs.prerelease }}
+          includeUpdaterJson: true
+          updaterJsonPreferNsis: false
+          updaterJsonKeepUniversal: false
+          args: ${{ matrix.args }}
