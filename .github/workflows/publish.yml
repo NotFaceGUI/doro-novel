@@ -4,7 +4,6 @@ on:
   push:
     tags:
       - 'v*' # 推送以 v 开头的标签时触发，如 v1.0.0
-  push:
     branches:
       - main
       - release
