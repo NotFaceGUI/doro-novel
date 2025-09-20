@@ -65,6 +65,24 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-pnpm-
 
+      - name: Debug environment variables
+        run: |
+          echo "TAURI_SIGNING_PRIVATE_KEY length: ${#TAURI_SIGNING_PRIVATE_KEY}"
+          echo "TAURI_SIGNING_PRIVATE_KEY_PASSWORD length: ${#TAURI_SIGNING_PRIVATE_KEY_PASSWORD}"
+          if [ -n "$TAURI_SIGNING_PRIVATE_KEY" ]; then
+            echo "TAURI_SIGNING_PRIVATE_KEY is set"
+          else
+            echo "TAURI_SIGNING_PRIVATE_KEY is NOT set"
+          fi
+          if [ -n "$TAURI_SIGNING_PRIVATE_KEY_PASSWORD" ]; then
+            echo "TAURI_SIGNING_PRIVATE_KEY_PASSWORD is set"
+          else
+            echo "TAURI_SIGNING_PRIVATE_KEY_PASSWORD is NOT set"
+          fi
+        env:
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
+
       - uses: tauri-apps/tauri-action@v0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
