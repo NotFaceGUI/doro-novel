@@ -2,7 +2,6 @@ import { ref, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { 
   checkForUpdates, 
-  silentCheckForUpdates, 
   manualUpdate,
   type UpdateInfo,
   type UpdateCallbacks 
@@ -26,10 +25,9 @@ export function useUpdater() {
     isChecking.value = true;
     
     try {
-      const result = silent 
-        ? await silentCheckForUpdates()
-        : await checkForUpdates();
+      const result = await checkForUpdates();
       
+      console.log('检查更新结果:', result);
       updateInfo.value = result;
       lastCheckTime.value = new Date();
       
