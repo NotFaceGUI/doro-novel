@@ -1,0 +1,2 @@
+patchedDependencies:
+  '@pixi-spine/loader-base': patches/@pixi-spine__loader-base.patch

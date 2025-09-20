@@ -1,0 +1,6308 @@
+[
+    {
+        "dirName": "777",
+        "characterName": "777",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "777",
+            "skel": "777_00.skel"
+        }
+    },
+    {
+        "dirName": "absolute",
+        "characterName": "absolute",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "absolute",
+            "skel": "absolute_00.skel"
+        }
+    },
+    {
+        "dirName": "acpufreeze",
+        "characterName": "acpufreeze",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "acpufreeze",
+            "skel": "acpufreeze_00.skel"
+        }
+    },
+    {
+        "dirName": "aegisthediver",
+        "characterName": "aegisthediver",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "aegisthediver",
+            "skel": "aegisthediver_00.skel"
+        }
+    },
+    {
+        "dirName": "alonesurvivor",
+        "characterName": "alonesurvivor",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "alonesurvivor",
+            "skel": "alonesurvivor_00.skel"
+        }
+    },
+    {
+        "dirName": "arcanearchive",
+        "characterName": "arcanearchive",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "arcanearchive",
+            "skel": "arcanearchive_00.skel"
+        }
+    },
+    {
+        "dirName": "bba001",
+        "characterName": "bba001",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "bba001",
+            "skel": "bba001_00.skel"
+        }
+    },
+    {
+        "dirName": "bbg001",
+        "characterName": "bbg001",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "bbg001",
+            "skel": "bbg001_00.skel"
+        }
+    },
+    {
+        "dirName": "bbg002",
+        "characterName": "bbg002",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "bbg002",
+            "skel": "bbg002_00.skel"
+        }
+    },
+    {
+        "dirName": "bbg003",
+        "characterName": "bbg003",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "bbg003",
+            "skel": "bbg003_00.skel"
+        }
+    },
+    {
+        "dirName": "beautyfullshot",
+        "characterName": "beautyfullshot",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "beautyfullshot",
+            "skel": "beautyfullshot_00.skel"
+        }
+    },
+    {
+        "dirName": "bluewaterisland",
+        "characterName": "bluewaterisland",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "bluewaterisland",
+            "skel": "bluewaterisland_00.skel"
+        }
+    },
+    {
+        "dirName": "boomsday",
+        "characterName": "boomsday",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "boomsday",
+            "skel": "boomsday_00.skel"
+        }
+    },
+    {
+        "dirName": "boomtheghost",
+        "characterName": "boomtheghost",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "boomtheghost",
+            "skel": "boomtheghost_00.skel"
+        }
+    },
+    {
+        "dirName": "bowwowparadise",
+        "characterName": "bowwowparadise",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "bowwowparadise",
+            "skel": "bowwowparadise_00.skel"
+        }
+    },
+    {
+        "dirName": "brandnewyear",
+        "characterName": "brandnewyear",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "brandnewyear",
+            "skel": "brandnewyear_00.skel"
+        }
+    },
+    {
+        "dirName": "c010",
+        "characterName": "c010",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c010",
+            "skel": "c010_00.skel",
+            "aimSkel": "c010_aim_00.skel",
+            "coverSkel": "c010_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c010_01",
+        "characterName": "c010_01",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c010_01",
+            "skel": "c010_01_00.skel",
+            "aimSkel": "c010_01_aim_00.skel",
+            "coverSkel": "c010_01_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c010_02",
+        "characterName": "c010_02",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c010_02",
+            "skel": "c010_02_00.skel",
+            "aimSkel": "c010_02_aim_00.skel",
+            "coverSkel": "c010_02_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c010_03",
+        "characterName": "c010_03",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c010_03",
+            "skel": "c010_03_00.skel",
+            "aimSkel": "c010_03_aim_00.skel",
+            "coverSkel": "c010_03_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c011",
+        "characterName": "c011",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c011",
+            "skel": "c011_00.skel",
+            "aimSkel": "c011_aim_00.skel",
+            "coverSkel": "c011_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c011_01",
+        "characterName": "c011_01",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c011_01",
+            "skel": "c011_01_00.skel",
+            "aimSkel": "c011_01_aim_00.skel",
+            "coverSkel": "c011_01_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c012",
+        "characterName": "c012",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c012",
+            "skel": "c012_00.skel",
+            "aimSkel": "c012_aim_00.skel",
+            "coverSkel": "c012_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c013",
+        "characterName": "c013",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c013",
+            "skel": "c013_00.skel",
+            "aimSkel": "c013_aim_00.skel",
+            "coverSkel": "c013_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c014",
+        "characterName": "c014",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c014",
+            "skel": "c014_00.skel",
+            "aimSkel": "c014_aim_00.skel",
+            "coverSkel": "c014_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c015",
+        "characterName": "c015",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c015",
+            "skel": "c015_00.skel",
+            "aimSkel": "c015_aim_00.skel",
+            "coverSkel": "c015_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c016",
+        "characterName": "c016",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c016",
+            "skel": "c016_00.skel",
+            "aimSkel": "c016_aim_00.skel",
+            "coverSkel": "c016_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c016_01",
+        "characterName": "c016_01",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c016_01",
+            "skel": "c016_01_00.skel",
+            "aimSkel": "c016_01_aim_00.skel",
+            "coverSkel": "c016_01_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c020",
+        "characterName": "c020",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c020",
+            "skel": "c020_00.skel",
+            "aimSkel": "c020_aim_00.skel",
+            "coverSkel": "c020_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c022",
+        "characterName": "c022",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c022",
+            "skel": "c022_00.skel",
+            "aimSkel": "c022_aim_00.skel",
+            "coverSkel": "c022_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c022_01",
+        "characterName": "c022_01",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c022_01",
+            "skel": "c022_01_00.skel",
+            "aimSkel": "c022_01_aim_00.skel",
+            "coverSkel": "c022_01_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c030",
+        "characterName": "c030",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c030",
+            "skel": "c030_00.skel",
+            "aimSkel": "c030_aim_00.skel",
+            "coverSkel": "c030_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c030_01",
+        "characterName": "c030_01",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c030_01",
+            "skel": "c030_01_00.skel",
+            "aimSkel": "c030_01_aim_00.skel",
+            "coverSkel": "c030_01_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c030_02",
+        "characterName": "c030_02",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c030_02",
+            "skel": "c030_02_00.skel",
+            "aimSkel": "c030_02_aim_00.skel",
+            "coverSkel": "c030_02_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c032",
+        "characterName": "c032",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c032",
+            "skel": "c032_00.skel",
+            "aimSkel": "c032_aim_00.skel",
+            "coverSkel": "c032_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c032_01",
+        "characterName": "c032_01",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c032_01",
+            "skel": "c032_01_00.skel",
+            "aimSkel": "c032_01_aim_00.skel",
+            "coverSkel": "c032_01_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c033",
+        "characterName": "c033",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c033",
+            "skel": "c033_00.skel",
+            "aimSkel": "c033_aim_00.skel",
+            "coverSkel": "c033_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c040",
+        "characterName": "c040",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c040",
+            "skel": "c040_00.skel",
+            "aimSkel": "c040_aim_00.skel",
+            "coverSkel": "c040_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c041",
+        "characterName": "c041",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c041",
+            "skel": "c041_00.skel",
+            "aimSkel": "c041_aim_00.skel",
+            "coverSkel": "c041_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c043",
+        "characterName": "c043",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c043",
+            "skel": "c043_00.skel",
+            "aimSkel": "c043_aim_00.skel",
+            "coverSkel": "c043_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c043_01",
+        "characterName": "c043_01",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c043_01",
+            "skel": "c043_01_00.skel",
+            "aimSkel": "c043_01_aim_00.skel",
+            "coverSkel": "c043_01_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c060",
+        "characterName": "c060",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c060",
+            "skel": "c060_00.skel",
+            "aimSkel": "c060_aim_00.skel",
+            "coverSkel": "c060_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c061",
+        "characterName": "c061",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c061",
+            "skel": "c061_00.skel",
+            "aimSkel": "c061_aim_00.skel",
+            "coverSkel": "c061_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c062",
+        "characterName": "c062",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c062",
+            "skel": "c062_00.skel",
+            "aimSkel": "c062_aim_00.skel",
+            "coverSkel": "c062_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c070",
+        "characterName": "c070",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c070",
+            "skel": "c070_00.skel",
+            "aimSkel": "c070_aim_00.skel",
+            "coverSkel": "c070_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c070_01",
+        "characterName": "c070_01",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c070_01",
+            "skel": "c070_01_00.skel",
+            "aimSkel": "c070_01_aim_00.skel",
+            "coverSkel": "c070_01_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c070_02",
+        "characterName": "c070_02",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c070_02",
+            "skel": "c070_02_00.skel",
+            "aimSkel": "c070_02_aim_00.skel",
+            "coverSkel": "c070_02_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c071",
+        "characterName": "c071",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c071",
+            "skel": "c071_00.skel",
+            "aimSkel": "c071_aim_00.skel",
+            "coverSkel": "c071_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c072",
+        "characterName": "c072",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c072",
+            "skel": "c072_00.skel",
+            "aimSkel": "c072_aim_00.skel",
+            "coverSkel": "c072_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c072_01",
+        "characterName": "c072_01",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c072_01",
+            "skel": "c072_01_00.skel",
+            "aimSkel": "c072_01_aim_00.skel",
+            "coverSkel": "c072_01_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c072_02",
+        "characterName": "c072_02",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c072_02",
+            "skel": "c072_02_00.skel",
+            "aimSkel": "c072_02_aim_00.skel",
+            "coverSkel": "c072_02_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c072_04",
+        "characterName": "c072_04",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c072_04",
+            "skel": "c072_04_00.skel",
+            "aimSkel": "c072_04_aim_00.skel",
+            "coverSkel": "c072_04_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c080",
+        "characterName": "c080",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c080",
+            "skel": "c080_00.skel",
+            "aimSkel": "c080_aim_00.skel",
+            "coverSkel": "c080_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c080_01",
+        "characterName": "c080_01",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c080_01",
+            "skel": "c080_01_00.skel",
+            "aimSkel": "c080_01_aim_00.skel",
+            "coverSkel": "c080_01_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c080_02",
+        "characterName": "c080_02",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c080_02",
+            "skel": "c080_02_00.skel",
+            "aimSkel": "c080_02_aim_00.skel",
+            "coverSkel": "c080_02_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c082",
+        "characterName": "c082",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c082",
+            "skel": "c082_00.skel",
+            "aimSkel": "c082_aim_00.skel",
+            "coverSkel": "c082_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c082_01",
+        "characterName": "c082_01",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c082_01",
+            "skel": "c082_01_00.skel",
+            "aimSkel": "c082_01_aim_00.skel",
+            "coverSkel": "c082_01_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c082_02",
+        "characterName": "c082_02",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c082_02",
+            "skel": "c082_02_00.skel",
+            "aimSkel": "c082_02_aim_00.skel",
+            "coverSkel": "c082_02_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c082_80",
+        "characterName": "c082_80",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c082_80",
+            "skel": "c082_80_00.skel",
+            "aimSkel": "c082_80_aim_00.skel",
+            "coverSkel": "c082_80_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c090",
+        "characterName": "c090",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c090",
+            "skel": "c090_00.skel",
+            "aimSkel": "c090_aim_00.skel",
+            "coverSkel": "c090_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c090_01",
+        "characterName": "c090_01",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c090_01",
+            "skel": "c090_01_00.skel",
+            "aimSkel": "c090_01_aim_00.skel",
+            "coverSkel": "c090_01_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c090_02",
+        "characterName": "c090_02",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c090_02",
+            "skel": "c090_02_00.skel",
+            "aimSkel": "c090_02_aim_00.skel",
+            "coverSkel": "c090_02_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c091",
+        "characterName": "c091",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c091",
+            "skel": "c091_00.skel",
+            "aimSkel": "c091_aim_00.skel",
+            "coverSkel": "c091_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c091_01",
+        "characterName": "c091_01",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c091_01",
+            "skel": "c091_01_00.skel",
+            "aimSkel": "c091_01_aim_00.skel",
+            "coverSkel": "c091_01_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c092",
+        "characterName": "c092",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c092",
+            "skel": "c092_00.skel",
+            "aimSkel": "c092_aim_00.skel",
+            "coverSkel": "c092_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c093",
+        "characterName": "c093",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c093",
+            "skel": "c093_00.skel",
+            "aimSkel": "c093_aim_00.skel",
+            "coverSkel": "c093_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c094",
+        "characterName": "c094",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c094",
+            "skel": "c094_00.skel",
+            "aimSkel": "c094_aim_00.skel",
+            "coverSkel": "c094_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c095",
+        "characterName": "c095",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c095",
+            "skel": "c095_00.skel",
+            "aimSkel": "c095_aim_00.skel",
+            "coverSkel": "c095_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c095_01",
+        "characterName": "c095_01",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c095_01",
+            "skel": "c095_01_00.skel",
+            "aimSkel": "c095_01_aim_00.skel",
+            "coverSkel": "c095_01_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c100",
+        "characterName": "c100",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c100",
+            "skel": "c100_00.skel",
+            "aimSkel": "c100_aim_00.skel",
+            "coverSkel": "c100_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c101",
+        "characterName": "c101",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c101",
+            "skel": "c101_00.skel",
+            "aimSkel": "c101_aim_00.skel",
+            "coverSkel": "c101_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c101_01",
+        "characterName": "c101_01",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c101_01",
+            "skel": "c101_01_00.skel",
+            "aimSkel": "c101_01_aim_00.skel",
+            "coverSkel": "c101_01_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c101_02",
+        "characterName": "c101_02",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c101_02",
+            "skel": "c101_02_00.skel",
+            "aimSkel": "c101_02_aim_00.skel",
+            "coverSkel": "c101_02_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c102",
+        "characterName": "c102",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c102",
+            "skel": "c102_00.skel",
+            "aimSkel": "c102_aim_00.skel",
+            "coverSkel": "c102_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c102_01",
+        "characterName": "c102_01",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c102_01",
+            "skel": "c102_01_00.skel",
+            "aimSkel": "c102_01_aim_00.skel",
+            "coverSkel": "c102_01_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c103",
+        "characterName": "c103",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c103",
+            "skel": "c103_00.skel"
+        }
+    },
+    {
+        "dirName": "c104",
+        "characterName": "c104",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c104",
+            "skel": "c104_00.skel"
+        }
+    },
+    {
+        "dirName": "c105",
+        "characterName": "c105",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c105",
+            "skel": "c105_00.skel"
+        }
+    },
+    {
+        "dirName": "c110",
+        "characterName": "c110",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c110",
+            "skel": "c110_00.skel",
+            "aimSkel": "c110_aim_00.skel",
+            "coverSkel": "c110_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c111",
+        "characterName": "c111",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c111",
+            "skel": "c111_00.skel",
+            "aimSkel": "c111_aim_00.skel",
+            "coverSkel": "c111_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c112",
+        "characterName": "c112",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c112",
+            "skel": "c112_00.skel",
+            "aimSkel": "c112_aim_00.skel",
+            "coverSkel": "c112_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c112_01",
+        "characterName": "c112_01",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c112_01",
+            "skel": "c112_01_00.skel",
+            "aimSkel": "c112_01_aim_00.skel",
+            "coverSkel": "c112_01_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c112_02",
+        "characterName": "c112_02",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c112_02",
+            "skel": "c112_02_00.skel",
+            "aimSkel": "c112_02_aim_00.skel",
+            "coverSkel": "c112_02_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c120",
+        "characterName": "c120",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c120",
+            "skel": "c120_00.skel",
+            "aimSkel": "c120_aim_00.skel",
+            "coverSkel": "c120_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c121",
+        "characterName": "c121",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c121",
+            "skel": "c121_00.skel",
+            "aimSkel": "c121_aim_00.skel",
+            "coverSkel": "c121_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c130",
+        "characterName": "c130",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c130",
+            "skel": "c130_00.skel",
+            "aimSkel": "c130_aim_00.skel",
+            "coverSkel": "c130_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c130_01",
+        "characterName": "c130_01",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c130_01",
+            "skel": "c130_01_00.skel",
+            "aimSkel": "c130_01_aim_00.skel",
+            "coverSkel": "c130_01_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c131",
+        "characterName": "c131",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c131",
+            "skel": "c131_00.skel",
+            "aimSkel": "c131_aim_00.skel",
+            "coverSkel": "c131_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c131_01",
+        "characterName": "c131_01",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c131_01",
+            "skel": "c131_01_00.skel",
+            "aimSkel": "c131_01_aim_00.skel",
+            "coverSkel": "c131_01_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c132",
+        "characterName": "c132",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c132",
+            "skel": "c132_00.skel",
+            "aimSkel": "c132_aim_00.skel",
+            "coverSkel": "c132_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c140",
+        "characterName": "c140",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c140",
+            "skel": "c140_00.skel",
+            "aimSkel": "c140_aim_00.skel",
+            "coverSkel": "c140_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c140_01",
+        "characterName": "c140_01",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c140_01",
+            "skel": "c140_01_00.skel",
+            "aimSkel": "c140_01_aim_00.skel",
+            "coverSkel": "c140_01_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c140_02",
+        "characterName": "c140_02",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c140_02",
+            "skel": "c140_02_00.skel",
+            "aimSkel": "c140_02_aim_00.skel",
+            "coverSkel": "c140_02_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c141",
+        "characterName": "c141",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c141",
+            "skel": "c141_00.skel",
+            "aimSkel": "c141_aim_00.skel",
+            "coverSkel": "c141_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c141_01",
+        "characterName": "c141_01",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c141_01",
+            "skel": "c141_01_00.skel",
+            "aimSkel": "c141_01_aim_00.skel",
+            "coverSkel": "c141_01_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c142",
+        "characterName": "c142",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c142",
+            "skel": "c142_00.skel",
+            "aimSkel": "c142_aim_00.skel",
+            "coverSkel": "c142_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c142_01",
+        "characterName": "c142_01",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c142_01",
+            "skel": "c142_01_00.skel",
+            "aimSkel": "c142_01_aim_00.skel",
+            "coverSkel": "c142_01_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c143",
+        "characterName": "c143",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c143",
+            "skel": "c143_00.skel",
+            "aimSkel": "c143_aim_00.skel",
+            "coverSkel": "c143_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c150",
+        "characterName": "c150",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c150",
+            "skel": "c150_00.skel",
+            "aimSkel": "c150_aim_00.skel",
+            "coverSkel": "c150_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c150_01",
+        "characterName": "c150_01",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c150_01",
+            "skel": "c150_01_00.skel",
+            "aimSkel": "c150_01_aim_00.skel",
+            "coverSkel": "c150_01_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c150_02",
+        "characterName": "c150_02",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c150_02",
+            "skel": "c150_02_00.skel",
+            "aimSkel": "c150_02_aim_00.skel",
+            "coverSkel": "c150_02_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c160",
+        "characterName": "c160",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c160",
+            "skel": "c160_00.skel",
+            "aimSkel": "c160_aim_00.skel",
+            "coverSkel": "c160_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c160_01",
+        "characterName": "c160_01",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c160_01",
+            "skel": "c160_01_00.skel",
+            "aimSkel": "c160_01_aim_00.skel",
+            "coverSkel": "c160_01_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c161",
+        "characterName": "c161",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c161",
+            "skel": "c161_00.skel",
+            "aimSkel": "c161_aim_00.skel",
+            "coverSkel": "c161_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c162",
+        "characterName": "c162",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c162",
+            "skel": "c162_00.skel",
+            "aimSkel": "c162_aim_00.skel",
+            "coverSkel": "c162_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c162_01",
+        "characterName": "c162_01",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c162_01",
+            "skel": "c162_01_00.skel",
+            "aimSkel": "c162_01_aim_00.skel",
+            "coverSkel": "c162_01_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c170",
+        "characterName": "c170",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c170",
+            "skel": "c170_00.skel",
+            "aimSkel": "c170_aim_00.skel",
+            "coverSkel": "c170_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c170_01",
+        "characterName": "c170_01",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c170_01",
+            "skel": "c170_01_00.skel",
+            "aimSkel": "c170_01_aim_00.skel",
+            "coverSkel": "c170_01_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c170_02",
+        "characterName": "c170_02",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c170_02",
+            "skel": "c170_02_00.skel",
+            "aimSkel": "c170_02_aim_00.skel",
+            "coverSkel": "c170_02_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c170_03",
+        "characterName": "c170_03",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c170_03",
+            "skel": "c170_03_00.skel",
+            "aimSkel": "c170_03_aim_00.skel",
+            "coverSkel": "c170_03_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c171",
+        "characterName": "c171",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c171",
+            "skel": "c171_00.skel",
+            "aimSkel": "c171_aim_00.skel",
+            "coverSkel": "c171_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c172",
+        "characterName": "c172",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c172",
+            "skel": "c172_00.skel",
+            "aimSkel": "c172_aim_00.skel",
+            "coverSkel": "c172_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c180",
+        "characterName": "c180",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c180",
+            "skel": "c180_00.skel",
+            "aimSkel": "c180_aim_00.skel",
+            "coverSkel": "c180_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c180_01",
+        "characterName": "c180_01",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c180_01",
+            "skel": "c180_01_00.skel",
+            "aimSkel": "c180_01_aim_00.skel",
+            "coverSkel": "c180_01_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c181",
+        "characterName": "c181",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c181",
+            "skel": "c181_00.skel",
+            "aimSkel": "c181_aim_00.skel",
+            "coverSkel": "c181_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c181_01",
+        "characterName": "c181_01",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c181_01",
+            "skel": "c181_01_00.skel",
+            "aimSkel": "c181_01_aim_00.skel",
+            "coverSkel": "c181_01_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c181_02",
+        "characterName": "c181_02",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c181_02",
+            "skel": "c181_02_00.skel",
+            "aimSkel": "c181_02_aim_00.skel",
+            "coverSkel": "c181_02_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c182",
+        "characterName": "c182",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c182",
+            "skel": "c182_00.skel",
+            "aimSkel": "c182_aim_00.skel",
+            "coverSkel": "c182_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c183",
+        "characterName": "c183",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c183",
+            "skel": "c183_00.skel",
+            "aimSkel": "c183_aim_00.skel",
+            "coverSkel": "c183_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c190",
+        "characterName": "c190",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c190",
+            "skel": "c190_00.skel",
+            "aimSkel": "c190_aim_00.skel",
+            "coverSkel": "c190_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c191",
+        "characterName": "c191",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c191",
+            "skel": "c191_00.skel",
+            "aimSkel": "c191_aim_00.skel",
+            "coverSkel": "c191_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c191_01",
+        "characterName": "c191_01",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c191_01",
+            "skel": "c191_01_00.skel",
+            "aimSkel": "c191_01_aim_00.skel",
+            "coverSkel": "c191_01_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c192",
+        "characterName": "c192",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c192",
+            "skel": "c192_00.skel",
+            "aimSkel": "c192_aim_00.skel",
+            "coverSkel": "c192_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c192_01",
+        "characterName": "c192_01",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c192_01",
+            "skel": "c192_01_00.skel",
+            "aimSkel": "c192_01_aim_00.skel",
+            "coverSkel": "c192_01_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c192_02",
+        "characterName": "c192_02",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c192_02",
+            "skel": "c192_02_00.skel",
+            "aimSkel": "c192_02_aim_00.skel",
+            "coverSkel": "c192_02_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c193",
+        "characterName": "c193",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c193",
+            "skel": "c193_00.skel",
+            "aimSkel": "c193_aim_00.skel",
+            "coverSkel": "c193_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c194",
+        "characterName": "c194",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c194",
+            "skel": "c194_00.skel",
+            "aimSkel": "c194_aim_00.skel",
+            "coverSkel": "c194_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c195",
+        "characterName": "c195",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c195",
+            "skel": "c195_00.skel",
+            "aimSkel": "c195_aim_00.skel",
+            "coverSkel": "c195_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c200",
+        "characterName": "c200",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c200",
+            "skel": "c200_00.skel",
+            "aimSkel": "c200_aim_00.skel",
+            "coverSkel": "c200_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c200_01",
+        "characterName": "c200_01",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c200_01",
+            "skel": "c200_01_00.skel",
+            "aimSkel": "c200_01_aim_00.skel",
+            "coverSkel": "c200_01_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c201",
+        "characterName": "c201",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c201",
+            "skel": "c201_00.skel",
+            "aimSkel": "c201_aim_00.skel",
+            "coverSkel": "c201_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c201_01",
+        "characterName": "c201_01",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c201_01",
+            "skel": "c201_01_00.skel",
+            "aimSkel": "c201_01_aim_00.skel",
+            "coverSkel": "c201_01_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c202",
+        "characterName": "c202",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c202",
+            "skel": "c202_00.skel",
+            "aimSkel": "c202_aim_00.skel",
+            "coverSkel": "c202_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c202_01",
+        "characterName": "c202_01",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c202_01",
+            "skel": "c202_01_00.skel",
+            "aimSkel": "c202_01_aim_00.skel",
+            "coverSkel": "c202_01_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c203",
+        "characterName": "c203",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c203",
+            "skel": "c203_00.skel",
+            "aimSkel": "c203_aim_00.skel",
+            "coverSkel": "c203_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c210",
+        "characterName": "c210",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c210",
+            "skel": "c210_00.skel",
+            "aimSkel": "c210_aim_00.skel",
+            "coverSkel": "c210_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c210_01",
+        "characterName": "c210_01",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c210_01",
+            "skel": "c210_01_00.skel",
+            "aimSkel": "c210_01_aim_00.skel",
+            "coverSkel": "c210_01_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c210_02",
+        "characterName": "c210_02",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c210_02",
+            "skel": "c210_02_00.skel",
+            "aimSkel": "c210_02_aim_00.skel",
+            "coverSkel": "c210_02_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c210_03",
+        "characterName": "c210_03",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c210_03",
+            "skel": "c210_03_00.skel",
+            "aimSkel": "c210_03_aim_00.skel",
+            "coverSkel": "c210_03_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c212",
+        "characterName": "c212",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c212",
+            "skel": "c212_00.skel",
+            "aimSkel": "c212_aim_00.skel",
+            "coverSkel": "c212_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c212_01",
+        "characterName": "c212_01",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c212_01",
+            "skel": "c212_01_00.skel",
+            "aimSkel": "c212_01_aim_00.skel",
+            "coverSkel": "c212_01_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c212_02",
+        "characterName": "c212_02",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c212_02",
+            "skel": "c212_02_00.skel",
+            "aimSkel": "c212_02_aim_00.skel",
+            "coverSkel": "c212_02_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c220",
+        "characterName": "c220",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c220",
+            "skel": "c220_00.skel",
+            "aimSkel": "c220_aim_00.skel",
+            "coverSkel": "c220_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c220_01",
+        "characterName": "c220_01",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c220_01",
+            "skel": "c220_01_00.skel",
+            "aimSkel": "c220_01_aim_00.skel",
+            "coverSkel": "c220_01_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c221",
+        "characterName": "c221",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c221",
+            "skel": "c221_00.skel",
+            "aimSkel": "c221_aim_00.skel",
+            "coverSkel": "c221_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c222",
+        "characterName": "c222",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c222",
+            "skel": "c222_00.skel",
+            "aimSkel": "c222_aim_00.skel",
+            "coverSkel": "c222_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c222_01",
+        "characterName": "c222_01",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c222_01",
+            "skel": "c222_01_00.skel",
+            "aimSkel": "c222_01_aim_00.skel",
+            "coverSkel": "c222_01_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c224",
+        "characterName": "c224",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c224",
+            "skel": "c224_00.skel",
+            "aimSkel": "c224_aim_00.skel",
+            "coverSkel": "c224_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c225",
+        "characterName": "c225",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c225",
+            "skel": "c225_00.skel",
+            "aimSkel": "c225_aim_00.skel",
+            "coverSkel": "c225_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c225_01",
+        "characterName": "c225_01",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c225_01",
+            "skel": "c225_01_00.skel",
+            "aimSkel": "c225_01_aim_00.skel",
+            "coverSkel": "c225_01_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c226",
+        "characterName": "c226",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c226",
+            "skel": "c226_00.skel",
+            "aimSkel": "c226_aim_00.skel",
+            "coverSkel": "c226_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c227",
+        "characterName": "c227",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c227",
+            "skel": "c227_00.skel"
+        }
+    },
+    {
+        "dirName": "c230",
+        "characterName": "c230",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c230",
+            "skel": "c230_00.skel",
+            "aimSkel": "c230_aim_00.skel",
+            "coverSkel": "c230_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c230_01",
+        "characterName": "c230_01",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c230_01",
+            "skel": "c230_01_00.skel",
+            "aimSkel": "c230_01_aim_00.skel",
+            "coverSkel": "c230_01_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c231",
+        "characterName": "c231",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c231",
+            "skel": "c231_00.skel",
+            "aimSkel": "c231_aim_00.skel",
+            "coverSkel": "c231_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c231_01",
+        "characterName": "c231_01",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c231_01",
+            "skel": "c231_01_00.skel",
+            "aimSkel": "c231_01_aim_00.skel",
+            "coverSkel": "c231_01_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c232",
+        "characterName": "c232",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c232",
+            "skel": "c232_00.skel",
+            "aimSkel": "c232_aim_00.skel",
+            "coverSkel": "c232_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c233",
+        "characterName": "c233",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c233",
+            "skel": "c233_00.skel",
+            "aimSkel": "c233_aim_00.skel",
+            "coverSkel": "c233_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c233_01",
+        "characterName": "c233_01",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c233_01",
+            "skel": "c233_01_00.skel",
+            "aimSkel": "c233_01_aim_00.skel",
+            "coverSkel": "c233_01_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c233_80",
+        "characterName": "c233_80",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c233_80",
+            "skel": "c233_80_00.skel",
+            "aimSkel": "c233_80_aim_00.skel",
+            "coverSkel": "c233_80_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c234",
+        "characterName": "c234",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c234",
+            "skel": "c234_00.skel",
+            "aimSkel": "c234_aim_00.skel",
+            "coverSkel": "c234_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c240",
+        "characterName": "c240",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c240",
+            "skel": "c240_00.skel",
+            "aimSkel": "c240_aim_00.skel",
+            "coverSkel": "c240_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c241",
+        "characterName": "c241",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c241",
+            "skel": "c241_00.skel",
+            "aimSkel": "c241_aim_00.skel",
+            "coverSkel": "c241_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c242",
+        "characterName": "c242",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c242",
+            "skel": "c242_00.skel",
+            "aimSkel": "c242_aim_00.skel",
+            "coverSkel": "c242_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c242_01",
+        "characterName": "c242_01",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c242_01",
+            "skel": "c242_01_00.skel",
+            "aimSkel": "c242_01_aim_00.skel",
+            "coverSkel": "c242_01_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c250",
+        "characterName": "c250",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c250",
+            "skel": "c250_00.skel"
+        }
+    },
+    {
+        "dirName": "c251",
+        "characterName": "c251",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c251",
+            "skel": "c251_00.skel"
+        }
+    },
+    {
+        "dirName": "c252",
+        "characterName": "c252",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c252",
+            "skel": "c252_00.skel"
+        }
+    },
+    {
+        "dirName": "c253",
+        "characterName": "c253",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c253",
+            "skel": "c253_00.skel"
+        }
+    },
+    {
+        "dirName": "c254",
+        "characterName": "c254",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c254",
+            "skel": "c254_00.skel"
+        }
+    },
+    {
+        "dirName": "c255",
+        "characterName": "c255",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c255",
+            "skel": "c255_00.skel"
+        }
+    },
+    {
+        "dirName": "c260",
+        "characterName": "c260",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c260",
+            "skel": "c260_00.skel",
+            "aimSkel": "c260_aim_00.skel",
+            "coverSkel": "c260_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c260_01",
+        "characterName": "c260_01",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c260_01",
+            "skel": "c260_01_00.skel",
+            "aimSkel": "c260_01_aim_00.skel",
+            "coverSkel": "c260_01_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c260_02",
+        "characterName": "c260_02",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c260_02",
+            "skel": "c260_02_00.skel",
+            "aimSkel": "c260_02_aim_00.skel",
+            "coverSkel": "c260_02_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c260_80",
+        "characterName": "c260_80",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c260_80",
+            "skel": "c260_80_00.skel",
+            "aimSkel": "c260_80_aim_00.skel",
+            "coverSkel": "c260_80_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c261",
+        "characterName": "c261",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c261",
+            "skel": "c261_00.skel",
+            "aimSkel": "c261_aim_00.skel",
+            "coverSkel": "c261_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c262",
+        "characterName": "c262",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c262",
+            "skel": "c262_00.skel"
+        }
+    },
+    {
+        "dirName": "c263",
+        "characterName": "c263",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c263",
+            "skel": "c263_00.skel"
+        }
+    },
+    {
+        "dirName": "c270",
+        "characterName": "c270",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c270",
+            "skel": "c270_00.skel",
+            "aimSkel": "c270_aim_00.skel",
+            "coverSkel": "c270_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c270_01",
+        "characterName": "c270_01",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c270_01",
+            "skel": "c270_01_00.skel",
+            "aimSkel": "c270_01_aim_00.skel",
+            "coverSkel": "c270_01_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c270_02",
+        "characterName": "c270_02",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c270_02",
+            "skel": "c270_02_00.skel",
+            "aimSkel": "c270_02_aim_00.skel",
+            "coverSkel": "c270_02_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c271",
+        "characterName": "c271",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c271",
+            "skel": "c271_00.skel",
+            "aimSkel": "c271_aim_00.skel",
+            "coverSkel": "c271_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c271_01",
+        "characterName": "c271_01",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c271_01",
+            "skel": "c271_01_00.skel",
+            "aimSkel": "c271_01_aim_00.skel",
+            "coverSkel": "c271_01_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c271_02",
+        "characterName": "c271_02",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c271_02",
+            "skel": "c271_02_00.skel",
+            "aimSkel": "c271_02_aim_00.skel",
+            "coverSkel": "c271_02_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c272",
+        "characterName": "c272",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c272",
+            "skel": "c272_00.skel",
+            "aimSkel": "c272_aim_00.skel",
+            "coverSkel": "c272_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c272_01",
+        "characterName": "c272_01",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c272_01",
+            "skel": "c272_01_00.skel",
+            "aimSkel": "c272_01_aim_00.skel",
+            "coverSkel": "c272_01_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c280",
+        "characterName": "c280",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c280",
+            "skel": "c280_00.skel",
+            "aimSkel": "c280_aim_00.skel",
+            "coverSkel": "c280_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c280_01",
+        "characterName": "c280_01",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c280_01",
+            "skel": "c280_01_00.skel",
+            "aimSkel": "c280_01_aim_00.skel",
+            "coverSkel": "c280_01_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c281",
+        "characterName": "c281",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c281",
+            "skel": "c281_00.skel",
+            "aimSkel": "c281_aim_00.skel",
+            "coverSkel": "c281_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c281_01",
+        "characterName": "c281_01",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c281_01",
+            "skel": "c281_01_00.skel",
+            "aimSkel": "c281_01_aim_00.skel",
+            "coverSkel": "c281_01_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c282",
+        "characterName": "c282",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c282",
+            "skel": "c282_00.skel",
+            "aimSkel": "c282_aim_00.skel",
+            "coverSkel": "c282_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c282_01",
+        "characterName": "c282_01",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c282_01",
+            "skel": "c282_01_00.skel",
+            "aimSkel": "c282_01_aim_00.skel",
+            "coverSkel": "c282_01_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c283",
+        "characterName": "c283",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c283",
+            "skel": "c283_00.skel",
+            "aimSkel": "c283_aim_00.skel",
+            "coverSkel": "c283_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c284",
+        "characterName": "c284",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c284",
+            "skel": "c284_00.skel",
+            "aimSkel": "c284_aim_00.skel",
+            "coverSkel": "c284_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c290",
+        "characterName": "c290",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c290",
+            "skel": "c290_00.skel",
+            "aimSkel": "c290_aim_00.skel",
+            "coverSkel": "c290_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c291",
+        "characterName": "c291",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c291",
+            "skel": "c291_00.skel",
+            "aimSkel": "c291_aim_00.skel",
+            "coverSkel": "c291_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c300",
+        "characterName": "c300",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c300",
+            "skel": "c300_00.skel",
+            "aimSkel": "c300_aim_00.skel",
+            "coverSkel": "c300_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c301",
+        "characterName": "c301",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c301",
+            "skel": "c301_00.skel",
+            "aimSkel": "c301_aim_00.skel",
+            "coverSkel": "c301_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c302",
+        "characterName": "c302",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c302",
+            "skel": "c302_00.skel",
+            "aimSkel": "c302_aim_00.skel",
+            "coverSkel": "c302_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c303",
+        "characterName": "c303",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c303",
+            "skel": "c303_00.skel",
+            "aimSkel": "c303_aim_00.skel",
+            "coverSkel": "c303_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c304",
+        "characterName": "c304",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c304",
+            "skel": "c304_00.skel",
+            "aimSkel": "c304_aim_00.skel",
+            "coverSkel": "c304_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c305",
+        "characterName": "c305",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c305",
+            "skel": "c305_00.skel",
+            "aimSkel": "c305_aim_00.skel",
+            "coverSkel": "c305_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c306",
+        "characterName": "c306",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c306",
+            "skel": "c306_00.skel",
+            "aimSkel": "c306_aim_00.skel",
+            "coverSkel": "c306_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c307",
+        "characterName": "c307",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c307",
+            "skel": "c307_00.skel",
+            "aimSkel": "c307_aim_00.skel",
+            "coverSkel": "c307_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c308",
+        "characterName": "c308",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c308",
+            "skel": "c308_00.skel",
+            "aimSkel": "c308_aim_00.skel",
+            "coverSkel": "c308_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c310",
+        "characterName": "c310",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c310",
+            "skel": "c310_00.skel",
+            "aimSkel": "c310_aim_00.skel",
+            "coverSkel": "c310_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c310_01",
+        "characterName": "c310_01",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c310_01",
+            "skel": "c310_01_00.skel",
+            "aimSkel": "c310_01_aim_00.skel",
+            "coverSkel": "c310_01_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c311",
+        "characterName": "c311",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c311",
+            "skel": "c311_00.skel",
+            "aimSkel": "c311_aim_00.skel",
+            "coverSkel": "c311_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c312",
+        "characterName": "c312",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c312",
+            "skel": "c312_00.skel",
+            "aimSkel": "c312_aim_00.skel",
+            "coverSkel": "c312_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c313",
+        "characterName": "c313",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c313",
+            "skel": "c313_00.skel",
+            "aimSkel": "c313_aim_00.skel",
+            "coverSkel": "c313_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c314",
+        "characterName": "c314",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c314",
+            "skel": "c314_00.skel",
+            "aimSkel": "c314_aim_00.skel",
+            "coverSkel": "c314_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c315",
+        "characterName": "c315",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c315",
+            "skel": "c315_00.skel",
+            "aimSkel": "c315_aim_00.skel",
+            "coverSkel": "c315_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c321",
+        "characterName": "c321",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c321",
+            "skel": "c321_00.skel",
+            "aimSkel": "c321_aim_00.skel",
+            "coverSkel": "c321_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c321_01",
+        "characterName": "c321_01",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c321_01",
+            "skel": "c321_01_00.skel",
+            "aimSkel": "c321_01_aim_00.skel",
+            "coverSkel": "c321_01_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c330",
+        "characterName": "c330",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c330",
+            "skel": "c330_00.skel",
+            "aimSkel": "c330_aim_00.skel",
+            "coverSkel": "c330_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c330_01",
+        "characterName": "c330_01",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c330_01",
+            "skel": "c330_01_00.skel",
+            "aimSkel": "c330_01_aim_00.skel",
+            "coverSkel": "c330_01_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c331",
+        "characterName": "c331",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c331",
+            "skel": "c331_00.skel"
+        }
+    },
+    {
+        "dirName": "c350",
+        "characterName": "c350",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c350",
+            "skel": "c350_00.skel",
+            "aimSkel": "c350_aim_00.skel",
+            "coverSkel": "c350_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c350_01",
+        "characterName": "c350_01",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c350_01",
+            "skel": "c350_01_00.skel",
+            "aimSkel": "c350_01_aim_00.skel",
+            "coverSkel": "c350_01_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c350_02",
+        "characterName": "c350_02",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c350_02",
+            "skel": "c350_02_00.skel",
+            "aimSkel": "c350_02_aim_00.skel",
+            "coverSkel": "c350_02_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c350_old",
+        "characterName": "c350_old",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c350_old",
+            "skel": "c350_old_00.skel"
+        }
+    },
+    {
+        "dirName": "c351",
+        "characterName": "c351",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c351",
+            "skel": "c351_00.skel",
+            "aimSkel": "c351_aim_00.skel",
+            "coverSkel": "c351_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c351_01",
+        "characterName": "c351_01",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c351_01",
+            "skel": "c351_01_00.skel",
+            "aimSkel": "c351_01_aim_00.skel",
+            "coverSkel": "c351_01_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c352",
+        "characterName": "c352",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c352",
+            "skel": "c352_00.skel",
+            "aimSkel": "c352_aim_00.skel",
+            "coverSkel": "c352_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c352_01",
+        "characterName": "c352_01",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c352_01",
+            "skel": "c352_01_00.skel",
+            "aimSkel": "c352_01_aim_00.skel",
+            "coverSkel": "c352_01_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c352_02",
+        "characterName": "c352_02",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c352_02",
+            "skel": "c352_02_00.skel",
+            "aimSkel": "c352_02_aim_00.skel",
+            "coverSkel": "c352_02_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c353",
+        "characterName": "c353",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c353",
+            "skel": "c353_00.skel",
+            "aimSkel": "c353_aim_00.skel",
+            "coverSkel": "c353_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c354",
+        "characterName": "c354",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c354",
+            "skel": "c354_00.skel",
+            "aimSkel": "c354_aim_00.skel",
+            "coverSkel": "c354_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c355",
+        "characterName": "c355",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c355",
+            "skel": "c355_00.skel",
+            "aimSkel": "c355_aim_00.skel",
+            "coverSkel": "c355_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c361",
+        "characterName": "c361",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c361",
+            "skel": "c361_00.skel",
+            "aimSkel": "c361_aim_00.skel",
+            "coverSkel": "c361_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c370",
+        "characterName": "c370",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c370",
+            "skel": "c370_00.skel"
+        }
+    },
+    {
+        "dirName": "c371",
+        "characterName": "c371",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c371",
+            "skel": "c371_00.skel"
+        }
+    },
+    {
+        "dirName": "c380",
+        "characterName": "c380",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c380",
+            "skel": "c380_00.skel",
+            "aimSkel": "c380_aim_00.skel",
+            "coverSkel": "c380_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c381",
+        "characterName": "c381",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c381",
+            "skel": "c381_00.skel",
+            "aimSkel": "c381_aim_00.skel",
+            "coverSkel": "c381_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c381_01",
+        "characterName": "c381_01",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c381_01",
+            "skel": "c381_01_00.skel",
+            "aimSkel": "c381_01_aim_00.skel",
+            "coverSkel": "c381_01_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c382",
+        "characterName": "c382",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c382",
+            "skel": "c382_00.skel",
+            "aimSkel": "c382_aim_00.skel",
+            "coverSkel": "c382_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c382_01",
+        "characterName": "c382_01",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c382_01",
+            "skel": "c382_01_00.skel",
+            "aimSkel": "c382_01_aim_00.skel",
+            "coverSkel": "c382_01_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c390",
+        "characterName": "c390",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c390",
+            "skel": "c390_00.skel",
+            "aimSkel": "c390_aim_00.skel",
+            "coverSkel": "c390_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c390_01",
+        "characterName": "c390_01",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c390_01",
+            "skel": "c390_01_00.skel",
+            "aimSkel": "c390_01_aim_00.skel",
+            "coverSkel": "c390_01_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c391",
+        "characterName": "c391",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c391",
+            "skel": "c391_00.skel",
+            "aimSkel": "c391_aim_00.skel",
+            "coverSkel": "c391_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c391_01",
+        "characterName": "c391_01",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c391_01",
+            "skel": "c391_01_00.skel",
+            "aimSkel": "c391_01_aim_00.skel",
+            "coverSkel": "c391_01_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c392",
+        "characterName": "c392",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c392",
+            "skel": "c392_00.skel",
+            "aimSkel": "c392_aim_00.skel",
+            "coverSkel": "c392_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c400",
+        "characterName": "c400",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c400",
+            "skel": "c400_00.skel",
+            "aimSkel": "c400_aim_00.skel",
+            "coverSkel": "c400_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c400_01",
+        "characterName": "c400_01",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c400_01",
+            "skel": "c400_01_00.skel",
+            "aimSkel": "c400_01_aim_00.skel",
+            "coverSkel": "c400_01_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c401",
+        "characterName": "c401",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c401",
+            "skel": "c401_00.skel",
+            "aimSkel": "c401_aim_00.skel",
+            "coverSkel": "c401_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c401_01",
+        "characterName": "c401_01",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c401_01",
+            "skel": "c401_01_00.skel",
+            "aimSkel": "c401_01_aim_00.skel",
+            "coverSkel": "c401_01_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c402",
+        "characterName": "c402",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c402",
+            "skel": "c402_00.skel",
+            "aimSkel": "c402_aim_00.skel",
+            "coverSkel": "c402_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c403",
+        "characterName": "c403",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c403",
+            "skel": "c403_00.skel",
+            "aimSkel": "c403_aim_00.skel",
+            "coverSkel": "c403_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c411",
+        "characterName": "c411",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c411",
+            "skel": "c411_00.skel",
+            "aimSkel": "c411_aim_00.skel",
+            "coverSkel": "c411_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c412",
+        "characterName": "c412",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c412",
+            "skel": "c412_00.skel",
+            "aimSkel": "c412_aim_00.skel",
+            "coverSkel": "c412_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c430",
+        "characterName": "c430",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c430",
+            "skel": "c430_00.skel",
+            "aimSkel": "c430_aim_00.skel",
+            "coverSkel": "c430_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c430_01",
+        "characterName": "c430_01",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c430_01",
+            "skel": "c430_01_00.skel",
+            "aimSkel": "c430_01_aim_00.skel",
+            "coverSkel": "c430_01_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c430_02",
+        "characterName": "c430_02",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c430_02",
+            "skel": "c430_02_00.skel",
+            "aimSkel": "c430_02_aim_00.skel",
+            "coverSkel": "c430_02_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c431",
+        "characterName": "c431",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c431",
+            "skel": "c431_00.skel",
+            "aimSkel": "c431_aim_00.skel",
+            "coverSkel": "c431_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c431_01",
+        "characterName": "c431_01",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c431_01",
+            "skel": "c431_01_00.skel",
+            "aimSkel": "c431_01_aim_00.skel",
+            "coverSkel": "c431_01_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c432",
+        "characterName": "c432",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c432",
+            "skel": "c432_00.skel",
+            "aimSkel": "c432_aim_00.skel",
+            "coverSkel": "c432_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c440",
+        "characterName": "c440",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c440",
+            "skel": "c440_00.skel"
+        }
+    },
+    {
+        "dirName": "c441",
+        "characterName": "c441",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c441",
+            "skel": "c441_00.skel"
+        }
+    },
+    {
+        "dirName": "c450",
+        "characterName": "c450",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c450",
+            "skel": "c450_00.skel",
+            "aimSkel": "c450_aim_00.skel",
+            "coverSkel": "c450_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c450_01",
+        "characterName": "c450_01",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c450_01",
+            "skel": "c450_01_00.skel",
+            "aimSkel": "c450_01_aim_00.skel",
+            "coverSkel": "c450_01_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c450_02",
+        "characterName": "c450_02",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c450_02",
+            "skel": "c450_02_00.skel",
+            "aimSkel": "c450_02_aim_00.skel",
+            "coverSkel": "c450_02_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c451",
+        "characterName": "c451",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c451",
+            "skel": "c451_00.skel",
+            "aimSkel": "c451_aim_00.skel",
+            "coverSkel": "c451_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c451_01",
+        "characterName": "c451_01",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c451_01",
+            "skel": "c451_01_00.skel",
+            "aimSkel": "c451_01_aim_00.skel",
+            "coverSkel": "c451_01_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c451_02",
+        "characterName": "c451_02",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c451_02",
+            "skel": "c451_02_00.skel",
+            "aimSkel": "c451_02_aim_00.skel",
+            "coverSkel": "c451_02_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c470",
+        "characterName": "c470",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c470",
+            "skel": "c470_00.skel",
+            "aimSkel": "c470_aim_00.skel",
+            "coverSkel": "c470_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c470_01",
+        "characterName": "c470_01",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c470_01",
+            "skel": "c470_01_00.skel",
+            "aimSkel": "c470_01_aim_00.skel",
+            "coverSkel": "c470_01_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c480",
+        "characterName": "c480",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c480",
+            "skel": "c480_00.skel"
+        }
+    },
+    {
+        "dirName": "c481",
+        "characterName": "c481",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c481",
+            "skel": "c481_00.skel"
+        }
+    },
+    {
+        "dirName": "c490",
+        "characterName": "c490",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c490",
+            "skel": "c490_00.skel"
+        }
+    },
+    {
+        "dirName": "c491",
+        "characterName": "c491",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c491",
+            "skel": "c491_00.skel"
+        }
+    },
+    {
+        "dirName": "c500",
+        "characterName": "c500",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c500",
+            "skel": "c500_00.skel",
+            "aimSkel": "c500_aim_00.skel",
+            "coverSkel": "c500_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c501",
+        "characterName": "c501",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c501",
+            "skel": "c501_00.skel",
+            "aimSkel": "c501_aim_00.skel",
+            "coverSkel": "c501_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c501_01",
+        "characterName": "c501_01",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c501_01",
+            "skel": "c501_01_00.skel",
+            "aimSkel": "c501_01_aim_00.skel",
+            "coverSkel": "c501_01_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c502",
+        "characterName": "c502",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c502",
+            "skel": "c502_00.skel",
+            "aimSkel": "c502_aim_00.skel",
+            "coverSkel": "c502_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c510",
+        "characterName": "c510",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c510",
+            "skel": "c510_00.skel"
+        }
+    },
+    {
+        "dirName": "c511",
+        "characterName": "c511",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c511",
+            "skel": "c511_00.skel",
+            "aimSkel": "c511_aim_00.skel",
+            "coverSkel": "c511_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c511_01",
+        "characterName": "c511_01",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c511_01",
+            "skel": "c511_01_00.skel",
+            "aimSkel": "c511_01_aim_00.skel",
+            "coverSkel": "c511_01_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c511_02",
+        "characterName": "c511_02",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c511_02",
+            "skel": "c511_02_00.skel",
+            "aimSkel": "c511_02_aim_00.skel",
+            "coverSkel": "c511_02_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c513",
+        "characterName": "c513",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c513",
+            "skel": "c513_00.skel",
+            "aimSkel": "c513_aim_00.skel",
+            "coverSkel": "c513_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c513_01",
+        "characterName": "c513_01",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c513_01",
+            "skel": "c513_01_00.skel",
+            "aimSkel": "c513_01_aim_00.skel",
+            "coverSkel": "c513_01_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c514",
+        "characterName": "c514",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c514",
+            "skel": "c514_00.skel",
+            "aimSkel": "c514_aim_00.skel",
+            "coverSkel": "c514_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c514_01",
+        "characterName": "c514_01",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c514_01",
+            "skel": "c514_01_00.skel",
+            "aimSkel": "c514_01_aim_00.skel",
+            "coverSkel": "c514_01_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c520",
+        "characterName": "c520",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c520",
+            "skel": "c520_00.skel",
+            "aimSkel": "c520_aim_00.skel",
+            "coverSkel": "c520_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c521",
+        "characterName": "c521",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c521",
+            "skel": "c521_00.skel",
+            "aimSkel": "c521_aim_00.skel",
+            "coverSkel": "c521_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c530",
+        "characterName": "c530",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c530",
+            "skel": "c530_00.skel"
+        }
+    },
+    {
+        "dirName": "c531",
+        "characterName": "c531",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c531",
+            "skel": "c531_00.skel"
+        }
+    },
+    {
+        "dirName": "c532",
+        "characterName": "c532",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c532",
+            "skel": "c532_00.skel",
+            "aimSkel": "c532_aim_00.skel",
+            "coverSkel": "c532_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c550",
+        "characterName": "c550",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c550",
+            "skel": "c550_00.skel",
+            "aimSkel": "c550_aim_00.skel",
+            "coverSkel": "c550_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c550_01",
+        "characterName": "c550_01",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c550_01",
+            "skel": "c550_01_00.skel",
+            "aimSkel": "c550_01_aim_00.skel",
+            "coverSkel": "c550_01_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c551",
+        "characterName": "c551",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c551",
+            "skel": "c551_00.skel",
+            "aimSkel": "c551_aim_00.skel",
+            "coverSkel": "c551_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c560",
+        "characterName": "c560",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c560",
+            "skel": "c560_00.skel"
+        }
+    },
+    {
+        "dirName": "c561",
+        "characterName": "c561",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c561",
+            "skel": "c561_00.skel"
+        }
+    },
+    {
+        "dirName": "c562",
+        "characterName": "c562",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c562",
+            "skel": "c562_00.skel"
+        }
+    },
+    {
+        "dirName": "c570",
+        "characterName": "c570",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c570",
+            "skel": "c570_00.skel"
+        }
+    },
+    {
+        "dirName": "c580",
+        "characterName": "c580",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c580",
+            "skel": "c580_00.skel",
+            "aimSkel": "c580_aim_00.skel",
+            "coverSkel": "c580_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c581",
+        "characterName": "c581",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c581",
+            "skel": "c581_00.skel",
+            "aimSkel": "c581_aim_00.skel",
+            "coverSkel": "c581_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c590",
+        "characterName": "c590",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c590",
+            "skel": "c590_00.skel",
+            "aimSkel": "c590_aim_00.skel",
+            "coverSkel": "c590_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c600",
+        "characterName": "c600",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c600",
+            "skel": "c600_00.skel"
+        }
+    },
+    {
+        "dirName": "c601",
+        "characterName": "c601",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c601",
+            "skel": "c601_00.skel"
+        }
+    },
+    {
+        "dirName": "c800",
+        "characterName": "c800",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c800",
+            "skel": "c800_00.skel",
+            "aimSkel": "c800_aim_00.skel",
+            "coverSkel": "c800_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c800_01",
+        "characterName": "c800_01",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c800_01",
+            "skel": "c800_01_00.skel",
+            "aimSkel": "c800_01_aim_00.skel",
+            "coverSkel": "c800_01_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c801",
+        "characterName": "c801",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c801",
+            "skel": "c801_00.skel",
+            "aimSkel": "c801_aim_00.skel",
+            "coverSkel": "c801_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c802",
+        "characterName": "c802",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c802",
+            "skel": "c802_00.skel",
+            "aimSkel": "c802_aim_00.skel",
+            "coverSkel": "c802_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c803",
+        "characterName": "c803",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c803",
+            "skel": "c803_00.skel"
+        }
+    },
+    {
+        "dirName": "c803_01",
+        "characterName": "c803_01",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c803_01",
+            "skel": "c803_01_00.skel"
+        }
+    },
+    {
+        "dirName": "c804",
+        "characterName": "c804",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c804",
+            "skel": "c804_00.skel"
+        }
+    },
+    {
+        "dirName": "c810",
+        "characterName": "c810",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c810",
+            "skel": "c810_00.skel",
+            "aimSkel": "c810_aim_00.skel",
+            "coverSkel": "c810_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c810_01",
+        "characterName": "c810_01",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c810_01",
+            "skel": "c810_01_00.skel",
+            "aimSkel": "c810_01_aim_00.skel",
+            "coverSkel": "c810_01_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c810_02",
+        "characterName": "c810_02",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c810_02",
+            "skel": "c810_02_00.skel",
+            "aimSkel": "c810_02_aim_00.skel",
+            "coverSkel": "c810_02_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c810_03",
+        "characterName": "c810_03",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c810_03",
+            "skel": "c810_03_00.skel",
+            "aimSkel": "c810_03_aim_00.skel",
+            "coverSkel": "c810_03_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c811",
+        "characterName": "c811",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c811",
+            "skel": "c811_00.skel",
+            "aimSkel": "c811_aim_00.skel",
+            "coverSkel": "c811_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c811_01",
+        "characterName": "c811_01",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c811_01",
+            "skel": "c811_01_00.skel",
+            "aimSkel": "c811_01_aim_00.skel",
+            "coverSkel": "c811_01_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c811_02",
+        "characterName": "c811_02",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c811_02",
+            "skel": "c811_02_00.skel",
+            "aimSkel": "c811_02_aim_00.skel",
+            "coverSkel": "c811_02_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c811_03",
+        "characterName": "c811_03",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c811_03",
+            "skel": "c811_03_00.skel",
+            "aimSkel": "c811_03_aim_00.skel",
+            "coverSkel": "c811_03_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c812",
+        "characterName": "c812",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c812",
+            "skel": "c812_00.skel",
+            "aimSkel": "c812_aim_00.skel",
+            "coverSkel": "c812_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c813",
+        "characterName": "c813",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c813",
+            "skel": "c813_00.skel"
+        }
+    },
+    {
+        "dirName": "c820",
+        "characterName": "c820",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c820",
+            "skel": "c820_00.skel",
+            "aimSkel": "c820_aim_00.skel",
+            "coverSkel": "c820_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c820_01",
+        "characterName": "c820_01",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c820_01",
+            "skel": "c820_01_00.skel",
+            "aimSkel": "c820_01_aim_00.skel",
+            "coverSkel": "c820_01_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c820_02",
+        "characterName": "c820_02",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c820_02",
+            "skel": "c820_02_00.skel",
+            "aimSkel": "c820_02_aim_00.skel",
+            "coverSkel": "c820_02_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c821",
+        "characterName": "c821",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c821",
+            "skel": "c821_00.skel",
+            "aimSkel": "c821_aim_00.skel",
+            "coverSkel": "c821_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c821_01",
+        "characterName": "c821_01",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c821_01",
+            "skel": "c821_01_00.skel",
+            "aimSkel": "c821_01_aim_00.skel",
+            "coverSkel": "c821_01_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c821_02",
+        "characterName": "c821_02",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c821_02",
+            "skel": "c821_02_00.skel",
+            "aimSkel": "c821_02_aim_00.skel",
+            "coverSkel": "c821_02_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c822",
+        "characterName": "c822",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c822",
+            "skel": "c822_00.skel",
+            "aimSkel": "c822_aim_00.skel",
+            "coverSkel": "c822_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c830",
+        "characterName": "c830",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c830",
+            "skel": "c830_00.skel",
+            "aimSkel": "c830_aim_00.skel",
+            "coverSkel": "c830_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c830_01",
+        "characterName": "c830_01",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c830_01",
+            "skel": "c830_01_00.skel",
+            "aimSkel": "c830_01_aim_00.skel",
+            "coverSkel": "c830_01_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c830_02",
+        "characterName": "c830_02",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c830_02",
+            "skel": "c830_02_00.skel",
+            "aimSkel": "c830_02_aim_00.skel",
+            "coverSkel": "c830_02_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c830_03",
+        "characterName": "c830_03",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c830_03",
+            "skel": "c830_03_00.skel",
+            "aimSkel": "c830_03_aim_00.skel",
+            "coverSkel": "c830_03_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c831",
+        "characterName": "c831",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c831",
+            "skel": "c831_00.skel",
+            "aimSkel": "c831_aim_00.skel",
+            "coverSkel": "c831_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c831_01",
+        "characterName": "c831_01",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c831_01",
+            "skel": "c831_01_00.skel",
+            "aimSkel": "c831_01_aim_00.skel",
+            "coverSkel": "c831_01_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c831_02",
+        "characterName": "c831_02",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c831_02",
+            "skel": "c831_02_00.skel",
+            "aimSkel": "c831_02_aim_00.skel",
+            "coverSkel": "c831_02_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c832",
+        "characterName": "c832",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c832",
+            "skel": "c832_00.skel",
+            "aimSkel": "c832_aim_00.skel",
+            "coverSkel": "c832_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c832_01",
+        "characterName": "c832_01",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c832_01",
+            "skel": "c832_01_00.skel",
+            "aimSkel": "c832_01_aim_00.skel",
+            "coverSkel": "c832_01_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c832_02",
+        "characterName": "c832_02",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c832_02",
+            "skel": "c832_02_00.skel",
+            "aimSkel": "c832_02_aim_00.skel",
+            "coverSkel": "c832_02_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c832_03",
+        "characterName": "c832_03",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c832_03",
+            "skel": "c832_03_00.skel",
+            "aimSkel": "c832_03_aim_00.skel",
+            "coverSkel": "c832_03_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c832_04",
+        "characterName": "c832_04",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c832_04",
+            "skel": "c832_04_00.skel",
+            "aimSkel": "c832_04_aim_00.skel",
+            "coverSkel": "c832_04_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c833",
+        "characterName": "c833",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c833",
+            "skel": "c833_00.skel",
+            "aimSkel": "c833_aim_00.skel",
+            "coverSkel": "c833_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c834",
+        "characterName": "c834",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c834",
+            "skel": "c834_00.skel",
+            "aimSkel": "c834_aim_00.skel",
+            "coverSkel": "c834_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c834_01",
+        "characterName": "c834_01",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c834_01",
+            "skel": "c834_01_00.skel",
+            "aimSkel": "c834_01_aim_00.skel",
+            "coverSkel": "c834_01_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c834_02",
+        "characterName": "c834_02",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c834_02",
+            "skel": "c834_02_00.skel",
+            "aimSkel": "c834_02_aim_00.skel",
+            "coverSkel": "c834_02_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c835",
+        "characterName": "c835",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c835",
+            "skel": "c835_00.skel",
+            "aimSkel": "c835_aim_00.skel",
+            "coverSkel": "c835_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c835_01",
+        "characterName": "c835_01",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c835_01",
+            "skel": "c835_01_00.skel",
+            "aimSkel": "c835_01_aim_00.skel",
+            "coverSkel": "c835_01_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c835_02",
+        "characterName": "c835_02",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c835_02",
+            "skel": "c835_02_00.skel",
+            "aimSkel": "c835_02_aim_00.skel",
+            "coverSkel": "c835_02_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c836",
+        "characterName": "c836",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c836",
+            "skel": "c836_00.skel",
+            "aimSkel": "c836_aim_00.skel",
+            "coverSkel": "c836_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c850",
+        "characterName": "c850",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c850",
+            "skel": "c850_00.skel",
+            "aimSkel": "c850_aim_00.skel",
+            "coverSkel": "c850_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c850_01",
+        "characterName": "c850_01",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c850_01",
+            "skel": "c850_01_00.skel",
+            "aimSkel": "c850_01_aim_00.skel",
+            "coverSkel": "c850_01_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c850_02",
+        "characterName": "c850_02",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c850_02",
+            "skel": "c850_02_00.skel",
+            "aimSkel": "c850_02_aim_00.skel",
+            "coverSkel": "c850_02_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c850_03",
+        "characterName": "c850_03",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c850_03",
+            "skel": "c850_03_00.skel",
+            "aimSkel": "c850_03_aim_00.skel",
+            "coverSkel": "c850_03_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c851",
+        "characterName": "c851",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c851",
+            "skel": "c851_00.skel",
+            "aimSkel": "c851_aim_00.skel",
+            "coverSkel": "c851_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c851_01",
+        "characterName": "c851_01",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c851_01",
+            "skel": "c851_01_00.skel",
+            "aimSkel": "c851_01_aim_00.skel",
+            "coverSkel": "c851_01_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c851_02",
+        "characterName": "c851_02",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c851_02",
+            "skel": "c851_02_00.skel",
+            "aimSkel": "c851_02_aim_00.skel",
+            "coverSkel": "c851_02_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c852",
+        "characterName": "c852",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c852",
+            "skel": "c852_00.skel",
+            "aimSkel": "c852_aim_00.skel",
+            "coverSkel": "c852_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c853",
+        "characterName": "c853",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c853",
+            "skel": "c853_00.skel"
+        }
+    },
+    {
+        "dirName": "c900",
+        "characterName": "c900",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c900",
+            "skel": "c900_00.skel"
+        }
+    },
+    {
+        "dirName": "c9000",
+        "characterName": "c9000",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c9000",
+            "skel": "c9000_00.skel"
+        }
+    },
+    {
+        "dirName": "c9000_01",
+        "characterName": "c9000_01",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c9000_01",
+            "skel": "c9000_01_00.skel"
+        }
+    },
+    {
+        "dirName": "c9000_02",
+        "characterName": "c9000_02",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c9000_02",
+            "skel": "c9000_02_00.skel"
+        }
+    },
+    {
+        "dirName": "c9000_03",
+        "characterName": "c9000_03",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c9000_03",
+            "skel": "c9000_03_00.skel"
+        }
+    },
+    {
+        "dirName": "c9000_05",
+        "characterName": "c9000_05",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c9000_05",
+            "skel": "c9000_05_00.skel"
+        }
+    },
+    {
+        "dirName": "c9000_06",
+        "characterName": "c9000_06",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c9000_06",
+            "skel": "c9000_06_00.skel"
+        }
+    },
+    {
+        "dirName": "c9000_07",
+        "characterName": "c9000_07",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c9000_07",
+            "skel": "c9000_07_00.skel"
+        }
+    },
+    {
+        "dirName": "c9001",
+        "characterName": "c9001",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c9001",
+            "skel": "c9001_00.skel"
+        }
+    },
+    {
+        "dirName": "c9003",
+        "characterName": "c9003",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c9003",
+            "skel": "c9003_00.skel"
+        }
+    },
+    {
+        "dirName": "c9004",
+        "characterName": "c9004",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c9004",
+            "skel": "c9004_00.skel"
+        }
+    },
+    {
+        "dirName": "c9005",
+        "characterName": "c9005",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c9005",
+            "skel": "c9005_00.skel"
+        }
+    },
+    {
+        "dirName": "c9005_01",
+        "characterName": "c9005_01",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c9005_01",
+            "skel": "c9005_01_00.skel"
+        }
+    },
+    {
+        "dirName": "c9008",
+        "characterName": "c9008",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c9008",
+            "skel": "c9008_00.skel"
+        }
+    },
+    {
+        "dirName": "c901",
+        "characterName": "c901",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c901",
+            "skel": "c901_00.skel",
+            "aimSkel": "c901_aim_00.skel",
+            "coverSkel": "c901_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c902",
+        "characterName": "c902",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c902",
+            "skel": "c902_00.skel"
+        }
+    },
+    {
+        "dirName": "c902_01",
+        "characterName": "c902_01",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c902_01",
+            "skel": "c902_01_00.skel"
+        }
+    },
+    {
+        "dirName": "c903",
+        "characterName": "c903",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c903",
+            "skel": "c903_00.skel"
+        }
+    },
+    {
+        "dirName": "c903_01",
+        "characterName": "c903_01",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c903_01",
+            "skel": "c903_01_00.skel"
+        }
+    },
+    {
+        "dirName": "c904",
+        "characterName": "c904",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c904",
+            "skel": "c904_00.skel"
+        }
+    },
+    {
+        "dirName": "c905",
+        "characterName": "c905",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c905",
+            "skel": "c905_00.skel"
+        }
+    },
+    {
+        "dirName": "c907",
+        "characterName": "c907",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c907",
+            "skel": "c907_00.skel",
+            "aimSkel": "c907_aim_00.skel",
+            "coverSkel": "c907_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c907_01",
+        "characterName": "c907_01",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c907_01",
+            "skel": "c907_01_00.skel"
+        }
+    },
+    {
+        "dirName": "c908",
+        "characterName": "c908",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c908",
+            "skel": "c908_00.skel"
+        }
+    },
+    {
+        "dirName": "c910",
+        "characterName": "c910",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c910",
+            "skel": "c910_00.skel"
+        }
+    },
+    {
+        "dirName": "c910_01",
+        "characterName": "c910_01",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c910_01",
+            "skel": "c910_01_00.skel"
+        }
+    },
+    {
+        "dirName": "c911",
+        "characterName": "c911",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c911",
+            "skel": "c911_00.skel"
+        }
+    },
+    {
+        "dirName": "c912",
+        "characterName": "c912",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c912",
+            "skel": "c912_00.skel"
+        }
+    },
+    {
+        "dirName": "c914",
+        "characterName": "c914",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c914",
+            "skel": "c914_00.skel"
+        }
+    },
+    {
+        "dirName": "c915",
+        "characterName": "c915",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c915",
+            "skel": "c915_00.skel"
+        }
+    },
+    {
+        "dirName": "c916",
+        "characterName": "c916",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c916",
+            "skel": "c916_00.skel"
+        }
+    },
+    {
+        "dirName": "c917",
+        "characterName": "c917",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c917",
+            "skel": "c917_00.skel"
+        }
+    },
+    {
+        "dirName": "c918",
+        "characterName": "c918",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c918",
+            "skel": "c918_00.skel"
+        }
+    },
+    {
+        "dirName": "c919",
+        "characterName": "c919",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c919",
+            "skel": "c919_00.skel"
+        }
+    },
+    {
+        "dirName": "c920",
+        "characterName": "c920",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c920",
+            "skel": "c920_00.skel"
+        }
+    },
+    {
+        "dirName": "c921",
+        "characterName": "c921",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c921",
+            "skel": "c921_00.skel"
+        }
+    },
+    {
+        "dirName": "c922",
+        "characterName": "c922",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c922",
+            "skel": "c922_00.skel"
+        }
+    },
+    {
+        "dirName": "c923",
+        "characterName": "c923",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c923",
+            "skel": "c923_00.skel"
+        }
+    },
+    {
+        "dirName": "c924",
+        "characterName": "c924",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c924",
+            "skel": "c924_00.skel"
+        }
+    },
+    {
+        "dirName": "c925",
+        "characterName": "c925",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c925",
+            "skel": "c925_00.skel"
+        }
+    },
+    {
+        "dirName": "c928",
+        "characterName": "c928",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c928",
+            "skel": "c928_00.skel"
+        }
+    },
+    {
+        "dirName": "c929",
+        "characterName": "c929",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c929",
+            "skel": "c929_00.skel"
+        }
+    },
+    {
+        "dirName": "c930",
+        "characterName": "c930",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c930",
+            "skel": "c930_00.skel"
+        }
+    },
+    {
+        "dirName": "c931",
+        "characterName": "c931",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c931",
+            "skel": "c931_00.skel"
+        }
+    },
+    {
+        "dirName": "c931_01",
+        "characterName": "c931_01",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c931_01",
+            "skel": "c931_01_00.skel"
+        }
+    },
+    {
+        "dirName": "c932",
+        "characterName": "c932",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c932",
+            "skel": "c932_00.skel"
+        }
+    },
+    {
+        "dirName": "c933",
+        "characterName": "c933",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c933",
+            "skel": "c933_00.skel"
+        }
+    },
+    {
+        "dirName": "c934",
+        "characterName": "c934",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c934",
+            "skel": "c934_00.skel"
+        }
+    },
+    {
+        "dirName": "c935",
+        "characterName": "c935",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c935",
+            "skel": "c935_00.skel"
+        }
+    },
+    {
+        "dirName": "c936",
+        "characterName": "c936",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c936",
+            "skel": "c936_00.skel"
+        }
+    },
+    {
+        "dirName": "c937",
+        "characterName": "c937",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c937",
+            "skel": "c937_00.skel"
+        }
+    },
+    {
+        "dirName": "c939",
+        "characterName": "c939",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c939",
+            "skel": "c939_00.skel"
+        }
+    },
+    {
+        "dirName": "c940",
+        "characterName": "c940",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c940",
+            "skel": "c940_00.skel"
+        }
+    },
+    {
+        "dirName": "c941",
+        "characterName": "c941",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c941",
+            "skel": "c941_00.skel"
+        }
+    },
+    {
+        "dirName": "c942",
+        "characterName": "c942",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c942",
+            "skel": "c942_00.skel"
+        }
+    },
+    {
+        "dirName": "c943",
+        "characterName": "c943",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c943",
+            "skel": "c943_00.skel"
+        }
+    },
+    {
+        "dirName": "c944",
+        "characterName": "c944",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c944",
+            "skel": "c944_00.skel"
+        }
+    },
+    {
+        "dirName": "c945",
+        "characterName": "c945",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c945",
+            "skel": "c945_00.skel"
+        }
+    },
+    {
+        "dirName": "c946",
+        "characterName": "c946",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c946",
+            "skel": "c946_00.skel"
+        }
+    },
+    {
+        "dirName": "c947",
+        "characterName": "c947",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c947",
+            "skel": "c947_00.skel"
+        }
+    },
+    {
+        "dirName": "c948",
+        "characterName": "c948",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c948",
+            "skel": "c948_00.skel"
+        }
+    },
+    {
+        "dirName": "c951",
+        "characterName": "c951",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c951",
+            "skel": "c951_00.skel"
+        }
+    },
+    {
+        "dirName": "c952",
+        "characterName": "c952",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c952",
+            "skel": "c952_00.skel"
+        }
+    },
+    {
+        "dirName": "c960",
+        "characterName": "c960",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c960",
+            "skel": "c960_00.skel"
+        }
+    },
+    {
+        "dirName": "c961",
+        "characterName": "c961",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c961",
+            "skel": "c961_00.skel"
+        }
+    },
+    {
+        "dirName": "c962",
+        "characterName": "c962",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c962",
+            "skel": "c962_00.skel"
+        }
+    },
+    {
+        "dirName": "c963",
+        "characterName": "c963",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c963",
+            "skel": "c963_00.skel"
+        }
+    },
+    {
+        "dirName": "c964",
+        "characterName": "c964",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c964",
+            "skel": "c964_00.skel"
+        }
+    },
+    {
+        "dirName": "c965",
+        "characterName": "c965",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c965",
+            "skel": "c965_00.skel"
+        }
+    },
+    {
+        "dirName": "c966",
+        "characterName": "c966",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c966",
+            "skel": "c966_00.skel"
+        }
+    },
+    {
+        "dirName": "c967",
+        "characterName": "c967",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c967",
+            "skel": "c967_00.skel"
+        }
+    },
+    {
+        "dirName": "c968",
+        "characterName": "c968",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c968",
+            "skel": "c968_00.skel"
+        }
+    },
+    {
+        "dirName": "c969",
+        "characterName": "c969",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c969",
+            "skel": "c969_00.skel"
+        }
+    },
+    {
+        "dirName": "c970",
+        "characterName": "c970",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c970",
+            "skel": "c970_00.skel"
+        }
+    },
+    {
+        "dirName": "c971",
+        "characterName": "c971",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c971",
+            "skel": "c971_00.skel"
+        }
+    },
+    {
+        "dirName": "c973",
+        "characterName": "c973",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c973",
+            "skel": "c973_00.skel"
+        }
+    },
+    {
+        "dirName": "c974",
+        "characterName": "c974",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c974",
+            "skel": "c974_00.skel"
+        }
+    },
+    {
+        "dirName": "c974_01",
+        "characterName": "c974_01",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c974_01",
+            "skel": "c974_01_00.skel"
+        }
+    },
+    {
+        "dirName": "c975",
+        "characterName": "c975",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c975",
+            "skel": "c975_00.skel"
+        }
+    },
+    {
+        "dirName": "c976",
+        "characterName": "c976",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c976",
+            "skel": "c976_00.skel"
+        }
+    },
+    {
+        "dirName": "c977",
+        "characterName": "c977",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c977",
+            "skel": "c977_00.skel"
+        }
+    },
+    {
+        "dirName": "c979",
+        "characterName": "c979",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c979",
+            "skel": "c979_00.skel"
+        }
+    },
+    {
+        "dirName": "c980",
+        "characterName": "c980",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c980",
+            "skel": "c980_00.skel"
+        }
+    },
+    {
+        "dirName": "c981",
+        "characterName": "c981",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c981",
+            "skel": "c981_00.skel"
+        }
+    },
+    {
+        "dirName": "c982",
+        "characterName": "c982",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c982",
+            "skel": "c982_00.skel"
+        }
+    },
+    {
+        "dirName": "c983",
+        "characterName": "c983",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c983",
+            "skel": "c983_00.skel"
+        }
+    },
+    {
+        "dirName": "c985",
+        "characterName": "c985",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c985",
+            "skel": "c985_00.skel"
+        }
+    },
+    {
+        "dirName": "c988",
+        "characterName": "c988",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c988",
+            "skel": "c988_00.skel"
+        }
+    },
+    {
+        "dirName": "c989",
+        "characterName": "c989",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c989",
+            "skel": "c989_00.skel"
+        }
+    },
+    {
+        "dirName": "c990",
+        "characterName": "c990",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c990",
+            "skel": "c990_00.skel"
+        }
+    },
+    {
+        "dirName": "c991",
+        "characterName": "c991",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c991",
+            "skel": "c991_00.skel"
+        }
+    },
+    {
+        "dirName": "c992",
+        "characterName": "c992",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c992",
+            "skel": "c992_00.skel"
+        }
+    },
+    {
+        "dirName": "c993",
+        "characterName": "c993",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c993",
+            "skel": "c993_00.skel",
+            "aimSkel": "c993_aim_00.skel",
+            "coverSkel": "c993_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c994",
+        "characterName": "c994",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c994",
+            "skel": "c994_00.skel"
+        }
+    },
+    {
+        "dirName": "c996",
+        "characterName": "c996",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c996",
+            "skel": "c996_00.skel"
+        }
+    },
+    {
+        "dirName": "c998",
+        "characterName": "c998",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c998",
+            "skel": "c998_00.skel"
+        }
+    },
+    {
+        "dirName": "cherryblossom",
+        "characterName": "cherryblossom",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "cherryblossom",
+            "skel": "cherryblossom_00.skel"
+        }
+    },
+    {
+        "dirName": "claymore",
+        "characterName": "claymore",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "claymore",
+            "skel": "claymore_00.skel"
+        }
+    },
+    {
+        "dirName": "colorless",
+        "characterName": "colorless",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "colorless",
+            "skel": "colorless_00.skel"
+        }
+    },
+    {
+        "dirName": "darkhero",
+        "characterName": "darkhero",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "darkhero",
+            "skel": "darkhero_00.skel"
+        }
+    },
+    {
+        "dirName": "dazzlingcupid_naga",
+        "characterName": "dazzlingcupid_naga",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "dazzlingcupid_naga",
+            "skel": "dazzlingcupid_naga_00.skel"
+        }
+    },
+    {
+        "dirName": "dazzlingcupid_tia",
+        "characterName": "dazzlingcupid_tia",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "dazzlingcupid_tia",
+            "skel": "dazzlingcupid_tia_00.skel"
+        }
+    },
+    {
+        "dirName": "dirtybackyard",
+        "characterName": "dirtybackyard",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "dirtybackyard",
+            "skel": "dirtybackyard_00.skel"
+        }
+    },
+    {
+        "dirName": "doutsider",
+        "characterName": "doutsider",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "doutsider",
+            "skel": "doutsider_00.skel"
+        }
+    },
+    {
+        "dirName": "eba001",
+        "characterName": "eba001",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "eba001",
+            "skel": "eba001_00.skel"
+        }
+    },
+    {
+        "dirName": "eba003",
+        "characterName": "eba003",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "eba003",
+            "skel": "eba003_00.skel"
+        }
+    },
+    {
+        "dirName": "eba003_green",
+        "characterName": "eba003_green",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "eba003_green",
+            "skel": "eba003_green_00.skel"
+        }
+    },
+    {
+        "dirName": "eba003_hsta",
+        "characterName": "eba003_hsta",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "eba003_hsta",
+            "skel": "eba003_hsta_00.skel"
+        }
+    },
+    {
+        "dirName": "ebg001",
+        "characterName": "ebg001",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "ebg001",
+            "skel": "ebg001_00.skel"
+        }
+    },
+    {
+        "dirName": "ebg002",
+        "characterName": "ebg002",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "ebg002",
+            "skel": "ebg002_00.skel"
+        }
+    },
+    {
+        "dirName": "evangelion",
+        "characterName": "evangelion",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "evangelion",
+            "skel": "evangelion_00.skel"
+        }
+    },
+    {
+        "dirName": "favorite_c030",
+        "characterName": "favorite_c030",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "favorite_c030",
+            "skel": "favorite_c030_00.skel"
+        }
+    },
+    {
+        "dirName": "favorite_c032",
+        "characterName": "favorite_c032",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "favorite_c032",
+            "skel": "favorite_c032_00.skel"
+        }
+    },
+    {
+        "dirName": "favorite_c072",
+        "characterName": "favorite_c072",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "favorite_c072",
+            "skel": "favorite_c072_00.skel"
+        }
+    },
+    {
+        "dirName": "favorite_c100",
+        "characterName": "favorite_c100",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "favorite_c100",
+            "skel": "favorite_c100_00.skel"
+        }
+    },
+    {
+        "dirName": "favorite_c101",
+        "characterName": "favorite_c101",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "favorite_c101",
+            "skel": "favorite_c101_00.skel"
+        }
+    },
+    {
+        "dirName": "favorite_c112",
+        "characterName": "favorite_c112",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "favorite_c112",
+            "skel": "favorite_c112_00.skel"
+        }
+    },
+    {
+        "dirName": "favorite_c141",
+        "characterName": "favorite_c141",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "favorite_c141",
+            "skel": "favorite_c141_00.skel"
+        }
+    },
+    {
+        "dirName": "favorite_c142",
+        "characterName": "favorite_c142",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "favorite_c142",
+            "skel": "favorite_c142_00.skel"
+        }
+    },
+    {
+        "dirName": "favorite_c150",
+        "characterName": "favorite_c150",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "favorite_c150",
+            "skel": "favorite_c150_00.skel"
+        }
+    },
+    {
+        "dirName": "favorite_c192",
+        "characterName": "favorite_c192",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "favorite_c192",
+            "skel": "favorite_c192_00.skel"
+        }
+    },
+    {
+        "dirName": "favorite_c210",
+        "characterName": "favorite_c210",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "favorite_c210",
+            "skel": "favorite_c210_00.skel"
+        }
+    },
+    {
+        "dirName": "favorite_c352",
+        "characterName": "favorite_c352",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "favorite_c352",
+            "skel": "favorite_c352_00.skel"
+        }
+    },
+    {
+        "dirName": "favorite_c550",
+        "characterName": "favorite_c550",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "favorite_c550",
+            "skel": "favorite_c550_00.skel"
+        }
+    },
+    {
+        "dirName": "footstepwalkrun",
+        "characterName": "footstepwalkrun",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "footstepwalkrun",
+            "skel": "footstepwalkrun_00.skel"
+        }
+    },
+    {
+        "dirName": "forrest",
+        "characterName": "forrest",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "forrest",
+            "skel": "forrest_00.skel"
+        }
+    },
+    {
+        "dirName": "goldencoinrush",
+        "characterName": "goldencoinrush",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "goldencoinrush",
+            "skel": "goldencoinrush_00.skel"
+        }
+    },
+    {
+        "dirName": "goldenship",
+        "characterName": "goldenship",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "goldenship",
+            "skel": "goldenship_00.skel"
+        }
+    },
+    {
+        "dirName": "hightechtoy",
+        "characterName": "hightechtoy",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "hightechtoy",
+            "skel": "hightechtoy_00.skel"
+        }
+    },
+    {
+        "dirName": "icedragonsaga",
+        "characterName": "icedragonsaga",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "icedragonsaga",
+            "skel": "icedragonsaga_00.skel"
+        }
+    },
+    {
+        "dirName": "jinxplayer",
+        "characterName": "jinxplayer",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "jinxplayer",
+            "skel": "jinxplayer_00.skel"
+        }
+    },
+    {
+        "dirName": "juveniledays",
+        "characterName": "juveniledays",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "juveniledays",
+            "skel": "juveniledays_00.skel"
+        }
+    },
+    {
+        "dirName": "killthelord",
+        "characterName": "killthelord",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "killthelord",
+            "skel": "killthelord_00.skel"
+        }
+    },
+    {
+        "dirName": "lastkingdom",
+        "characterName": "lastkingdom",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "lastkingdom",
+            "skel": "lastkingdom_00.skel"
+        }
+    },
+    {
+        "dirName": "lifeagain",
+        "characterName": "lifeagain",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "lifeagain",
+            "skel": "lifeagain_00.skel"
+        }
+    },
+    {
+        "dirName": "lionheart",
+        "characterName": "lionheart",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "lionheart",
+            "skel": "lionheart_00.skel"
+        }
+    },
+    {
+        "dirName": "lordforjustice",
+        "characterName": "lordforjustice",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "lordforjustice",
+            "skel": "lordforjustice_00.skel"
+        }
+    },
+    {
+        "dirName": "ltk",
+        "characterName": "ltk",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "ltk",
+            "skel": "ltk_00.skel"
+        }
+    },
+    {
+        "dirName": "maidinvalentine",
+        "characterName": "maidinvalentine",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "maidinvalentine",
+            "skel": "maidinvalentine_00.skel"
+        }
+    },
+    {
+        "dirName": "mba002",
+        "characterName": "mba002",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "mba002",
+            "skel": "mba002_00.skel"
+        }
+    },
+    {
+        "dirName": "mbg001",
+        "characterName": "mbg001",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "mbg001",
+            "skel": "mbg001_00.skel"
+        }
+    },
+    {
+        "dirName": "mbg002",
+        "characterName": "mbg002",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "mbg002",
+            "skel": "mbg002_00.skel"
+        }
+    },
+    {
+        "dirName": "mbg004",
+        "characterName": "mbg004",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "mbg004",
+            "skel": "mbg004_00.skel"
+        }
+    },
+    {
+        "dirName": "mbg004_appearance",
+        "characterName": "mbg004_appearance",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "mbg004_appearance",
+            "skel": "mbg004_appearance_00.skel"
+        }
+    },
+    {
+        "dirName": "memoriesteller_1",
+        "characterName": "memoriesteller_1",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "memoriesteller_1",
+            "skel": "memoriesteller_1_00.skel"
+        }
+    },
+    {
+        "dirName": "memoriesteller_2",
+        "characterName": "memoriesteller_2",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "memoriesteller_2",
+            "skel": "memoriesteller_2_00.skel"
+        }
+    },
+    {
+        "dirName": "miraclesnow",
+        "characterName": "miraclesnow",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "miraclesnow",
+            "skel": "miraclesnow_00.skel"
+        }
+    },
+    {
+        "dirName": "neverland",
+        "characterName": "neverland",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "neverland",
+            "skel": "neverland_00.skel"
+        }
+    },
+    {
+        "dirName": "newflavor",
+        "characterName": "newflavor",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "newflavor",
+            "skel": "newflavor_00.skel"
+        }
+    },
+    {
+        "dirName": "newyearnewsword",
+        "characterName": "newyearnewsword",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "newyearnewsword",
+            "skel": "newyearnewsword_00.skel"
+        }
+    },
+    {
+        "dirName": "nocallerid",
+        "characterName": "nocallerid",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "nocallerid",
+            "skel": "nocallerid_00.skel"
+        }
+    },
+    {
+        "dirName": "nyanyaparadise",
+        "characterName": "nyanyaparadise",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "nyanyaparadise",
+            "skel": "nyanyaparadise_00.skel"
+        }
+    },
+    {
+        "dirName": "oldtales",
+        "characterName": "oldtales",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "oldtales",
+            "skel": "oldtales_00.skel"
+        }
+    },
+    {
+        "dirName": "onemoretime",
+        "characterName": "onemoretime",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "onemoretime",
+            "skel": "onemoretime_00.skel"
+        }
+    },
+    {
+        "dirName": "outerautomata",
+        "characterName": "outerautomata",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "outerautomata",
+            "skel": "outerautomata_00.skel"
+        }
+    },
+    {
+        "dirName": "overthehorizon",
+        "characterName": "overthehorizon",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "overthehorizon",
+            "skel": "overthehorizon_00.skel"
+        }
+    },
+    {
+        "dirName": "perfectmaid",
+        "characterName": "perfectmaid",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "perfectmaid",
+            "skel": "perfectmaid_00.skel"
+        }
+    },
+    {
+        "dirName": "phantomthief",
+        "characterName": "phantomthief",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "phantomthief",
+            "skel": "phantomthief_00.skel"
+        }
+    },
+    {
+        "dirName": "piratecafe",
+        "characterName": "piratecafe",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "piratecafe",
+            "skel": "piratecafe_00.skel"
+        }
+    },
+    {
+        "dirName": "queensorder",
+        "characterName": "queensorder",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "queensorder",
+            "skel": "queensorder_00.skel"
+        }
+    },
+    {
+        "dirName": "recipeforyou",
+        "characterName": "recipeforyou",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "recipeforyou",
+            "skel": "recipeforyou_00.skel"
+        }
+    },
+    {
+        "dirName": "redash1",
+        "characterName": "redash1",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "redash1",
+            "skel": "redash1_00.skel"
+        }
+    },
+    {
+        "dirName": "redash2",
+        "characterName": "redash2",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "redash2",
+            "skel": "redash2_00.skel"
+        }
+    },
+    {
+        "dirName": "romanticvalentine",
+        "characterName": "romanticvalentine",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "romanticvalentine",
+            "skel": "romanticvalentine_00.skel"
+        }
+    },
+    {
+        "dirName": "schooloflock",
+        "characterName": "schooloflock",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "schooloflock",
+            "skel": "schooloflock_00.skel"
+        }
+    },
+    {
+        "dirName": "seayouagain",
+        "characterName": "seayouagain",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "seayouagain",
+            "skel": "seayouagain_00.skel"
+        }
+    },
+    {
+        "dirName": "secondquest1",
+        "characterName": "secondquest1",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "secondquest1",
+            "skel": "secondquest1_00.skel"
+        }
+    },
+    {
+        "dirName": "secondquest2",
+        "characterName": "secondquest2",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "secondquest2",
+            "skel": "secondquest2_00.skel"
+        }
+    },
+    {
+        "dirName": "secretgarden",
+        "characterName": "secretgarden",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "secretgarden",
+            "skel": "secretgarden_00.skel"
+        }
+    },
+    {
+        "dirName": "smol_ade",
+        "characterName": "smol_ade",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "smol_ade",
+            "skel": "smol_ade_00.skel"
+        }
+    },
+    {
+        "dirName": "smol_anchor",
+        "characterName": "smol_anchor",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "smol_anchor",
+            "skel": "smol_anchor_00.skel"
+        }
+    },
+    {
+        "dirName": "smol_anchor_pirate",
+        "characterName": "smol_anchor_pirate",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "smol_anchor_pirate",
+            "skel": "smol_anchor_pirate_00.skel"
+        }
+    },
+    {
+        "dirName": "smol_bolt",
+        "characterName": "smol_bolt",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "smol_bolt",
+            "skel": "smol_bolt_00.skel"
+        }
+    },
+    {
+        "dirName": "smol_emilia",
+        "characterName": "smol_emilia",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "smol_emilia",
+            "skel": "smol_emilia_00.skel"
+        }
+    },
+    {
+        "dirName": "smol_frima",
+        "characterName": "smol_frima",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "smol_frima",
+            "skel": "smol_frima_00.skel"
+        }
+    },
+    {
+        "dirName": "smol_helm",
+        "characterName": "smol_helm",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "smol_helm",
+            "skel": "smol_helm_00.skel"
+        }
+    },
+    {
+        "dirName": "smol_liter",
+        "characterName": "smol_liter",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "smol_liter",
+            "skel": "smol_liter_00.skel"
+        }
+    },
+    {
+        "dirName": "smol_mary",
+        "characterName": "smol_mary",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "smol_mary",
+            "skel": "smol_mary_00.skel"
+        }
+    },
+    {
+        "dirName": "smol_mast",
+        "characterName": "smol_mast",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "smol_mast",
+            "skel": "smol_mast_00.skel"
+        }
+    },
+    {
+        "dirName": "smol_mast_pirate",
+        "characterName": "smol_mast_pirate",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "smol_mast_pirate",
+            "skel": "smol_mast_pirate_00.skel"
+        }
+    },
+    {
+        "dirName": "smol_mpriv",
+        "characterName": "smol_mpriv",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "smol_mpriv",
+            "skel": "smol_mpriv_00.skel"
+        }
+    },
+    {
+        "dirName": "smol_pepper",
+        "characterName": "smol_pepper",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "smol_pepper",
+            "skel": "smol_pepper_00.skel"
+        }
+    },
+    {
+        "dirName": "smol_ram",
+        "characterName": "smol_ram",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "smol_ram",
+            "skel": "smol_ram_00.skel"
+        }
+    },
+    {
+        "dirName": "smol_rapi",
+        "characterName": "smol_rapi",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "smol_rapi",
+            "skel": "smol_rapi_00.skel"
+        }
+    },
+    {
+        "dirName": "smol_rem",
+        "characterName": "smol_rem",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "smol_rem",
+            "skel": "smol_rem_00.skel"
+        }
+    },
+    {
+        "dirName": "smol_sin_pirate",
+        "characterName": "smol_sin_pirate",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "smol_sin_pirate",
+            "skel": "smol_sin_pirate_00.skel"
+        }
+    },
+    {
+        "dirName": "smol_yan",
+        "characterName": "smol_yan",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "smol_yan",
+            "skel": "smol_yan_00.skel"
+        }
+    },
+    {
+        "dirName": "story0001",
+        "characterName": "story0001",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "story0001",
+            "skel": "story0001_00.skel"
+        }
+    },
+    {
+        "dirName": "story0001_2",
+        "characterName": "story0001_2",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "story0001_2",
+            "skel": "story0001_2_00.skel"
+        }
+    },
+    {
+        "dirName": "story0002",
+        "characterName": "story0002",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "story0002",
+            "skel": "story0002_00.skel"
+        }
+    },
+    {
+        "dirName": "story0002_2",
+        "characterName": "story0002_2",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "story0002_2",
+            "skel": "story0002_2_00.skel"
+        }
+    },
+    {
+        "dirName": "story0003",
+        "characterName": "story0003",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "story0003",
+            "skel": "story0003_00.skel"
+        }
+    },
+    {
+        "dirName": "story0201",
+        "characterName": "story0201",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "story0201",
+            "skel": "story0201_00.skel"
+        }
+    },
+    {
+        "dirName": "story0401",
+        "characterName": "story0401",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "story0401",
+            "skel": "story0401_00.skel"
+        }
+    },
+    {
+        "dirName": "story0401_2",
+        "characterName": "story0401_2",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "story0401_2",
+            "skel": "story0401_2_00.skel"
+        }
+    },
+    {
+        "dirName": "story0401_3",
+        "characterName": "story0401_3",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "story0401_3",
+            "skel": "story0401_3_00.skel"
+        }
+    },
+    {
+        "dirName": "story0405",
+        "characterName": "story0405",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "story0405",
+            "skel": "story0405_00.skel"
+        }
+    },
+    {
+        "dirName": "story0702",
+        "characterName": "story0702",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "story0702",
+            "skel": "story0702_00.skel"
+        }
+    },
+    {
+        "dirName": "story1201",
+        "characterName": "story1201",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "story1201",
+            "skel": "story1201_00.skel"
+        }
+    },
+    {
+        "dirName": "story1302",
+        "characterName": "story1302",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "story1302",
+            "skel": "story1302_00.skel"
+        }
+    },
+    {
+        "dirName": "story1303",
+        "characterName": "story1303",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "story1303",
+            "skel": "story1303_00.skel"
+        }
+    },
+    {
+        "dirName": "story1401",
+        "characterName": "story1401",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "story1401",
+            "skel": "story1401_00.skel"
+        }
+    },
+    {
+        "dirName": "story1403",
+        "characterName": "story1403",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "story1403",
+            "skel": "story1403_00.skel"
+        }
+    },
+    {
+        "dirName": "story1405",
+        "characterName": "story1405",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "story1405",
+            "skel": "story1405_00.skel"
+        }
+    },
+    {
+        "dirName": "story1501",
+        "characterName": "story1501",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "story1501",
+            "skel": "story1501_00.skel"
+        }
+    },
+    {
+        "dirName": "story1902",
+        "characterName": "story1902",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "story1902",
+            "skel": "story1902_00.skel"
+        }
+    },
+    {
+        "dirName": "story2002",
+        "characterName": "story2002",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "story2002",
+            "skel": "story2002_00.skel"
+        }
+    },
+    {
+        "dirName": "story2101",
+        "characterName": "story2101",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "story2101",
+            "skel": "story2101_00.skel"
+        }
+    },
+    {
+        "dirName": "story2201",
+        "characterName": "story2201",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "story2201",
+            "skel": "story2201_00.skel"
+        }
+    },
+    {
+        "dirName": "story2202",
+        "characterName": "story2202",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "story2202",
+            "skel": "story2202_00.skel"
+        }
+    },
+    {
+        "dirName": "story2206",
+        "characterName": "story2206",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "story2206",
+            "skel": "story2206_00.skel"
+        }
+    },
+    {
+        "dirName": "story2501",
+        "characterName": "story2501",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "story2501",
+            "skel": "story2501_00.skel"
+        }
+    },
+    {
+        "dirName": "story2602",
+        "characterName": "story2602",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "story2602",
+            "skel": "story2602_00.skel"
+        }
+    },
+    {
+        "dirName": "trueflavor",
+        "characterName": "trueflavor",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "trueflavor",
+            "skel": "trueflavor_00.skel"
+        }
+    },
+    {
+        "dirName": "unbreakablesphere",
+        "characterName": "unbreakablesphere",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "unbreakablesphere",
+            "skel": "unbreakablesphere_00.skel"
+        }
+    },
+    {
+        "dirName": "whitememory1",
+        "characterName": "whitememory1",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "whitememory1",
+            "skel": "whitememory1_00.skel"
+        }
+    },
+    {
+        "dirName": "whitememory2",
+        "characterName": "whitememory2",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "whitememory2",
+            "skel": "whitememory2_00.skel"
+        }
+    },
+    {
+        "dirName": "wisdomspring",
+        "characterName": "wisdomspring",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "wisdomspring",
+            "skel": "wisdomspring_00.skel"
+        }
+    }
+]
