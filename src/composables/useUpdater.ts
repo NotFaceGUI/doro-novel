@@ -27,11 +27,11 @@ export function useUpdater() {
     try {
       const result = await checkForUpdates();
       
-      console.log('检查更新结果:', result);
+      console.log('检查更新结果:', result, silent);
       updateInfo.value = result;
       lastCheckTime.value = new Date();
       
-      if (result.available && !silent) {
+      if (result.available) {
         showUpdateDialog.value = true;
       }
       
@@ -61,7 +61,7 @@ export function useUpdater() {
     
     checkInterval.value = window.setInterval(() => {
       if (autoCheckEnabled.value) {
-        silentCheck();
+        manualCheck();
       }
     }, intervalMinutes * 60 * 1000);
   };

@@ -20,7 +20,7 @@ const updater = useUpdater();
 
 const app = ref<DoroApp>({
   name: 'Doro Novel',
-  version: 'ver 0.2.1'
+  version: 'ver 0.2.3'
 });
 
 onMounted(() => {
@@ -94,7 +94,7 @@ onUnmounted(() => {
   <!-- 更新对话框 -->
   <UpdateDialog
     :updateInfo="updater.updateInfo.value"
-    :show="updater.showUpdateDialog.value"
+    :showDialog="updater.showUpdateDialog.value"
     @close="updater.hideUpdate"
     @updateStarted="handleUpdateStarted"
     @updateCompleted="handleUpdateCompleted"

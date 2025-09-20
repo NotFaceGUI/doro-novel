@@ -2,12 +2,13 @@
   <div v-if="showDialog" class="update-dialog-overlay" @click.self="closeDialog">
     <div class="update-dialog">
       <div class="dialog-header">
-        <h3>{{ $t('update.title') }}</h3>
-        <button class="close-btn" @click="closeDialog">×</button>
+        <h3>{{ getDialogTitle() }}</h3>
+        <button class="close-btn" @click="closeDialog" :disabled="isDownloading">×</button>
       </div>
       
       <div class="dialog-content">
-        <div class="update-info">
+        <!-- 更新信息 -->
+        <div v-if="!isDownloading && !downloadCompleted" class="update-info">
           <p class="version-info">
             <strong>{{ $t('update.newVersion') }}:</strong> {{ updateInfo?.version }}
           </p>
@@ -16,70 +17,81 @@
           </p>
         </div>
         
-        <div class="update-notes">
+        <!-- 发布说明 -->
+        <div v-if="!isDownloading && !downloadCompleted" class="update-notes">
           <h4>{{ $t('update.releaseNotes') }}</h4>
           <div class="notes-content" v-html="formatReleaseNotes(updateInfo?.body)"></div>
         </div>
         
+        <!-- 下载进度 -->
         <div v-if="isDownloading" class="download-progress">
           <div class="progress-info">
-            <span>{{ $t('update.downloading') }}...</span>
-            <span>{{ downloadProgress }}%</span>
+            <p class="progress-text">{{ $t('update.downloading') }}...</p>
+            <p class="progress-percentage">{{ Math.round(downloadProgress) }}%</p>
           </div>
           <div class="progress-bar">
             <div class="progress-fill" :style="{ width: downloadProgress + '%' }"></div>
           </div>
-          <div class="download-details">
-            {{ formatBytes(downloadedBytes) }} / {{ formatBytes(totalBytes) }}
+          <div class="progress-details">
+            <span class="download-speed">{{ formatBytes(downloadSpeed) }}/s</span>
+            <span class="file-size">{{ formatBytes(downloadedBytes) }} / {{ formatBytes(totalBytes) }}</span>
+          </div>
+        </div>
+        
+        <!-- 下载完成确认 -->
+        <div v-if="downloadCompleted" class="download-completed">
+          <div class="completion-icon">✓</div>
+          <h4>{{ $t('update.downloadCompleted') }}</h4>
+          <p class="completion-message">{{ $t('update.readyToInstall') }}</p>
+          <div class="install-options">
+            <p>{{ $t('update.installPrompt') }}</p>
           </div>
         </div>
       </div>
       
       <div class="dialog-actions">
-        <button 
-          v-if="!isDownloading && !isCompleted" 
-          class="btn btn-secondary" 
-          @click="closeDialog"
-        >
-          {{ $t('update.later') }}
-        </button>
-        <button 
-          v-if="!isDownloading && !isCompleted" 
-          class="btn btn-primary" 
-          @click="startUpdate"
-        >
-          {{ $t('update.updateNow') }}
-        </button>
-        <button 
-          v-if="isCompleted" 
-          class="btn btn-primary" 
-          @click="restartApp"
-        >
-          {{ $t('update.restartNow') }}
-        </button>
-        <button 
-          v-if="isCompleted" 
-          class="btn btn-secondary" 
-          @click="closeDialog"
-        >
-          {{ $t('update.restartLater') }}
-        </button>
+        <!-- 初始状态按钮 -->
+        <template v-if="!isDownloading && !downloadCompleted">
+          <button class="btn btn-secondary" @click="closeDialog">
+            {{ $t('update.later') }}
+          </button>
+          <button class="btn btn-primary" @click="startUpdate">
+            {{ $t('update.updateNow') }}
+          </button>
+        </template>
+        
+        <!-- 下载中按钮 -->
+        <template v-if="isDownloading">
+          <button class="btn btn-secondary" @click="cancelDownload">
+            {{ $t('update.cancel') }}
+          </button>
+        </template>
+        
+        <!-- 下载完成按钮 -->
+        <template v-if="downloadCompleted">
+          <button class="btn btn-secondary" @click="installLater">
+            {{ $t('update.installLater') }}
+          </button>
+          <button class="btn btn-primary" @click="installAndRestart">
+            {{ $t('update.installAndRestart') }}
+          </button>
+        </template>
       </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue';
+import { ref } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { manualUpdate, type UpdateInfo, type UpdateCallbacks } from '../script/updater';
+import { manualUpdate, restartApp, type UpdateInfo, type UpdateCallbacks } from '../script/updater';
 
 const { t } = useI18n();
 
 // Props
 interface Props {
   updateInfo: UpdateInfo | null;
-  show: boolean;
+  showDialog: boolean;
 }
 
 const props = defineProps<Props>();
@@ -92,19 +104,40 @@ const emit = defineEmits<{
   updateError: [error: string];
 }>();
 
-// State
-const showDialog = computed(() => props.show && props.updateInfo?.available);
+// 状态管理
 const isDownloading = ref(false);
-const isCompleted = ref(false);
+const downloadCompleted = ref(false);
 const downloadProgress = ref(0);
+const downloadSpeed = ref(0);
 const downloadedBytes = ref(0);
 const totalBytes = ref(0);
+
+// 计算属性
+const getDialogTitle = () => {
+  if (isDownloading.value) {
+    return t('update.downloading');
+  } else if (downloadCompleted.value) {
+    return t('update.downloadCompleted');
+  } else {
+    return t('update.title');
+  }
+};
 
 // Methods
 const closeDialog = () => {
   if (!isDownloading.value) {
+    resetState();
     emit('close');
   }
+};
+
+const resetState = () => {
+  isDownloading.value = false;
+  downloadCompleted.value = false;
+  downloadProgress.value = 0;
+  downloadSpeed.value = 0;
+  downloadedBytes.value = 0;
+  totalBytes.value = 0;
 };
 
 const startUpdate = async () => {
@@ -115,31 +148,32 @@ const startUpdate = async () => {
   
   const callbacks: UpdateCallbacks = {
     onDownloadProgress: (progress) => {
-      switch (progress.event) {
-        case 'Started':
-          totalBytes.value = progress.data?.contentLength || 0;
-          downloadedBytes.value = 0;
-          downloadProgress.value = 0;
-          break;
-        case 'Progress':
-          downloadedBytes.value += progress.data?.chunkLength || 0;
-          if (totalBytes.value > 0) {
-            downloadProgress.value = Math.round((downloadedBytes.value / totalBytes.value) * 100);
-          }
-          break;
-        case 'Finished':
-          downloadProgress.value = 100;
-          break;
+      if (progress.event === 'Started') {
+        downloadProgress.value = 0;
+        totalBytes.value = progress.data?.contentLength || 0;
+        downloadedBytes.value = 0;
+      } else if (progress.event === 'Progress') {
+        const chunkLength = progress.data?.chunkLength || 0;
+        downloadedBytes.value += chunkLength;
+        
+        if (totalBytes.value > 0) {
+          downloadProgress.value = (downloadedBytes.value / totalBytes.value) * 100;
+        }
+        
+        // 简单的下载速度计算（这里可以优化为更精确的计算）
+        downloadSpeed.value = chunkLength;
+      } else if (progress.event === 'Finished') {
+        downloadProgress.value = 100;
       }
     },
     onUpdateComplete: () => {
       isDownloading.value = false;
-      isCompleted.value = true;
+      downloadCompleted.value = true;
       emit('updateCompleted');
     },
     onError: (error) => {
       isDownloading.value = false;
-      emit('updateError', error);
+      console.error('更新失败:', error);
     }
   };
   
@@ -147,17 +181,32 @@ const startUpdate = async () => {
     await manualUpdate(callbacks);
   } catch (error) {
     isDownloading.value = false;
-    emit('updateError', error instanceof Error ? error.message : '更新失败');
+    const errorMessage = error instanceof Error ? error.message : '更新失败';
+    console.error('更新失败:', errorMessage);
+    emit('updateError', errorMessage);
   }
 };
 
-const restartApp = async () => {
+const cancelDownload = () => {
+  // TODO: 实现取消下载逻辑
+  resetState();
+  emit('close');
+};
+
+const installLater = () => {
+  resetState();
+  emit('close');
+};
+
+const installAndRestart = async () => {
   try {
-    const { relaunch } = await import('@tauri-apps/plugin-process');
-    await relaunch();
+    console.log('开始安装并重启应用');
+    await restartApp();
+    resetState();
+    emit('close');
   } catch (error) {
-    console.error('重启应用失败:', error);
-    emit('updateError', '重启应用失败');
+    console.error('安装失败:', error);
+    emit('updateError', error instanceof Error ? error.message : '安装失败');
   }
 };
 
@@ -197,7 +246,7 @@ const formatBytes = (bytes: number) => {
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.7);
+  background: var(--overlay-bg);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -206,94 +255,100 @@ const formatBytes = (bytes: number) => {
 }
 
 .update-dialog {
-  background: #1a1a1a;
-  border-radius: 12px;
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+  background: var(--secondary-bg);
+  border-radius: 8px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
   max-width: 500px;
   width: 90%;
   max-height: 80vh;
   overflow: hidden;
-  border: 1px solid #333;
+  border: 1px solid var(--high-hover-bg);
 }
 
 .dialog-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 20px 24px;
-  border-bottom: 1px solid #333;
-  background: linear-gradient(135deg, #2a2a2a, #1a1a1a);
+  padding: 15px 20px;
+  border-bottom: 1px solid var(--high-hover-bg);
+  background: var(--secondary-bg);
 }
 
 .dialog-header h3 {
   margin: 0;
-  color: #fff;
-  font-size: 18px;
+  color: var(--text-color);
+  font-size: 16px;
   font-weight: 600;
 }
 
 .close-btn {
   background: none;
   border: none;
-  color: #999;
-  font-size: 24px;
+  color: var(--text-color);
+  font-size: 20px;
   cursor: pointer;
   padding: 0;
-  width: 30px;
-  height: 30px;
+  width: 24px;
+  height: 24px;
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 6px;
+  border-radius: 4px;
   transition: all 0.2s;
+  opacity: 0.7;
 }
 
-.close-btn:hover {
-  background: #333;
-  color: #fff;
+.close-btn:hover:not(:disabled) {
+  background: var(--high-hover-bg);
+  opacity: 1;
+}
+
+.close-btn:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
 }
 
 .dialog-content {
-  padding: 24px;
+  padding: 20px;
   max-height: 400px;
   overflow-y: auto;
 }
 
 .update-info {
-  margin-bottom: 20px;
+  margin-bottom: 16px;
 }
 
 .version-info,
 .date-info {
-  margin: 8px 0;
-  color: #ccc;
+  margin: 6px 0;
+  color: var(--text-color);
   font-size: 14px;
 }
 
 .version-info strong,
 .date-info strong {
-  color: #fff;
+  color: var(--text-color);
 }
 
 .update-notes {
-  margin-bottom: 20px;
+  margin-bottom: 16px;
 }
 
 .update-notes h4 {
-  margin: 0 0 12px 0;
-  color: #fff;
-  font-size: 16px;
+  margin: 0 0 10px 0;
+  color: var(--text-color);
+  font-size: 14px;
   font-weight: 600;
 }
 
 .notes-content {
-  background: #0f0f0f;
-  border: 1px solid #333;
-  border-radius: 8px;
-  padding: 16px;
-  color: #ccc;
-  font-size: 14px;
-  line-height: 1.6;
+  background: var(--primary-bg);
+  border: 1px solid var(--high-hover-bg);
+  border-radius: 6px;
+  padding: 12px;
+  color: var(--text-color);
+  font-size: 13px;
+  line-height: 1.5;
   max-height: 200px;
   overflow-y: auto;
 }
@@ -301,102 +356,195 @@ const formatBytes = (bytes: number) => {
 .notes-content :deep(h2),
 .notes-content :deep(h3),
 .notes-content :deep(h4) {
-  color: #fff;
-  margin: 12px 0 8px 0;
+  color: var(--text-color);
+  margin: 10px 0 6px 0;
 }
 
 .notes-content :deep(ul) {
-  margin: 8px 0;
-  padding-left: 20px;
+  margin: 6px 0;
+  padding-left: 16px;
 }
 
 .notes-content :deep(li) {
-  margin: 4px 0;
+  margin: 3px 0;
 }
 
 .notes-content :deep(strong) {
-  color: #fff;
+  color: var(--text-color);
 }
 
+/* 下载进度样式 */
 .download-progress {
-  margin-top: 20px;
+  text-align: center;
+  padding: 20px 0;
 }
 
 .progress-info {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 8px;
-  color: #ccc;
+  margin-bottom: 12px;
+}
+
+.progress-text {
+  margin: 0;
+  color: var(--text-color);
   font-size: 14px;
+  font-weight: 500;
+}
+
+.progress-percentage {
+  margin: 0;
+  color: var(--button-bg);
+  font-size: 16px;
+  font-weight: 600;
 }
 
 .progress-bar {
-  background: #333;
-  border-radius: 10px;
+  width: 100%;
   height: 8px;
+  background: var(--primary-bg);
+  border-radius: 4px;
   overflow: hidden;
-  margin-bottom: 8px;
+  margin-bottom: 12px;
+  border: 1px solid var(--high-hover-bg);
 }
 
 .progress-fill {
-  background: linear-gradient(90deg, #4CAF50, #45a049);
   height: 100%;
+  background: linear-gradient(90deg, var(--button-bg), var(--button-hover-bg));
+  border-radius: 3px;
   transition: width 0.3s ease;
-  border-radius: 10px;
+  position: relative;
 }
 
-.download-details {
-  text-align: center;
-  color: #999;
+.progress-fill::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  animation: shimmer 2s infinite;
+}
+
+@keyframes shimmer {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+.progress-details {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   font-size: 12px;
+  color: var(--text-color);
+  opacity: 0.8;
+}
+
+.download-speed {
+  color: var(--button-bg);
+  font-weight: 500;
+}
+
+/* 下载完成样式 */
+.download-completed {
+  text-align: center;
+  padding: 30px 20px;
+}
+
+.completion-icon {
+  width: 60px;
+  height: 60px;
+  background: var(--button-bg);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 20px;
+  font-size: 30px;
+  color: white;
+  font-weight: bold;
+  animation: checkmark 0.6s ease-in-out;
+}
+
+@keyframes checkmark {
+  0% {
+    transform: scale(0);
+    opacity: 0;
+  }
+  50% {
+    transform: scale(1.2);
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.download-completed h4 {
+  margin: 0 0 10px 0;
+  color: var(--text-color);
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.completion-message {
+  margin: 0 0 20px 0;
+  color: var(--text-color);
+  font-size: 14px;
+  opacity: 0.8;
+}
+
+.install-options p {
+  margin: 0;
+  color: var(--text-color);
+  font-size: 14px;
+  font-weight: 500;
 }
 
 .dialog-actions {
   display: flex;
-  gap: 12px;
-  padding: 20px 24px;
-  border-top: 1px solid #333;
-  background: #1a1a1a;
+  gap: 10px;
+  padding: 15px 20px;
+  border-top: 1px solid var(--high-hover-bg);
+  background: var(--secondary-bg);
 }
 
 .btn {
   flex: 1;
-  padding: 12px 20px;
+  padding: 8px 16px;
   border: none;
-  border-radius: 8px;
-  font-size: 14px;
+  border-radius: 6px;
+  font-size: 13px;
   font-weight: 500;
   cursor: pointer;
   transition: all 0.2s;
 }
 
-.btn-primary {
-  background: linear-gradient(135deg, #4CAF50, #45a049);
-  color: white;
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
-.btn-primary:hover {
-  background: linear-gradient(135deg, #45a049, #3d8b40);
-  transform: translateY(-1px);
+.btn-primary {
+  background: var(--button-bg);
+  color: var(--text-color);
+}
+
+.btn-primary:hover:not(:disabled) {
+  background: var(--button-hover-bg);
 }
 
 .btn-secondary {
-  background: #333;
-  color: #ccc;
-  border: 1px solid #555;
+  background: var(--high-bg);
+  color: var(--text-color);
+  border: 1px solid var(--high-hover-bg);
 }
 
-.btn-secondary:hover {
-  background: #444;
-  color: #fff;
-  border-color: #666;
-}
-
-.btn:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-  transform: none;
+.btn-secondary:hover:not(:disabled) {
+  background: var(--high-hover-bg);
 }
 
 /* 滚动条样式 */
@@ -407,17 +555,17 @@ const formatBytes = (bytes: number) => {
 
 .dialog-content::-webkit-scrollbar-track,
 .notes-content::-webkit-scrollbar-track {
-  background: #1a1a1a;
+  background: var(--primary-bg);
 }
 
 .dialog-content::-webkit-scrollbar-thumb,
 .notes-content::-webkit-scrollbar-thumb {
-  background: #555;
+  background: var(--high-hover-bg);
   border-radius: 3px;
 }
 
 .dialog-content::-webkit-scrollbar-thumb:hover,
 .notes-content::-webkit-scrollbar-thumb:hover {
-  background: #666;
+  background: var(--high-bg);
 }
 </style>
