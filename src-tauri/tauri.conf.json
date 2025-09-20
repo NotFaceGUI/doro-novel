@@ -63,7 +63,7 @@
   },
   "plugins": {
     "updater": {
-      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDM1QjJBMjg3NDFGQTdGRjYKUldUMmYvcEJoNkt5TlN4aUZRTUdTcVFxS3k2czFmbnJuYjk1L0Rlc3JYeXpLQ2xoL1dwVVpyZ0EK",
+      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDIxNTcxNTZBNTk2NTAyQkIKUldTN0FtVlphaFZYSWRqYUVQM28rcERXcjJIUXU3c0svQm5NdHRsc0JBN0F3OFgxSmpjZmZkSmoK",
       "endpoints": ["https://github.com/NotFaceGUI/doro-novel/releases/latest/download/latest.json"]
     }
   }
