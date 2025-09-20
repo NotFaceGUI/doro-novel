@@ -57,6 +57,9 @@ jobs:
       - name: install frontend dependencies
         run: pnpm install
 
+      - name: apply patches
+        run: pnpm run postinstall
+
       - name: Cache pnpm store
         uses: actions/cache@v3
         with:
