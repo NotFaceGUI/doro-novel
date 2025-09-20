@@ -84,24 +84,50 @@ jobs:
           }
         shell: pwsh
 
+      - name: Generate release notes
+        id: release_notes
+        run: |
+          # 获取上一个标签
+          PREVIOUS_TAG=$(git describe --tags --abbrev=0 HEAD^ 2>/dev/null || echo "")
+          
+          if [ -z "$PREVIOUS_TAG" ]; then
+            # 如果没有上一个标签，获取所有提交
+            RELEASE_NOTES=$(git log --pretty=format:"- %s (%h)" --reverse)
+          else
+            # 获取从上一个标签到当前的提交
+            RELEASE_NOTES=$(git log ${PREVIOUS_TAG}..HEAD --pretty=format:"- %s (%h)" --reverse)
+          fi
+          
+          # 生成完整的发布说明
+          cat << EOF > release_notes.md
+          ## What's Changed
+          
+          ### 🚀 New Features & Improvements
+          $RELEASE_NOTES
+          
+          ### 📦 Installation
+          - **Windows**: Download the \`.msi\` installer
+          
+          ### 🔄 Auto Update
+          The app supports automatic updates. You'll be notified when a new version is available.
+          
+          ---
+          **Full Changelog**: https://github.com/NotFaceGUI/doro-novel/compare/${PREVIOUS_TAG}...v__VERSION__
+          EOF
+          
+          # 输出到 GitHub Actions 变量
+          echo "RELEASE_NOTES<<EOF" >> $GITHUB_OUTPUT
+          cat release_notes.md >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+        shell: bash
+
       - uses: tauri-apps/tauri-action@v0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           tagName: v__VERSION__ # the action automatically replaces __VERSION__ with the app version.
           releaseName: 'Doro Novel v__VERSION__'
-          releaseBody: |
-            ## What's Changed
-            
-            See the assets below to download this version and install.
-            
-            ### Installation
-            - **Windows**: Download the `.msi` installer
-            - **macOS**: Download the `.dmg` file
-            - **Linux**: Download the `.AppImage` or `.deb` file
-            
-            ### Auto Update
-            The app supports automatic updates. You'll be notified when a new version is available.
+          releaseBody: ${{ steps.release_notes.outputs.RELEASE_NOTES }}
           releaseDraft: false
           prerelease: false
           includeUpdaterJson: true

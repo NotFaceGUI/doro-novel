@@ -7,11 +7,16 @@ import { LOCAL_OPEN_KEY } from './script/var';
 import ProjectView from './views/ProjectView.vue';
 import AssetManager from './script/asset-manager';
 import InputActionItemType from './components/common/InputActionItemType.vue';
+import UpdateDialog from './components/UpdateDialog.vue';
 import { useSearchDialogStore } from './stores/search-dialog-store';
+import { useUpdater } from './composables/useUpdater';
 
 // 是否打开项目，用于判断显示引导界面还是项目界面
 const isOpenProject = ref(false);
 const searchStore = useSearchDialogStore();
+
+// 初始化更新功能
+const updater = useUpdater();
 
 const app = ref<DoroApp>({
   name: 'Doro Novel',
@@ -42,8 +47,24 @@ const handleSpacePress = (event: KeyboardEvent) => {
     }
 };
 
+// 更新相关事件处理
+const handleUpdateStarted = () => {
+  console.log('更新开始');
+};
+
+const handleUpdateCompleted = () => {
+  console.log('更新完成');
+};
+
+const handleUpdateError = (error: string) => {
+  console.error('更新失败:', error);
+  // 可以在这里显示错误提示
+};
+
 onUnmounted(() => {
     window.removeEventListener('keydown', handleSpacePress);
+    // 清理更新功能
+    updater.cleanup();
 });
 </script>
 
@@ -68,6 +89,16 @@ onUnmounted(() => {
     :fileName="searchStore.fileName"
     @select="searchStore.handleSelect"
     @close="searchStore.handleClose"
+  />
+  
+  <!-- 更新对话框 -->
+  <UpdateDialog
+    :updateInfo="updater.updateInfo.value"
+    :show="updater.showUpdateDialog.value"
+    @close="updater.hideUpdate"
+    @updateStarted="handleUpdateStarted"
+    @updateCompleted="handleUpdateCompleted"
+    @updateError="handleUpdateError"
   />
 </template>
 
