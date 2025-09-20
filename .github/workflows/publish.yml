@@ -4,9 +4,6 @@ on:
   push:
     tags:
       - 'v*' # 推送以 v 开头的标签时触发，如 v1.0.0
-    branches:
-      - main
-      - release
 
 # This workflow will trigger on each push to the `main` or `release` branch to create or update a GitHub release, build your app, and upload the artifacts to the release.
 
