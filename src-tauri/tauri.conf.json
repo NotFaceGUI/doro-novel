@@ -58,7 +58,9 @@
     ],
     "resources": [
       "resources",
-      "resources/**/*"
+      "resources/**/*",
+      "resources/locales",
+      "resources/locales/*"
     ]
   },
   "plugins": {
