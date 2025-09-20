@@ -103,7 +103,9 @@ jobs:
           $RELEASE_NOTES
           
           ### 📦 Installation
-          - **Windows**: Download the \`.msi\` installer
+          - **Windows**: Download the \`.msi\` or \`.exe\` installer
+          - **macOS**: Download the \`.dmg\` installer
+          - **Linux**: Download the \`.AppImage\` or \`.deb\` package
           
           ### 🔄 Auto Update
           The app supports automatic updates. You'll be notified when a new version is available.
