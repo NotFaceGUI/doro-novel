@@ -68,7 +68,8 @@
       "resources",
       "resources/**/*",
       "resources/locales",
-      "resources/locales/*"
+      "resources/locales/*",
+      "update_l2d.ps1"
     ]
   },
   "plugins": {
