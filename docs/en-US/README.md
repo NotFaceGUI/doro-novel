@@ -65,7 +65,61 @@ If you find any inappropriate or unnatural expressions, please feel free to poin
      - Stores audio files such as background music and sound effects
    
    - **📁 character** - Character resources folder
-     - Spine Files Containing Different Characters (Detailed Tutorial)
+     - Contains Spine files for different characters
+
+     ---
+     
+     ### 🚀 Automatic Character Resource Update Scripts
+     
+     To facilitate obtaining the latest character resources, we provide cross-platform automatic update scripts:
+     
+     #### Windows Users
+     ```powershell
+     # Execute in the application installation directory
+     .\update_l2d.ps1
+     ```
+     
+     #### Mac Users
+     ```bash
+     # Execute in the application installation directory
+     ./update_l2d_mac.sh
+     ```
+     
+     #### Linux Users
+     ```bash
+     # Execute in the application installation directory
+     ./update_l2d_linux.sh
+     ```
+     
+     #### Script Functionality
+     
+     These scripts will automatically perform the following operations:
+     
+     1. **Check Git Environment**
+        - Windows: Automatically download and extract MinGit portable version (approximately 45MB)
+        - Mac/Linux: Check system Git installation and provide installation guidance
+     
+     2. **Clone/Update Resource Repository**
+        - Clone the latest L2D resources from [Nikke-db/Nikke-db.github.io](https://github.com/Nikke-db/Nikke-db.github.io)
+        - If already exists, execute `git pull` to update to the latest version
+     
+     3. **Smart File Synchronization**
+        - Compare the source repository's `l2d` directory with the local `resources/character` directory
+        - Only copy missing files to avoid duplicate downloads
+        - Maintain complete directory structure
+     
+     4. **Download Content**
+        - Spine animation files for various characters (.skel, .atlas, .png)
+        - Character illustrations and expression resources
+        - Estimated total size: 3GB+ (depending on the number of characters)
+     
+     #### 🙏 Acknowledgments
+     
+     Special thanks to the [Nikke-db](https://github.com/Nikke-db) team for maintaining the open-source resource repository [Nikke-db.github.io](https://github.com/Nikke-db/Nikke-db.github.io), providing complete character resource data for the community. This repository contains high-quality Spine animation resources for all characters in the game, enabling this project to provide rich character display functionality for users.
+     
+     Without their selfless contribution and continuous maintenance, the character system of this project would not be able to achieve such complete functionality.
+
+     ---
    
    - **📁 image** - Image resource folder
      - Stores background images, character illustrations, etc.
@@ -123,3 +177,27 @@ This project is licensed under the MIT License - see the [LICENSE](../../LICENSE
 - [Vue.js](https://vuejs.org/) - Progressive JavaScript framework
 - [PixiJS](https://pixijs.com/) - 2D rendering engine
 - [Spine](http://esotericsoftware.com/) - 2D skeletal animation tool
+
+## Disclaimer
+
+> **⚠️ Important Notice: Please read the following terms carefully**
+
+### Purpose of Use
+- This software is **for educational, research, and technical communication purposes only**
+- **Commercial use or profit-making activities are strictly prohibited**
+- Aims to promote technical development and knowledge sharing in the open source community
+
+### Resource Sources
+- All resources are from **publicly accessible channels**
+- This software **does not contain or distribute any form of game unpacking content**
+- Users need to **obtain resource files on their own**
+
+### Legal Responsibility
+- Users **must comply with local laws and regulations** when using this software
+- **Users are solely responsible** for any legal issues arising from the use of this software
+- Developers are not liable for any legal consequences of user actions
+
+### Intellectual Property
+- Please respect the **copyright and intellectual property** of original works
+- If third-party content is involved, ensure you have **obtained legal authorization**
+- This project follows open source licenses, but this does not mean that referenced third-party resources are also open source
