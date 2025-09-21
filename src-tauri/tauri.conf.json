@@ -56,6 +56,14 @@
       "icons/icon.icns",
       "icons/icon.ico"
     ],
+    "fileAssociations": [
+      {
+        "ext": ["doro", "DORO", "Doro"],
+        "name": "Doro Novel Project File",
+        "role": "Editor",
+        "description": "Doro Novel Project File"
+      }
+    ],
     "resources": [
       "resources",
       "resources/**/*",
