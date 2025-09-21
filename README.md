@@ -15,7 +15,7 @@
       <a href="./docs/ko-KR/README.md">한국어</a>
     </small>
   </p>
-🎨 A visual novel editor built with <a href="https://github.com/tauri-apps/tauri">Tauri</a>, designed for creating Nikke-style interactive visual novels, supporting visual editing, branching storylines, multi-language localization, and real-time preview.
+🎨 一个基于 <a href="https://github.com/tauri-apps/tauri">Tauri</a> 可视化小说编辑器，专为创建 Nikke 风格的交互式视觉小说 而设计，支持可视化编辑、剧情分支、多语言本地化 和 实时预览
 </h3>
 
 ## 预览
