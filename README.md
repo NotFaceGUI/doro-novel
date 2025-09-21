@@ -3,6 +3,10 @@
   <br>
   Doro Novel
   <br>
+
+</h1>
+
+<h3 align="center">
   <p align="center">
     <small align="center">
       简体中文 | 
@@ -11,10 +15,7 @@
       <a href="./docs/ko-KR/README.md">한국어</a>
     </small>
   </p>
-</h1>
-
-<h3 align="center">
-一个基于 <a href="https://github.com/tauri-apps/tauri">Tauri</a> 跨平台的可视化小说编辑器，专为创建交互式视觉小说而设计。
+🎨 A visual novel editor built with <a href="https://github.com/tauri-apps/tauri">Tauri</a>, designed for creating Nikke-style interactive visual novels, supporting visual editing, branching storylines, multi-language localization, and real-time preview.
 </h3>
 
 ## 预览

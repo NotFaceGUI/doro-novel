@@ -3,6 +3,10 @@
   <br>
   Doro Novel
   <br>
+
+</h1>
+
+<h3 align="center">
   <p align="center">
     <small align="center">
       <a href="../../README.md">简体中文</a> | 
@@ -11,10 +15,7 @@
       한국어
     </small>
   </p>
-</h1>
-
-<h3 align="center">
-<a href="https://github.com/tauri-apps/tauri">Tauri</a> 기반의 비주얼 노벨 에디터로, 인터랙티브한 비주얼 노벨 제작을 위해 설계되었습니다.
+🎨 <a href="https://github.com/tauri-apps/tauri">Tauri</a> 기반의 비주얼 노벨 편집기로, Nikke 스타일의 인터랙티브 비주얼 노벨 제작을 위해 설계되었습니다. 시각적 편집, 스토리 분기, 다국어 현지화 및 실시간 미리보기를 지원합니다.
 </h3>
 
 ## 미리보기

@@ -3,6 +3,10 @@
   <br>
   Doro Novel
   <br>
+
+</h1>
+
+<h3 align="center">
   <p align="center">
     <small align="center">
       <a href="../../README.md">简体中文</a> | 
@@ -11,9 +15,6 @@
       <a href="../ko-KR/README.md">한국어</a>
     </small>
   </p>
-</h1>
-
-<h3 align="center">
 A visual novel editor based on <a href="https://github.com/tauri-apps/tauri">Tauri</a> , designed for creating interactive visual novels.
 </h3>
 
