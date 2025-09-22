@@ -60,7 +60,7 @@
                 <template v-if="slelectOptions.length > 0">
                     <div class="type-action-content" v-for="option in slelectOptions" :key="option.path">
                         <div class="type-action-item type-image-content" @click="selectResType(option)">
-                            <img :src="ResourceManager.allResUrl[option.path]" width="50px" >
+                            <img :src="ResourceManager.allResUrl[option.path]" width="50px">
                             {{ option.name }}
                         </div>
                     </div>
@@ -101,6 +101,8 @@ const props = defineProps<{
 const emit = defineEmits(["select", 'selectCharacter', 'close']);
 
 const options = [
+    { value: "分隔符", label: "初始化" },
+    { value: ASIType.SCENE, label: "初始化 场景", icon: '🎬', desc: "重置场景状态" },
     { value: "分隔符", label: "常用" },
     { value: ASIType.BACKGROUND, label: "操作 角色", icon: '👯', desc: "移动/缩放/动作/表情" },
     { value: ASIType.OPERATINGCAMERA, label: "操作 摄像机", icon: '🎥', desc: "调整摄像机视角" },
@@ -111,8 +113,7 @@ const options = [
     { value: ASIType.BGM, label: "设置/取消 背景音乐", icon: '🎶', desc: "更改或关闭BGM" },
     { value: ASIType.BACKGROUND, label: "设置/取消 背景图片", icon: '🎨', desc: "设置或移除背景" },
     { value: ASIType.BACKGROUND, label: "添加/删除 角色", icon: '😍', desc: "加入或移除角色" },
-    { value: "分隔符", label: "初始化" },
-    { value: ASIType.SCENE, label: "初始化 场景", icon: '🎬', desc: "重置场景状态" },
+    { value: ASIType.WAIT, label: "添加 阻塞", icon: '⏱️', desc: "阻塞程序执行指定时间" },
     { value: "分隔符", label: "高级" },
     { value: ASIType.TRANSITION, label: "设置 过渡", icon: '⏩', desc: "画面或场景渐变效果" },
     { value: ASIType.BGM, label: "添加 特效", icon: '✨', desc: "在场景中添加特效" },

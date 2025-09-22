@@ -134,6 +134,7 @@ export const useActionStore = defineStore('action', () => {
    * @returns {Promise<void>} 
    * */
   async function runAllActions() {
+     CanvasManager.getInstance().initMask.alpha = 1;
     // 开始播放前端必要初始化
     initAny();
     // 设置播放状态为 true
@@ -312,8 +313,8 @@ export const useActionStore = defineStore('action', () => {
     cm.transitionMask.alpha = 0;
 
     cm.uiRender.voiceoverTextAera.visible = false;
-    cm.uiRender.normalDialog.visible = true;
-    cm.uiRender.normalTextAera.visible = true;
+    cm.uiRender.normalDialog.visible = false;
+    cm.uiRender.normalTextAera.visible = false;
 
     cm.uiRender.stage.sortChildren()
   }
@@ -370,6 +371,8 @@ export const useActionStore = defineStore('action', () => {
     removeAction,
     getAction,
     runAllActions,
+
+    initAny,
   };
 });
 

@@ -21,6 +21,7 @@ import ActionTransition from "./actions/ActionTransition.vue";
 import { useActionStore } from "../../stores/action-store";
 import { makeSnapshot } from "../../script/common/snapshot";
 import CanvasManager from "../../script/render/canvas-manager";
+import ActionBlock from "./actions/ActionBlock.vue";
 
 // 定义 Props
 const props = defineProps<{
@@ -44,6 +45,7 @@ const currentComponent = computed(() => {
     if (props.asiType === ASIType.SCENE) return ActionInitScene;
     if (props.asiType === ASIType.OPERATINGCAMERA) return ActionOperatingCamera;
     if (props.asiType === ASIType.TRANSITION) return ActionTransition;
+    if (props.asiType === ASIType.WAIT) return ActionBlock;
 
     // 默认无组件
     return null;

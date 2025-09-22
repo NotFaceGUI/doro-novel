@@ -35,12 +35,92 @@
                     循环播放
                     <ToggleSwitch v-model="isLoop"></ToggleSwitch>
                 </div>
+
+                <!-- 淡入淡出设置 -->
+                <div class="action-title">
+                    淡入效果
+                    <ToggleSwitch v-model="enableFadeIn"></ToggleSwitch>
+                </div>
+                
+                <template v-if="enableFadeIn">
+                    <div>
+                        <DynamicInputs v-model="fadeInSettings" :columns="fadeInSettings.length">
+                        </DynamicInputs>
+                    </div>
+                </template>
+
+                <div class="action-title">
+                    淡出效果
+                    <ToggleSwitch v-model="enableFadeOut"></ToggleSwitch>
+                </div>
+                
+                <template v-if="enableFadeOut">
+                    <div>
+                        <DynamicInputs v-model="fadeOutSettings" :columns="fadeOutSettings.length">
+                        </DynamicInputs>
+                    </div>
+                </template>
+
+                <!-- 音频过滤器设置 -->
+                <div class="action-title">
+                    音频效果
+                    <ToggleSwitch v-model="enableFilters"></ToggleSwitch>
+                </div>
+                
+                <template v-if="enableFilters">
+                    <div>
+                        <DynamicInputs v-model="filterSettings" :columns="2">
+                        </DynamicInputs>
+                    </div>
+                    
+                    <div class="action-title">
+                        电话效果
+                        <ToggleSwitch v-model="enableTelephone"></ToggleSwitch>
+                    </div>
+                    
+                    <div class="action-title">
+                        混响效果
+                        <ToggleSwitch v-model="enableReverb"></ToggleSwitch>
+                    </div>
+                    
+                    <template v-if="enableReverb">
+                        <div>
+                            <DynamicInputs v-model="reverbSettings" :columns="2">
+                            </DynamicInputs>
+                        </div>
+                    </template>
+                    
+                    <div class="action-title">
+                        均衡器
+                        <ToggleSwitch v-model="enableEqualizer"></ToggleSwitch>
+                    </div>
+                    
+                    <template v-if="enableEqualizer">
+                        <div>
+                            <DynamicInputs v-model="equalizerSettings" :columns="5">
+                            </DynamicInputs>
+                        </div>
+                    </template>
+                </template>
             </template>
 
             <template v-else-if="AudioOperaMode[selectedOption].value === 'stop'">
                 <div style="display: flex;justify-content: center;align-items: center;">
                     停止当前播放的背景音乐
                 </div>
+                
+                <!-- 停止时的淡出设置 -->
+                <div class="action-title">
+                    淡出停止
+                    <ToggleSwitch v-model="enableStopFadeOut"></ToggleSwitch>
+                </div>
+                
+                <template v-if="enableStopFadeOut">
+                    <div>
+                        <DynamicInputs v-model="stopFadeOutSettings" :columns="stopFadeOutSettings.length">
+                        </DynamicInputs>
+                    </div>
+                </template>
             </template>
 
             <template v-else>
@@ -61,6 +141,9 @@
                     <button @click="previewStop" class="preview-btn">
                         ⏹️
                     </button>
+                    <button @click="clearAllFilters" class="preview-btn" title="清除所有音效">
+                        🔄
+                    </button>
                 </div>
             </div>
         </div>
@@ -78,9 +161,8 @@ import DynamicInputs from '../../common/DynamicInputs.vue';
 import ToggleSwitch from '../../common/ToggleSwitch.vue';
 import ActionBottomLine from '../../common/ActionBottomLine.vue';
 import ResourceManager from '../../../script/resource-manager';
-import { ResType } from '../../../script/var';
-import { Sound } from '@pixi/sound';
 import { setModification } from '../../../script/util/common';
+import AudioManager, { FadeOptions, FilterOptions } from '../../../script/audio-manager';
 
 const selectedOption = ref(0);
 const AudioOperaMode = ref<DropdownOption[]>([
@@ -91,8 +173,90 @@ const AudioOperaMode = ref<DropdownOption[]>([
 const selectedAudioOption = ref(0);
 const isLoop = ref(false);
 const isPlaying = ref(false);
-const currentSound = ref<Sound | null>(null);
+// 不再使用本地音频引用，完全依赖全局音频管理器
 const audioList = ref<Record<string, string>>({});
+
+// 淡入淡出设置
+const enableFadeIn = ref(false);
+const enableFadeOut = ref(false);
+const enableStopFadeOut = ref(false);
+
+const fadeInSettings = ref<InputOption[]>([
+    {
+        label: '淡入时长 (秒)',
+        value: 3.0,
+        type: 'number',
+        disabled: false
+    }
+]);
+
+const fadeOutSettings = ref<InputOption[]>([
+    {
+        label: '淡出时长 (秒)',
+        value: 3.0,
+        type: 'number',
+        disabled: false
+    }
+]);
+
+const stopFadeOutSettings = ref<InputOption[]>([
+    {
+        label: '停止淡出时长 (秒)',
+        value: 2.0,
+        type: 'number',
+        disabled: false
+    }
+]);
+
+// 音频过滤器设置
+const enableFilters = ref(false);
+const enableTelephone = ref(false);
+const enableReverb = ref(false);
+const enableEqualizer = ref(false);
+
+const filterSettings = ref<InputOption[]>([
+    {
+        label: '立体声分离 (-1到1)',
+        value: 0,
+        type: 'number',
+        disabled: false
+    },
+    {
+        label: '失真效果 (0到1)',
+        value: 0,
+        type: 'number',
+        disabled: false
+    }
+]);
+
+const reverbSettings = ref<InputOption[]>([
+    {
+        label: '混响时间 (秒)',
+        value: 3,
+        type: 'number',
+        disabled: false
+    },
+    {
+        label: '衰减强度',
+        value: 2,
+        type: 'number',
+        disabled: false
+    }
+]);
+
+const equalizerSettings = ref<InputOption[]>([
+    { label: '32Hz', value: 0, type: 'number', disabled: false },
+    { label: '64Hz', value: 0, type: 'number', disabled: false },
+    { label: '125Hz', value: 0, type: 'number', disabled: false },
+    { label: '250Hz', value: 0, type: 'number', disabled: false },
+    { label: '500Hz', value: 0, type: 'number', disabled: false },
+    { label: '1kHz', value: 0, type: 'number', disabled: false },
+    { label: '2kHz', value: 0, type: 'number', disabled: false },
+    { label: '4kHz', value: 0, type: 'number', disabled: false },
+    { label: '8kHz', value: 0, type: 'number', disabled: false },
+    { label: '16kHz', value: 0, type: 'number', disabled: false }
+]);
+
 
 const volumeSettings = ref<InputOption[]>([
     {
@@ -103,16 +267,7 @@ const volumeSettings = ref<InputOption[]>([
     }
 ]);
 
-// 监听音量和循环设置变化，实时更新播放效果
-watchEffect(() => {
-    // 只有在当前有音频在播放时才更新设置
-    if (currentSound.value && isPlaying.value) {
-        // 更新音量
-        currentSound.value.volume = volumeSettings.value[0].value;
-        // 更新循环设置
-        currentSound.value.loop = isLoop.value;
-    }
-});
+
 
 const props = defineProps<{
     title: string,
@@ -168,40 +323,70 @@ const selectedAudioKey = computed(() => {
 // 主要的action执行函数
 const targetAction = () => {
     const mode = AudioOperaMode.value[selectedOption.value].value;
-    console.log("当前操作模式:", mode);
+    console.log("当前操作模式:", mode, "组件ID:", props.id);
+    
+    const audioManager = AudioManager.getInstance();
+    
     if (mode === 'play') {
         // 播放音频
         if (selectedAudioKey.value) {
-            const sound = ResourceManager.getResource<Sound>(selectedAudioKey.value, ResType.Audio);
-            if (sound) {
-                // 停止之前的音频
-                if (currentSound.value) {
-                    currentSound.value.stop();
-                }
-
-                // 设置音频属性
-                sound.volume = volumeSettings.value[0].value;
-                sound.loop = isLoop.value;
-
-                // 播放音频
-                sound.play();
-                currentSound.value = sound;
-
-                // 保存到快照
-                setModification(modification, 'sound.bgm', selectedAudioKey.value);
-                // setModification(modification, 'sound.volume', volumeSettings.value[0].value);
-                // setModification(modification, 'sound.loop', isLoop.value);
+            // 准备淡入选项
+            let fadeInOptions: FadeOptions | undefined;
+            if (enableFadeIn.value) {
+                fadeInOptions = {
+                    duration: fadeInSettings.value[0].value,
+                    from: 0,
+                    to: volumeSettings.value[0].value
+                };
             }
+            
+            // 准备过滤器选项
+            let filterOptions: FilterOptions | undefined;
+            if (enableFilters.value) {
+                filterOptions = {
+                    stereoSeparation: filterSettings.value[0].value,
+                    distortion: filterSettings.value[1].value,
+                    telephone: enableTelephone.value,
+                    reverb: enableReverb.value ? {
+                        seconds: reverbSettings.value[0].value,
+                        decay: reverbSettings.value[1].value
+                    } : undefined,
+                    equalizer: enableEqualizer.value ? 
+                        equalizerSettings.value.map(setting => setting.value) : undefined
+                };
+            }
+            
+            // 使用全局音频管理器播放（带高级功能）
+            audioManager.playBgm(
+                selectedAudioKey.value, 
+                volumeSettings.value[0].value, 
+                isLoop.value,
+                fadeInOptions,
+                filterOptions
+            );
+            
+            // 只更新当前组件的UI状态
+            if (AudioOperaMode.value[selectedOption.value].value === 'play') {
+                isPlaying.value = true;
+            }
+            
+            // 保存到快照
+            setModification(modification, 'sound.bgm', selectedAudioKey.value);
         }
     } else if (mode === 'stop') {
-        console.log("停止音频:", currentSound.value);
-
-        // 停止音频
-        if (currentSound.value) {
-            currentSound.value.stop();
-            currentSound.value = null;
+        console.log("停止播放，组件ID:", props.id);
+        // 准备淡出选项
+        let fadeOutOptions: FadeOptions | undefined;
+        if (enableStopFadeOut.value) {
+            fadeOutOptions = {
+                duration: stopFadeOutSettings.value[0].value,
+                to: 0
+            };
         }
-
+        
+        // 停止音频（带淡出效果）
+        audioManager.stopBgm(fadeOutOptions);
+        
         // 清除快照中的音频信息
         setModification(modification, 'sound.bgm', '');
     }
@@ -211,28 +396,54 @@ const targetAction = () => {
 const previewPlay = () => {
     if (!canPreview.value) return;
 
+    const audioManager = AudioManager.getInstance();
+    console.log("预览播放，组件ID:", props.id, "音频:", selectedAudioKey.value);
+    
     if (isPlaying.value) {
         // 暂停
-        if (currentSound.value) {
-            currentSound.value.pause();
-            isPlaying.value = false;
-        }
+        audioManager.pauseBgm();
+        isPlaying.value = false;
     } else {
-        // 播放
-        const sound = ResourceManager.getResource<Sound>(selectedAudioKey.value, ResType.Audio);
-        if (sound) {
-            if (currentSound.value && currentSound.value !== sound) {
-                currentSound.value.stop();
-            }
-
-            sound.volume = volumeSettings.value[0].value;
-            sound.loop = false; // 预览时不循环
-            sound.play({
+        // 准备过滤器选项（预览时也应用过滤器）
+        let filterOptions: FilterOptions | undefined;
+        if (enableFilters.value) {
+            filterOptions = {
+                stereoSeparation: filterSettings.value[0].value,
+                distortion: filterSettings.value[1].value,
+                telephone: enableTelephone.value,
+                reverb: enableReverb.value ? {
+                    seconds: reverbSettings.value[0].value,
+                    decay: reverbSettings.value[1].value
+                } : undefined,
+                equalizer: enableEqualizer.value ? 
+                    equalizerSettings.value.map(setting => setting.value) : undefined
+            };
+        }
+        
+        // 播放（预览时不使用淡入效果，但可以使用过滤器）
+        audioManager.playBgm(
+            selectedAudioKey.value, 
+            volumeSettings.value[0].value, 
+            false, // 预览时不循环
+            undefined, // 预览时不使用淡入
+            filterOptions
+        );
+        
+        // 设置播放完成回调
+        if (audioManager.currentBgm) {
+            audioManager.currentBgm.play({
                 complete: () => {
-                    isPlaying.value = false;
+                    // 只有当前组件是播放这个音频的组件时才更新状态
+                    if (audioManager.currentBgmKey === selectedAudioKey.value) {
+                        isPlaying.value = false;
+                    }
                 }
             });
-            currentSound.value = sound;
+        }
+        
+        // 只有当前组件是播放模式且选择的音频与正在播放的相同时才更新状态
+        if (AudioOperaMode.value[selectedOption.value].value === 'play' && 
+            audioManager.currentBgmKey === selectedAudioKey.value) {
             isPlaying.value = true;
         }
     }
@@ -240,11 +451,17 @@ const previewPlay = () => {
 
 // 预览停止
 const previewStop = () => {
-    if (currentSound.value) {
-        currentSound.value.stop();
-        currentSound.value = null;
-        isPlaying.value = false;
-    }
+    // 直接使用全局音频管理器停止
+    const audioManager = AudioManager.getInstance();
+    audioManager.stopBgm();
+    isPlaying.value = false;
+};
+
+// 清除所有过滤器
+const clearAllFilters = () => {
+    const audioManager = AudioManager.getInstance();
+    audioManager.clearFilters();
+    console.log("已清除所有音频过滤器");
 };
 
 const onSelectModel = () => {
@@ -287,6 +504,40 @@ onUnmounted(() => {
     if (audioListTimer !== null) {
         clearInterval(audioListTimer);
         audioListTimer = null;
+    }
+});
+
+// 监听音量和循环设置变化，实时更新播放效果
+watchEffect(() => {
+    // 只有在当前有音频在播放时才更新设置
+    if (isPlaying.value) {
+        const audioManager = AudioManager.getInstance();
+        if (audioManager.currentBgm) {
+            // 更新音量
+            audioManager.currentBgm.volume = volumeSettings.value[0].value;
+            // 更新循环设置
+            audioManager.currentBgm.loop = isLoop.value;
+        }
+    }
+});
+
+// 监听全局音频管理器状态变化
+watchEffect(() => {
+    const audioManager = AudioManager.getInstance();
+    
+    // 根据全局音频管理器状态更新UI
+    if (audioManager.currentBgm) {
+        // 如果当前模式是播放且全局正在播放的是当前选择的音频
+        if (AudioOperaMode.value[selectedOption.value].value === 'play' && 
+            audioManager.currentBgmKey === selectedAudioKey.value) {
+            isPlaying.value = !audioManager.currentBgm.paused;
+        }
+        // 不要在这里更新停止模式的状态，让每个实例独立控制
+    } else {
+        // 如果全局没有音频在播放，且当前组件是播放模式，则更新UI状态
+        if (AudioOperaMode.value[selectedOption.value].value === 'play') {
+            isPlaying.value = false;
+        }
     }
 });
 </script>

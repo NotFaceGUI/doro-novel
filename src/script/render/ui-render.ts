@@ -460,11 +460,19 @@ export class UIRender {
      * @param hideDelay 隐藏延迟时间(秒): 默认0秒
      */
     public async startDialogue(messages: DialogTextData[], modification: Map<PropertyPath, Modification>, isEndVisible: boolean = false, hideDelay: number = 0) {
-
-
         this.isStart = true; // 开始处理文本
 
+        if (messages.length > 0) {
+            if (messages[0].mode === DialogueType.NORMAL || messages[0].mode === DialogueType.COMMANDER) {
+                this.normalDialog.visible = true;
+                this.normalTextAera.visible = true;
+            } else if (messages[0].mode === DialogueType.VOICEOVER) {
+                this.voiceoverTextAera.visible = true;
+            }
+        }
+
         await this.playDialogue(messages, modification);
+
 
 
         if (isEndVisible) {
@@ -711,7 +719,7 @@ export class UIRender {
                     fullText: fullText,
                     parseResult: parseResult
                 };
-                
+
                 // 执行标签逻辑
                 executeTextTag(tag, context);
                 console.log(`在索引 ${i} 处执行标签 ${tag.name}，属性为 ${tag.attributes}`);

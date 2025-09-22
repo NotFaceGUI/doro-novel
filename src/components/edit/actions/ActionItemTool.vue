@@ -6,7 +6,9 @@
 </template>
 
 <script setup lang="ts">
+import CanvasManager from '../../../script/render/canvas-manager';
 import { useActionStore } from '../../../stores/action-store';
+import { GameMode } from '../../../types/app';
 
 const actions = useActionStore();
 
@@ -23,6 +25,18 @@ const play = () => {
     // 更新数据
     // actions.updateSnapshot(props.title, 0, props.id);
     // console.log("更新数据:", actions.previewSnapshot);
+
+    actions.initAny();
+
+    actions.gameMode = GameMode.PREVIEW;
+    CanvasManager.getInstance().setMode(GameMode.PREVIEW);
+    
+    // 播放前需要选中这个actionItem
+    if (actions.currentSelectActionItemId !== props.id) {
+        actions.currentSelectActionTitle = props.title;
+        actions.currentSelectActionItemId = props.id;
+        console.log("已选中 ActionItem:", props.id, "标题:", props.title);
+    }
 
     actions.getAction(props.title).as[props.id].action?.();
 }

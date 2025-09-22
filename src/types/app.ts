@@ -77,7 +77,8 @@ export enum ASIType {
     SCENE = "Scene",
     OPERATINGCAMERA = "OperatingCamera", // 操作摄像机
     AUDIO = "Audio", // 音频播放
-    TRANSITION = "Transition" // 过渡效果
+    TRANSITION = "Transition", // 过渡效果
+    WAIT = "Wait" // 等待
 }
 
 export interface LoadRes {

@@ -114,7 +114,7 @@ export class TransitionManager implements TransitionExecutor {
                 // 淡入结束后将transitionMask移到文字下面
                 this.canvasManager.transitionMask.zIndex = -1;
                 this.canvasManager.uiRender.stage.sortChildren() // 重新排序
-            }, Math.max(config.duration - 10, 0));
+            }, Math.max(config.duration - 50, 0));
         });
     }
 

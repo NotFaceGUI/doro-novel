@@ -493,7 +493,12 @@ const valueChange = (updateIndex: number) => {
 
 // 这个方法是用于将原状态过渡到目标状态的操作，用于播放模式或预览模式
 // e.g 我预览当前节点就需要执行这个方法从状态到这个状态之间要经历什么
-const targetAction = () => {
+const targetAction = async () => {
+    await new Promise((resolve)=>{
+        setTimeout(()=>{
+            resolve(true);
+        }, 500)
+    })
     // 为了是拿到上一个的状态 永远是上一个的状态
     handleSceneState(canvasManager, props);
 
@@ -503,8 +508,9 @@ const targetAction = () => {
 
     // 设置摄像机到上一个的状态初始状态
     // viewport.moveCenter(action.previewSnapshot.camera.x, action.previewSnapshot.camera.y);
-    viewport.moveCenter(cameraValues.value[0].value, cameraValues.value[1].value);
     viewport.setZoom(action.previewSnapshot.camera.zoom);
+    viewport.moveCenter(cameraValues.value[0].value, cameraValues.value[1].value);
+    console.log("初始化场景", cameraValues.value[0].value, cameraValues.value[1].value, action.previewSnapshot.camera.zoom);
 
     viewport.emit('moved')
 
@@ -540,6 +546,7 @@ const targetAction = () => {
     } else {
         canvasManager.initMask.alpha = 0;
     }
+   
 
 }
 
