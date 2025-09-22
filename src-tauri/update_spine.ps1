@@ -5,12 +5,59 @@ $PortableGit = ".\MinGit-2.51.0-64-bit\cmd\git.exe"
 $PortableGitZip = ".\MinGit-2.51.0-64-bit.zip"
 $PortableGitDir = ".\MinGit-2.51.0-64-bit"
 $MinGitDownloadUrl = "https://github.com/git-for-windows/git/releases/download/v2.51.0.windows.1/MinGit-2.51.0-64-bit.zip"
-$RepoUrl = "https://github.com/Nikke-db/Nikke-db.github.io.git"
+$RepoUrl = "https://github.com/NotFaceGUI/Nikke-db.github.io.git"
 $Branch = "main"
 $RepoName = "data"                                   # Folder name for clone
 $RepoDir = Join-Path (Get-Location) $RepoName
-$CharacterDir = ".\resources\character"             # Target folder
+$CharacterDir = ".\resources\character"             # Target folder for character files
+$ImageDir = ".\resources\image"                     # Target folder for image files
+$AudioDir = ".\resources\audio"                     # Target folder for audio files
 $L2dDir = Join-Path $RepoDir "l2d"
+$RepoImageDir = Join-Path $RepoDir "image"
+$RepoAudioDir = Join-Path $RepoDir "audio"
+
+# -----------------------------
+# Function: Sync Directory
+# -----------------------------
+function Sync-Directory {
+    param(
+        [string]$SourceDir,
+        [string]$TargetDir,
+        [string]$DirName
+    )
+    
+    if (-Not (Test-Path $SourceDir)) {
+        Write-Output "⚠️  Source directory $SourceDir not found, skipping $DirName sync."
+        return
+    }
+    
+    # Ensure target folder exists
+    if (-Not (Test-Path $TargetDir)) {
+        New-Item -ItemType Directory -Force -Path $TargetDir | Out-Null
+        Write-Output "📁 Created target directory: $TargetDir"
+    }
+    
+    Write-Output "🔄 Syncing $DirName files from $SourceDir to $TargetDir..."
+    $syncCount = 0
+    
+    Get-ChildItem -Path $SourceDir -Recurse | ForEach-Object {
+        $RelativePath = $_.FullName.Substring($SourceDir.Length).TrimStart('\')
+        $DestinationPath = Join-Path $TargetDir $RelativePath
+
+        if (-Not (Test-Path $DestinationPath)) {
+            if ($_.PSIsContainer) {
+                New-Item -ItemType Directory -Force -Path $DestinationPath | Out-Null
+                Write-Output "📁 Created directory: $DestinationPath"
+            } else {
+                Copy-Item -Path $_.FullName -Destination $DestinationPath -Force
+                Write-Output "📄 Copied file: $DestinationPath"
+                $syncCount++
+            }
+        }
+    }
+    
+    Write-Output "✅ $DirName sync completed. $syncCount new files copied."
+}
 
 # -----------------------------
 # Download and extract MinGit if not exists
@@ -79,13 +126,31 @@ try {
 # Clone or Pull Repository
 # -----------------------------
 if (Test-Path $RepoDir) {
-    Write-Output "📂 Repository already exists. Running git pull to update..."
+    Write-Output "📂 Repository already exists. Checking remote URL..."
     $OriginalLocation = Get-Location
     Set-Location $RepoDir
+    
     try {
+        # Get current remote URL
+        $CurrentRemoteUrl = & "$GitExe" remote get-url origin
+        Write-Output "Current remote URL: $CurrentRemoteUrl"
+        Write-Output "Expected remote URL: $RepoUrl"
+        
+        # Check if remote URL matches
+        if ($CurrentRemoteUrl -ne $RepoUrl) {
+            Write-Output "🔄 Remote URL has changed. Updating remote origin..."
+            & "$GitExe" remote set-url origin $RepoUrl
+            Write-Output "✅ Remote URL updated successfully."
+        } else {
+            Write-Output "✅ Remote URL is correct."
+        }
+        
+        # Pull latest changes
+        Write-Output "🔄 Running git pull to update..."
         & "$GitExe" pull origin $Branch
+        Write-Output "✅ Repository updated successfully."
     } catch {
-        Write-Error "Failed to run git pull: $_"
+        Write-Error "Failed to update repository: $_"
         Set-Location $OriginalLocation
         exit 1
     }
@@ -94,6 +159,7 @@ if (Test-Path $RepoDir) {
     Write-Output "📂 Repository not found. Cloning repository..."
     try {
         & "$GitExe" clone --depth 1 -b $Branch $RepoUrl $RepoName
+        Write-Output "✅ Repository cloned successfully."
     } catch {
         Write-Error "Failed to clone repository: $_"
         exit 1
@@ -101,29 +167,22 @@ if (Test-Path $RepoDir) {
 }
 
 # -----------------------------
-# Ensure target folder exists
+# Sync all resource directories
 # -----------------------------
-if (-Not (Test-Path $CharacterDir)) {
-    New-Item -ItemType Directory -Force -Path $CharacterDir | Out-Null
-}
+Write-Output ""
+Write-Output "🔄 Starting resource synchronization..."
 
-# -----------------------------
-# Copy missing files from data/l2d to resources/character
-# -----------------------------
-Write-Output "🔄 Comparing $L2dDir with $CharacterDir..."
-Get-ChildItem -Path $L2dDir -Recurse | ForEach-Object {
-    $RelativePath = $_.FullName.Substring($L2dDir.Length).TrimStart('\')
-    $DestinationPath = Join-Path $CharacterDir $RelativePath
+# Sync character files (l2d -> character)
+Sync-Directory -SourceDir $L2dDir -TargetDir $CharacterDir -DirName "Character"
 
-    if (-Not (Test-Path $DestinationPath)) {
-        if ($_.PSIsContainer) {
-            New-Item -ItemType Directory -Force -Path $DestinationPath | Out-Null
-            Write-Output "📁 Created directory: $DestinationPath"
-        } else {
-            Copy-Item -Path $_.FullName -Destination $DestinationPath -Force
-            Write-Output "📄 Copied file: $DestinationPath"
-        }
-    }
-}
+# Sync image files (image -> image)
+Sync-Directory -SourceDir $RepoImageDir -TargetDir $ImageDir -DirName "Image"
 
-Write-Output "✅ Migration completed. $CharacterDir has been updated."
+# Sync audio files (audio -> audio)
+Sync-Directory -SourceDir $RepoAudioDir -TargetDir $AudioDir -DirName "Audio"
+
+Write-Output ""
+Write-Output "🎉 All resource synchronization completed successfully!"
+Write-Output "📁 Character files: $CharacterDir"
+Write-Output "🖼️ Image files: $ImageDir"
+Write-Output "🔊 Audio files: $AudioDir"
