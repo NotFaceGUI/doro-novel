@@ -91,11 +91,11 @@ jobs:
           PREVIOUS_TAG=$(git describe --tags --abbrev=0 HEAD^ 2>/dev/null || echo "")
           
           if [ -z "$PREVIOUS_TAG" ]; then
-            # 如果没有上一个标签，获取所有提交
-            RELEASE_NOTES=$(git log --pretty=format:"- %s (%h)" --reverse)
+            # 如果没有上一个标签，获取所有提交的完整信息
+            RELEASE_NOTES=$(git log --pretty=format:"### %s%n**Author:** %an <%ae>%n**Date:** %ad%n**Commit:** %H%n%n%b%n---" --date=format:"%Y-%m-%d %H:%M:%S" --reverse)
           else
-            # 获取从上一个标签到当前的提交
-            RELEASE_NOTES=$(git log ${PREVIOUS_TAG}..HEAD --pretty=format:"- %s (%h)" --reverse)
+            # 获取从上一个标签到当前的提交的完整信息
+            RELEASE_NOTES=$(git log ${PREVIOUS_TAG}..HEAD --pretty=format:"### %s%n**Author:** %an <%ae>%n**Date:** %ad%n**Commit:** %H%n%n%b%n---" --date=format:"%Y-%m-%d %H:%M:%S" --reverse)
           fi
           
           # 生成完整的发布说明
@@ -103,6 +103,7 @@ jobs:
           ## What's Changed
           
           ### 🚀 New Features & Improvements
+          
           $RELEASE_NOTES
           
           ### 📦 Installation
