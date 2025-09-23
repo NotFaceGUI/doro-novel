@@ -87,8 +87,15 @@ jobs:
       - name: Generate release notes
         id: release_notes
         run: |
+          # 获取当前标签
+          CURRENT_TAG=$(git describe --tags --exact-match HEAD 2>/dev/null || echo "")
+          
           # 获取上一个标签（排除当前标签）
-          PREVIOUS_TAG=$(git tag --sort=-version:refname | grep -v "^v__VERSION__$" | head -n 1 2>/dev/null || echo "")
+          if [ -n "$CURRENT_TAG" ]; then
+            PREVIOUS_TAG=$(git tag --sort=-version:refname | grep -v "^${CURRENT_TAG}$" | head -n 1 2>/dev/null || echo "")
+          else
+            PREVIOUS_TAG=$(git tag --sort=-version:refname | head -n 1 2>/dev/null || echo "")
+          fi
           
           if [ -z "$PREVIOUS_TAG" ]; then
             # 如果没有上一个标签，获取所有提交
@@ -104,7 +111,7 @@ jobs:
           
           $RELEASE_NOTES
           
-          **Full Changelog**: https://github.com/NotFaceGUI/doro-novel/compare/${PREVIOUS_TAG}...v__VERSION__
+          **Full Changelog**: https://github.com/NotFaceGUI/doro-novel/compare/${PREVIOUS_TAG}...${CURRENT_TAG}
           EOF
           
           # 输出到 GitHub Actions 变量
