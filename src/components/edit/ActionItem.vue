@@ -14,6 +14,7 @@ import { ActionItemtype, ASIType, DragType, GameMode, LoadRes } from "../../type
 import ActionLoad from "./actions/ActionLoad.vue";
 import ActionBackground from "./actions/ActionBackground.vue";
 import ActionBgm from "./actions/ActionBgm.vue";
+import ActionSfx from "./actions/ActionSfx.vue";
 import ActionDialogue from "./actions/ActionDialogue.vue";
 import ActionInitScene from "./actions/ActionInitScene.vue";
 import ActionOperatingCamera from "./actions/ActionOperatingCamera.vue";
@@ -41,6 +42,7 @@ const currentComponent = computed(() => {
     if (props.type === ActionItemtype.LOAD) return ActionLoad;
     if (props.asiType === ASIType.BACKGROUND) return ActionBackground;
     if (props.asiType === ASIType.BGM) return ActionBgm;
+    if (props.asiType === ASIType.AUDIO) return ActionSfx;
     if (props.asiType === ASIType.DIALOGUE) return ActionDialogue;
     if (props.asiType === ASIType.SCENE) return ActionInitScene;
     if (props.asiType === ASIType.OPERATINGCAMERA) return ActionOperatingCamera;

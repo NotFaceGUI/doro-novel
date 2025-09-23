@@ -59,7 +59,8 @@ const openSelect = async () => {
     }
 
     actionStore.getAction(props.title).as.push({
-        type: res
+        type: res,
+        id: ""
     })
 }
 

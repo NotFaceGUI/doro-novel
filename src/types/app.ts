@@ -116,12 +116,18 @@ export enum GameMode {
 
 export type ActionCallback = () => Promise<void> | void;
 
+// TODO: 重构 ActionItems 类型，解决 一系列问题
 export interface ActionItems {
+    id: string; // 唯一标识符
+    
     type: ASIType,
     snapshot?: Snapshot, // 存储快照
     modification?: Map<PropertyPath, Modification>, // 当前ActionItem对快照的修改
     wait?: boolean
     action?: ActionCallback,
+ 
+    next?: string; // 下一个Action的ID
+    nextActionTitle?: string; // 下一个Action的标题
 }
 
 /**

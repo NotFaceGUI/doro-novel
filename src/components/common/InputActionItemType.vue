@@ -109,7 +109,7 @@ const options = [
     { value: ASIType.DIALOGUE, label: "添加 对话", icon: '💬', desc: "添加角色台词" },
     { value: ASIType.BACKGROUND, label: "添加 分支对话", icon: '💬', desc: "创建多条分支对话" },
     { value: ASIType.BGM, label: "添加/删除 CG", icon: '📷', desc: "插入或移除CG画面" },
-    { value: ASIType.BGM, label: "添加 音效", icon: '🎶', desc: "播放特定音效" },
+    { value: ASIType.AUDIO, label: "添加 音效", icon: '🎶', desc: "播放特定音效" },
     { value: ASIType.BGM, label: "设置/取消 背景音乐", icon: '🎶', desc: "更改或关闭BGM" },
     { value: ASIType.BACKGROUND, label: "设置/取消 背景图片", icon: '🎨', desc: "设置或移除背景" },
     { value: ASIType.BACKGROUND, label: "添加/删除 角色", icon: '😍', desc: "加入或移除角色" },
