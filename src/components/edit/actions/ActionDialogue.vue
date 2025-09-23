@@ -506,7 +506,8 @@ const handlePaste = (event: ClipboardEvent) => {
 // 在组件挂载后，初始化所有已有的div内容
 onMounted(() => {
     // 保留现有的 onMounted 代码
-    action.getAction(props.title).as[props.id].action = targetAction;
+    const actionIndex = action.getAction(props.title).as.findIndex((item) => item.id === props.id);
+    action.getAction(props.title).as[actionIndex].action = targetAction;
     modification = action.getCurrentModification(props.title, props.id);
 
     // 添加键盘事件监听

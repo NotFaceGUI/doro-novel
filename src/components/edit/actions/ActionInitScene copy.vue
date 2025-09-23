@@ -255,7 +255,8 @@ viewport
 
 onMounted(() => {
     // 想action中注册回调
-    action.getAction(props.title).as[props.id].action = targetAction;
+    const actionIndex = action.getAction(props.title).as.findIndex((item) => item.id === props.id);
+    action.getAction(props.title).as[actionIndex].action = targetAction;
 
     modification = action.getCurrentModification(props.title, props.id);
 

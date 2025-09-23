@@ -148,7 +148,7 @@ const handleSearchAction = async (event: DragEvent, fileType: ResType, name: str
             if (selectHoverActionTitle.value && selectHoverActionTitle.value !== initAction.value) {
                 actionStore.getAction(selectHoverActionTitle.value).as.push({
                     type: res,
-                    id: "",
+                    id: new Date().getTime(),
                 })
             }
 

@@ -106,8 +106,9 @@ const targetAction = async () => {
 };
 
 onMounted(() => {
+    const actionIndex = action.getAction(props.title).as.findIndex((item) => item.id === props.id);
     // 向action中注册回调
-    action.getAction(props.title).as[props.id].action = targetAction;
+    action.getAction(props.title).as[actionIndex].action = targetAction;
 
     modification = action.getCurrentModification(props.title, props.id);
 

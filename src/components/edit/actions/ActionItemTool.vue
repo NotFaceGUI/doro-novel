@@ -18,7 +18,10 @@ const props = defineProps<{
 }>();
 
 const onDelete = () => {
-    actions.getAction(props.title).as.splice(props.id, 1);
+    const actionIndex = actions.getAction(props.title).as.findIndex((item) => item.id === props.id);
+    if (actionIndex !== -1) {
+        actions.getAction(props.title).as.splice(actionIndex, 1);
+    }
 }
 
 const play = () => {
@@ -38,7 +41,8 @@ const play = () => {
         console.log("已选中 ActionItem:", props.id, "标题:", props.title);
     }
 
-    actions.getAction(props.title).as[props.id].action?.();
+    const actionIndex = actions.getAction(props.title).as.findIndex((item) => item.id === props.id);
+    actions.getAction(props.title).as[actionIndex].action?.();
 }
 </script>
 

@@ -90,7 +90,8 @@ const selectActionItem = () => {
         if (props.title === action.currentSelectActionTitle && action.currentSelectActionItemId != props.id) {
             action.currentSelectActionItemId = props.id;
             const canvas = CanvasManager.getInstance()
-            const type = action.getAction(props.title).as[props.id].type;
+            const actionIndex = action.getAction(props.title).as.findIndex((item) => item.id === props.id);
+            const type = action.getAction(props.title).as[actionIndex].type;
             // 如果当前的模式是场景就修改
             if (type === ASIType.SCENE ) {
                 canvas.setMode(GameMode.SCENE);

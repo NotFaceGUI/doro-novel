@@ -118,7 +118,7 @@ export type ActionCallback = () => Promise<void> | void;
 
 // TODO: 重构 ActionItems 类型，解决 一系列问题
 export interface ActionItems {
-    id: string; // 唯一标识符
+    id: number; // 唯一标识符
     
     type: ASIType,
     snapshot?: Snapshot, // 存储快照

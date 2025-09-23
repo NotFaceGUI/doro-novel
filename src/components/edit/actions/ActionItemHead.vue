@@ -12,7 +12,9 @@ defineProps<{
     <div class="action-item-head">
         <span>
             {{ content }}
+            <span class="id">id:{{ id }}</span>
         </span>
+
         <ActionItemTool :title="title" :id="id"></ActionItemTool>
     </div>
 </template>
@@ -26,5 +28,8 @@ defineProps<{
     border-bottom: 1px dashed #88888855;
 }
 
-
+.id {
+    font-size: 10px !important;
+    color: #888888;
+}
 </style>

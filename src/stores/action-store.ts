@@ -90,8 +90,9 @@ export const useActionStore = defineStore('action', () => {
   function getCurrentModification(actionTitle: string, actionItemId: number): Map<PropertyPath, Modification> {
     // 获取 action 对象
     const action = getAction(actionTitle);
+    const actionIndex = action.as.findIndex((item) => item.id === actionItemId);
     // 获取特定的 ActionItem
-    const actionItem = action.as[actionItemId];
+    const actionItem = action.as[actionIndex];
 
     // 如果当前 ActionItem 有 modification，直接返回
     if (actionItem.modification) {

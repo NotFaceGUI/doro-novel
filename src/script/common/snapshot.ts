@@ -7,14 +7,15 @@ import { Snapshot } from "../../types/app";
  */
 export function makeSnapshot(actionTitle: string, actionItemId: number): Snapshot {
     const action = useActionStore();
+    const actionIndex = action.getAction(actionTitle).as.findIndex((item) => item.id === actionItemId);
     // 查询当前action中上一个actionitem的快照（如果有）
-    if (actionItemId > 0) {
+    if (actionIndex > 0) {
         // 等于上一个的先
-        console.log(actionItemId, action.getAction(actionTitle).as[actionItemId - 1].snapshot);
-        action.getAction(actionTitle).as[actionItemId].snapshot = cloneDeep(
-            action.getAction(actionTitle).as[actionItemId - 1].snapshot!
+        console.log(actionItemId, action.getAction(actionTitle).as[actionIndex - 1].snapshot);
+        action.getAction(actionTitle).as[actionIndex].snapshot = cloneDeep(
+            action.getAction(actionTitle).as[actionIndex - 1].snapshot!
         ) as Snapshot;
-        return action.getAction(actionTitle).as[actionItemId - 1].snapshot!
+        return action.getAction(actionTitle).as[actionIndex - 1].snapshot!
     }
     // 如果是第一个就初始化一个快照
     const snapshot: Snapshot = {
@@ -28,14 +29,15 @@ export function makeSnapshot(actionTitle: string, actionItemId: number): Snapsho
         sound: { bgm: '', sfx: [] }
     };
 
-    action.getAction(actionTitle).as[actionItemId].snapshot = snapshot;
+    action.getAction(actionTitle).as[actionIndex].snapshot = snapshot;
     return snapshot;
 }
 
 // 更新快照需要更新所有快照
 export function getSnapshot(actionTitle: string, actionItemId: number): Snapshot {
     const action = useActionStore();
-    return action.getAction(actionTitle).as[actionItemId].snapshot!;
+    const actionIndex = action.getAction(actionTitle).as.findIndex((item) => item.id === actionItemId);
+    return action.getAction(actionTitle).as[actionIndex].snapshot!;
 }
 
 export type PropertyPath =

@@ -8,7 +8,8 @@ import { Ref } from 'vue';
 
 export function useCommonState(actionTitle: string, actionId: number) {
     const action = useActionStore();
-    const actionItem = action.getAction(actionTitle).as[actionId]!;
+    const actionIndex = action.getAction(actionTitle).as.findIndex((item) => item.id === actionId);
+    const actionItem = action.getAction(actionTitle).as[actionIndex]!;
     actionItem.wait = true;
 
     return { action, actionItem };
@@ -16,19 +17,20 @@ export function useCommonState(actionTitle: string, actionId: number) {
 
 export function handleSceneState(canvasManager: CanvasManager, props: { id: number; title: string }) {
     const action = useActionStore();
+    const actionIndex = action.getAction(props.title).as.findIndex((item) => item.id === props.id);
     // 检查当前游戏模式并应用相应的操作
     if (canvasManager.getMode() === GameMode.PREVIEW || canvasManager.getMode() === GameMode.SCENE || canvasManager.getMode() === GameMode.PLAY)  {
         // 应用上一个场景快照
-        action.applyPreviewSnapshot(props.id, props.title);
+        action.applyPreviewSnapshot(actionIndex, props.title);
     } else {
         // 在播放模式下增量更新预览快照
         // 获取当前动作的修改
         const actionObj = action.getAction(props.title);
-        const actionItem = actionObj.as[props.id];
+        const actionItem = actionObj.as[actionIndex];
         console.log("actrion", actionItem);
 
         if (actionItem && actionItem.modification) {
-            console.log(`播放模式下增量更新快照: ${props.title} - ${props.id} ${JSON.stringify(actionItem.modification)}`);
+            console.log(`播放模式下增量更新快照: ${props.title} - ${actionIndex} ${JSON.stringify(actionItem.modification)}`);
             console.log("预览快照", action.previewSnapshot);
             // 遍历当前动作的所有修改，应用到预览快照
             actionItem.modification.forEach((modification) => {
