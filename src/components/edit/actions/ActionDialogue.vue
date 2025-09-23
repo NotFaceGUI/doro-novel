@@ -23,111 +23,141 @@
                 </div>
             </div>
         </div>
-        <div class="action-item-content" v-for="(message, messageIndex) in messages" :key="messageIndex">
+        <VueDraggable v-model="messages" :animation="200" ghostClass="ghost-item" chosenClass="chosen-item"
+            dragClass="drag-item" handle=".drag-handle" @start="onDragStart" @end="onDragEnd">
+            <div class="action-item-content" v-for="(message, messageIndex) in messages" :key="message.id || messageIndex">
+                <!-- 拖拽手柄 -->
+                <div class="drag-handle" title="拖拽排序">⋮⋮</div>
 
-            <div class="left-content">
-                <!-- 只有普通对话才显示头像 -->
-                <img v-if="message.mode === DialogueType.NORMAL" class="character-image"
-                    @click="bindCharacter(messageIndex)" src="../../../assets/Icon.jpg"
-                    style="width: 25px;height: 25px;" alt="" srcset="">
-                <div class="character-name" v-if="!editing[messageIndex]" @click="editName(messageIndex)">
-                    {{ t(message.speaker) }}
-                    <span class="dialogue-type-tag" :class="getDialogueTypeClass(message.mode)">
-                        {{ getDialogueTypeLabel(message.mode) }}
-                    </span>
-                </div>
-                <input v-if="editing[messageIndex]" v-model="message.speaker"
-                    @blur="saveName(message.speaker, messageIndex)"
-                    @keydown.enter="saveName(message.speaker, messageIndex)" type="text" class="name-input" />
+                <div class="left-content">
 
-                <div class="name-edit" title="点击设置别名" @click="editName(messageIndex)">🖍</div>
-
-                <!-- 高级模式开关 -->
-                <div class="advanced-mode-toggle">
-                    <label @click="message.advancedMode = !message.advancedMode" class="advanced-label">🔧高级模式</label>
-                </div>
-
-                <div class="character-tip" v-if="message.speaker === '请选择角色' && message.mode === DialogueType.NORMAL">
-                    点击头像绑定角色</div>
-            </div>
-            <div class="right-content">
-                <div class="text-input" v-for="(text, textIndex) in message.texts" :key="textIndex">
-                    <div class="editable-div" contenteditable="true" @input="updateTextContent($event, text)"
-                        @paste="handlePaste($event)" :data-placeholder="'请输入文本……'"></div>
-                    <div class="text-controls" v-if="message.advancedMode">
-                        <label class="text-control-label">摄像机代理：</label>
-                        <ToggleSwitch v-model="(text.isCameraProxy as boolean)"></ToggleSwitch>
+                    <!-- 只有普通对话才显示头像 -->
+                    <img v-if="message.mode === DialogueType.NORMAL" class="character-image"
+                        @click="bindCharacter(messageIndex)" src="../../../assets/Icon.jpg"
+                        style="width: 25px;height: 25px;" alt="" srcset="">
+                    <!-- 颜色选择器 -->
+                    <div class="color-picker-container" v-if="message.mode === DialogueType.NORMAL">
+                        <!-- <label class="color-picker-label">🎨角色颜色</label> -->
+                        <ColorPicker v-model="message.speakerColor"
+                            @update:modelValue="updateSpeakerColor(messageIndex, $event)" />
                     </div>
-                    <div class="action-item-content">
-                        <!-- 使用Dropdown组件的摄像机控制选项，只在高级模式开启且为最后一个文本条目时显示 -->
-                        <div class="camera-controls"
-                            v-if="message.parms && message.advancedMode && textIndex === message.texts.length - 1">
-                            <div class="camera-control-row">
-                                <label class="control-label">机位选择：</label>
-                                <Dropdown v-model="message.parms.cameraStandTypeIndex!" @update:modelValue="(value) => {
-                                    if (messages[messageIndex].parms) {
-                                        messages[messageIndex].parms.cameraStandTypeIndex = value;
-                                        messages[messageIndex].parms.cameraStandType = cameraStandOptions[value].value as CameraStandType;
-                                    }
-                                }" :options="cameraStandOptions" :disabled="false" />
-                            </div>
+                    <div class="character-name" v-if="!editing[messageIndex]" @click="editName(messageIndex)">
+                        {{ t(message.speaker) }}
+                        <span class="dialogue-type-tag" :class="getDialogueTypeClass(message.mode)">
+                            {{ getDialogueTypeLabel(message.mode) }}
+                        </span>
+                    </div>
+                    <input v-if="editing[messageIndex]" v-model="message.speaker"
+                        @blur="saveName(message.speaker, messageIndex)"
+                        @keydown.enter="saveName(message.speaker, messageIndex)" type="text" class="name-input" />
 
-                            <div class="camera-control-row">
-                                <label class="control-label">启用移动：</label>
-                                <ToggleSwitch v-model="message.parms.isMove"></ToggleSwitch>
-                            </div>
+                    <div class="name-edit" title="点击设置别名" @click="editName(messageIndex)">🖍</div>
 
-                            <div class="camera-control-row" v-if="message.parms.isMove">
-                                <label class="control-label">缓动函数：</label>
-                                <Dropdown v-model="message.parms.easeIndex!" @update:modelValue="(value) => {
-                                    if (messages[messageIndex].parms) {
-                                        messages[messageIndex].parms.easeIndex = value;
-                                        messages[messageIndex].parms.ease = easingOptions[value].value as EasingFunction;
-                                    }
-                                }" :options="easingOptions" :disabled="false" />
-                            </div>
+                    <!-- 高级模式开关 -->
+                    <div class="advanced-mode-toggle">
+                        <label @click="message.advancedMode = !message.advancedMode"
+                            class="advanced-label">🔧高级模式</label>
+                    </div>
+                    <!-- 对话操作按钮 -->
+                    <div class="message-controls">
+                        <!-- <button class="control-btn move-up-btn" 
+                        @click="moveMessage(messageIndex, 'up')" 
+                        :disabled="messageIndex === 0"
+                        title="上移">
+                    ↑
+                </button>
+                <button class="control-btn move-down-btn" 
+                        @click="moveMessage(messageIndex, 'down')" 
+                        :disabled="messageIndex === messages.length - 1"
+                        title="下移">
+                    ↓
+                </button> -->
+                        <button class="control-btn delete-btn" @click="deleteMessage(messageIndex)" title="删除">
+                            ✕
+                        </button>
+                    </div>
+                    <div class="character-tip"
+                        v-if="message.speaker === '请选择角色' && message.mode === DialogueType.NORMAL">
+                        点击头像绑定角色</div>
+                </div>
+                <div class="right-content">
+                    <div class="text-input" v-for="(text, textIndex) in message.texts" :key="message.id || (text + textIndex.toString())">
+                        <div class="editable-div" contenteditable="true" @input="updateTextContent($event, text)"
+                            @paste="handlePaste($event)" :data-placeholder="'请输入文本……'"></div>
+                        <div class="text-controls" v-if="message.advancedMode">
+                            <label class="text-control-label">摄像机代理：</label>
+                            <ToggleSwitch v-model="(text.isCameraProxy as boolean)"></ToggleSwitch>
+                        </div>
+                        <div class="action-item-content">
+                            <!-- 使用Dropdown组件的摄像机控制选项，只在高级模式开启且为最后一个文本条目时显示 -->
+                            <div class="camera-controls"
+                                v-if="message.parms && message.advancedMode && textIndex === message.texts.length - 1">
+                                <div class="camera-control-row">
+                                    <label class="control-label">机位选择：</label>
+                                    <Dropdown v-model="message.parms.cameraStandTypeIndex!" @update:modelValue="(value) => {
+                                        if (messages[messageIndex].parms) {
+                                            messages[messageIndex].parms.cameraStandTypeIndex = value;
+                                            messages[messageIndex].parms.cameraStandType = cameraStandOptions[value].value as CameraStandType;
+                                        }
+                                    }" :options="cameraStandOptions" :disabled="false" />
+                                </div>
 
-                            <div class="camera-control-row" v-if="message.parms.isMove">
-                                <label class="control-label">动画时长：</label>
-                                <input type="number" v-model.number="message.parms.duration" min="100" max="5000"
-                                    step="100" class="camera-input">
-                                <span class="unit-label">ms</span>
-                            </div>
+                                <div class="camera-control-row">
+                                    <label class="control-label">启用移动：</label>
+                                    <ToggleSwitch v-model="message.parms.isMove"></ToggleSwitch>
+                                </div>
 
-                            <div class="camera-control-row">
-                                <label class="control-label">选择名称：</label>
-                                <Dropdown v-model="message.parms.animationIndex!" @update:modelValue="(value) => {
-                                    if (messages[messageIndex].parms) {
-                                        messages[messageIndex].parms.animationIndex = value;
-                                        messages[messageIndex].parms.animation = messages[messageIndex].parms?.amintionOption![value].value as string;
-                                    }
-                                }" :options="messages[messageIndex].parms?.amintionOption!" :disabled="false" />
-                            </div>
+                                <div class="camera-control-row" v-if="message.parms.isMove">
+                                    <label class="control-label">缓动函数：</label>
+                                    <Dropdown v-model="message.parms.easeIndex!" @update:modelValue="(value) => {
+                                        if (messages[messageIndex].parms) {
+                                            messages[messageIndex].parms.easeIndex = value;
+                                            messages[messageIndex].parms.ease = easingOptions[value].value as EasingFunction;
+                                        }
+                                    }" :options="easingOptions" :disabled="false" />
+                                </div>
 
-                            <div class="camera-control-row">
-                                <label class="control-label">动画循环：</label>
-                                <ToggleSwitch v-model="message.parms.isLoop"></ToggleSwitch>
-                            </div>
+                                <div class="camera-control-row" v-if="message.parms.isMove">
+                                    <label class="control-label">动画时长：</label>
+                                    <input type="number" v-model.number="message.parms.duration" min="100" max="5000"
+                                        step="100" class="camera-input">
+                                    <span class="unit-label">ms</span>
+                                </div>
 
-                            <div class="camera-control-row">
-                                <label class="control-label">机位偏移X：</label>
-                                <input type="number" v-model.number="message.parms.xOffSet" class="camera-input"
-                                    step="10">
-                                <span class="unit-label">px</span>
-                            </div>
+                                <div class="camera-control-row">
+                                    <label class="control-label">选择名称：</label>
+                                    <Dropdown v-model="message.parms.animationIndex!" @update:modelValue="(value) => {
+                                        if (messages[messageIndex].parms) {
+                                            messages[messageIndex].parms.animationIndex = value;
+                                            messages[messageIndex].parms.animation = messages[messageIndex].parms?.amintionOption![value].value as string;
+                                        }
+                                    }" :options="messages[messageIndex].parms?.amintionOption!" :disabled="false" />
+                                </div>
 
-                            <div class="camera-control-row">
-                                <label class="control-label">机位偏移Y：</label>
-                                <input type="number" v-model.number="message.parms.yOffSet" class="camera-input"
-                                    step="10">
-                                <span class="unit-label">px</span>
+                                <div class="camera-control-row">
+                                    <label class="control-label">动画循环：</label>
+                                    <ToggleSwitch v-model="message.parms.isLoop"></ToggleSwitch>
+                                </div>
+
+                                <div class="camera-control-row">
+                                    <label class="control-label">机位偏移X：</label>
+                                    <input type="number" v-model.number="message.parms.xOffSet" class="camera-input"
+                                        step="10">
+                                    <span class="unit-label">px</span>
+                                </div>
+
+                                <div class="camera-control-row">
+                                    <label class="control-label">机位偏移Y：</label>
+                                    <input type="number" v-model.number="message.parms.yOffSet" class="camera-input"
+                                        step="10">
+                                    <span class="unit-label">px</span>
+                                </div>
                             </div>
                         </div>
                     </div>
-
                 </div>
             </div>
-        </div>
+        </VueDraggable>
         <div>
             <div class="pre-bind-section">
                 <button v-if="!preSelectedCharacter" @click.stop="preBindCharacter" class="pre-bind-btn">
@@ -187,7 +217,7 @@
 
 <script setup lang="ts">
 // 在 script setup 部分添加
-import { onMounted, onUnmounted, ref } from 'vue';
+import { onMounted, onUnmounted, ref, watch } from 'vue';
 import { DialogTextData, DialogueType } from '../../../types/app';
 import ActionItemHead from './ActionItemHead.vue';
 import massage from '../../../script/common/massage';
@@ -196,12 +226,15 @@ import { handleSceneState, useCommonState } from '../../../script/common/common-
 import CanvasManager from '../../../script/render/canvas-manager';
 import ToggleSwitch from '../../common/ToggleSwitch.vue';
 import { useI18n } from 'vue-i18n';
+import { useCharacterConfigStore } from '../../../stores/character-config-store';
 // 添加机位相关导入
 import { CameraStandType, getEasingFunctionOptions, EasingFunction } from '../../../script/camera-stand';
 import Dropdown from '../../common/Dropdown.vue';
+import ColorPicker from '../../common/ColorPicker.vue';
 import { DropdownOption } from '../../../types/app';
 import { Modification, PropertyPath } from '../../../script/common/snapshot';
 import Tooltip from '../../common/Tooltip.vue';
+import { VueDraggable } from 'vue-draggable-plus';
 
 const props = defineProps<{
     title: string,
@@ -210,10 +243,18 @@ const props = defineProps<{
 
 const { t } = useI18n()
 
+// 使用角色配置store
+const characterConfigStore = useCharacterConfigStore()
+
 const { action, actionItem } = useCommonState(props.title, props.id);
 const canvasManager = CanvasManager.getInstance();
 
 let viewport = canvasManager.viewport;
+
+// 生成唯一ID的函数
+const generateUniqueId = () => {
+    return Date.now() + Math.random().toString(36).substr(2, 9);
+};
 
 const messages = ref<DialogTextData[]>([]);
 const editing = ref<{ [key: number]: boolean }>({});
@@ -231,9 +272,6 @@ const preSelectedCharacter = ref<{
     speakerColor: number;
     parms?: any;
 } | null>(null);
-
-
-
 
 // 对话类型定义
 const dialogueTypes = [
@@ -281,13 +319,20 @@ const showDialogueTypeSelector = () => {
 // 添加预绑定角色的方法
 const preBindCharacter = () => {
     selectSceneCharacterType().then((res) => {
+        const characterName = res.character.characterName;
+
+        // 从store中获取已保存的角色配置
+        const savedConfig = characterConfigStore.getCharacterConfig(characterName);
+
+        console.log("preBindCharacter:", characterName, savedConfig);
+
         preSelectedCharacter.value = {
-            characterName: res.character.characterName,
-            speakerColor: 0xfaaaaa, // 可以根据角色设置不同颜色
+            characterName,
+            speakerColor: savedConfig?.speakerColor ?? 0xfaaaaa, // 使用保存的颜色或默认颜色
             parms: {
-                CharacterName: res.character.characterName,
-                yOffSet: res.x,
-                xOffSet: res.y,
+                CharacterName: characterName,
+                yOffSet: savedConfig?.yOffSet ?? 0, // 使用保存的偏移或场景偏移
+                xOffSet: savedConfig?.xOffSet ?? 0, // 使用保存的偏移或场景偏移
                 isMove: true,
                 spine: res.spine,
                 animationOption: res.spine.state.data.skeletonData.animations.map((item, _index) => {
@@ -298,8 +343,19 @@ const preBindCharacter = () => {
                 })
             }
         };
+
+        // 如果没有保存的配置，保存当前配置到store
+        if (!savedConfig) {
+            characterConfigStore.saveCharacterConfig({
+                characterName,
+                speakerColor: preSelectedCharacter.value.speakerColor,
+                yOffSet: preSelectedCharacter.value.parms.yOffSet,
+                xOffSet: preSelectedCharacter.value.parms.xOffSet
+            });
+        }
+
         console.log("object:", preSelectedCharacter.value);
-        massage(`已预选角色：${res.character.characterName}`, 'success', 2000);
+        massage(`已预选角色：${characterName}`, 'success', 2000);
     }).catch((err) => {
         console.log(err);
     });
@@ -323,8 +379,11 @@ const easingOptions = ref<DropdownOption[]>(getEasingFunctionOptions());
 
 // 修改选择对话类型并添加新对话的方法
 const selectDialogueType = (type: DialogueType) => {
+
+
     // 根据不同对话类型设置不同的默认值
     let newMessage: DialogTextData = {
+        id: generateUniqueId(),
         speakerColor: 0xfaaaaa,
         speaker: '请选择角色',
         texts: [{
@@ -336,8 +395,11 @@ const selectDialogueType = (type: DialogueType) => {
 
     // 如果是普通对话且有预选角色，直接使用预选角色
     if (type === DialogueType.NORMAL && preSelectedCharacter.value) {
+
+        const savedConfig = characterConfigStore.getCharacterConfig(preSelectedCharacter.value?.characterName);
+
         newMessage.speaker = preSelectedCharacter.value.characterName;
-        newMessage.speakerColor = preSelectedCharacter.value.speakerColor;
+        newMessage.speakerColor = savedConfig?.speakerColor ?? preSelectedCharacter.value.speakerColor;
         newMessage.isBind = true;
         newMessage.parms = {
             ...preSelectedCharacter.value.parms,
@@ -350,29 +412,32 @@ const selectDialogueType = (type: DialogueType) => {
             animationIndex: 0, // 默认第为idel
             amintionOption: preSelectedCharacter.value.parms.animationOption, // 显式设置动画选项
             isLoop: true, // 默认循环播放动画
-            xOffSet: 0, // 默认机位X轴偏移值
-            yOffSet: 0 // 默认机位Y轴偏移值
+            // 保持预选角色中已经从store读取的偏移值
+            xOffSet: savedConfig?.xOffSet ?? preSelectedCharacter.value.parms.xOffSet,
+            yOffSet: savedConfig?.yOffSet ?? preSelectedCharacter.value.parms.yOffSet
         };
 
         if (newMessage.parms) {
             newMessage.parms.animationIndex = newMessage.parms?.amintionOption?.findIndex((item: any) => item.value === "idle") || 0;
         }
     } else if (type === DialogueType.NORMAL) {
-        // 普通对话但没有预选角色
-        newMessage.parms = {
-            CharacterName: '',
-            yOffSet: 0,
-            xOffSet: 0,
-            isMove: false,
-            cameraStandTypeIndex: 0,
-            cameraStandType: 'large',
-            easeIndex: 0,
-            animationIndex: 0,
-            animation: 'idle',
-            ease: '',
-            duration: 300,
-            isLoop: true, // 默认循环播放动画
-        };
+        // // 普通对话但没有预选角色
+        // newMessage.parms = {
+        //     CharacterName: '',
+        //     yOffSet: 0,
+        //     xOffSet: 0,
+        //     isMove: false,
+        //     cameraStandTypeIndex: 0,
+        //     cameraStandType: 'large',
+        //     easeIndex: 0,
+        //     animationIndex: 0,
+        //     animation: 'idle',
+        //     ease: '',
+        //     duration: 300,
+        //     isLoop: true, // 默认循环播放动画
+        // };
+        massage('请先选择角色', 'error', 2000);
+        return;
     }
     // 如果是旁白，修改默认值
     else if (type === DialogueType.VOICEOVER) {
@@ -395,12 +460,20 @@ const bindCharacter = (index: number) => {
     }
 
     selectCharacterType().then((res) => {
-        messages.value[index].speaker = res.characterName;
+        const characterName = res.characterName;
+
+        // 从store中获取已保存的角色配置
+        const savedConfig = characterConfigStore.getCharacterConfig(characterName);
+
+        messages.value[index].speaker = characterName;
         messages.value[index].isBind = true;
+
+        // 使用保存的配置或默认值
+        messages.value[index].speakerColor = savedConfig?.speakerColor ?? 0xfaaaaa;
         messages.value[index].parms = {
-            CharacterName: res.characterName,
-            yOffSet: 0,
-            xOffSet: 0,
+            CharacterName: characterName,
+            yOffSet: savedConfig?.yOffSet ?? 0,
+            xOffSet: savedConfig?.xOffSet ?? 0,
             isMove: true,
             isLoop: true, // 默认循环播放动画
 
@@ -412,6 +485,16 @@ const bindCharacter = (index: number) => {
             ease: EasingFunction.EaseInOutSine,
             duration: 300
         }
+
+        // 如果没有保存的配置，保存当前配置到store
+        if (!savedConfig) {
+            characterConfigStore.saveCharacterConfig({
+                characterName,
+                speakerColor: messages.value[index].speakerColor!,
+                yOffSet: messages.value[index].parms!.yOffSet,
+                xOffSet: messages.value[index].parms!.xOffSet
+            });
+        }
     }).catch((err) => {
         console.log(err);
     });
@@ -421,6 +504,7 @@ const bindCharacter = (index: number) => {
 // @ts-ignore
 const addMsg = () => {
     messages.value.push({
+        id: generateUniqueId(),
         speakerColor: 0xfaaaaa,
         speaker: '请选择角色',
         texts: [{
@@ -428,6 +512,44 @@ const addMsg = () => {
         }],
         mode: DialogueType.NORMAL
     });
+};
+
+// 删除对话
+const deleteMessage = (index: number) => {
+    // if (messages.value.length <= 1) {
+    //     massage('至少需要保留一个对话', 'warning', 2000);
+    //     return;
+    // }
+
+    messages.value.splice(index, 1);
+    massage('已删除对话', 'success', 1500);
+};
+
+// 移动对话位置
+const moveMessage = (index: number, direction: 'up' | 'down') => {
+    const newIndex = direction === 'up' ? index - 1 : index + 1;
+
+    // 检查边界
+    if (newIndex < 0 || newIndex >= messages.value.length) {
+        return;
+    }
+
+    // 使用splice方法来移动元素，这样能确保Vue正确检测到变化
+    const [movedItem] = messages.value.splice(index, 1);
+    messages.value.splice(newIndex, 0, movedItem);
+
+    massage(`已${direction === 'up' ? '上移' : '下移'}对话`, 'success', 1500);
+};
+
+// 拖拽开始事件
+const onDragStart = (evt: any) => {
+    console.log('拖拽开始', evt);
+};
+
+// 拖拽结束事件
+const onDragEnd = (evt: any) => {
+    console.log('拖拽结束', evt);
+    massage('对话顺序已更新', 'success', 1500);
 };
 
 const readditionMsg = () => {
@@ -446,12 +568,39 @@ const editName = (index: number) => {
 };
 
 const saveName = (speaker: string, index: number) => {
-    if (speaker === '') {
-        massage('角色名不能为空！', 'error', 2000);
-        return;
-    }
     editing.value[index] = false;
+    messages.value[index].speaker = speaker;
 };
+
+// 更新角色颜色并保存到store
+const updateSpeakerColor = (messageIndex: number, color: number) => {
+    const message = messages.value[messageIndex];
+    message.speakerColor = color;
+
+    // 如果是绑定了角色的对话，保存颜色到store
+    if (message.speaker && message.speaker !== '请选择角色') {
+        characterConfigStore.saveCharacterConfig({
+            characterName: message.speaker,
+            speakerColor: color,
+            yOffSet: message.parms?.yOffSet || 0,
+            xOffSet: message.parms?.xOffSet || 0
+        });
+    }
+};
+
+// 监听messages变化，自动保存角色配置
+watch(messages, (newMessages) => {
+    newMessages.forEach(message => {
+        if (message.mode === DialogueType.NORMAL && message.isBind && message.speaker !== '请选择角色') {
+            // 更新store中的角色配置
+            characterConfigStore.updateCharacterConfig(message.speaker, {
+                speakerColor: message.speakerColor,
+                yOffSet: message.parms?.yOffSet,
+                xOffSet: message.parms?.xOffSet
+            });
+        }
+    });
+}, { deep: true });
 
 let modification: Map<PropertyPath, Modification>;
 
@@ -531,10 +680,69 @@ onUnmounted(() => {
 </script>
 
 <style lang="css" scoped>
+/* 对话操作按钮样式 */
+.message-controls {
+
+    z-index: 10;
+}
+
+.control-btn {
+    width: 20px;
+    height: 20px;
+    border: none;
+    border-radius: 3px;
+    cursor: pointer;
+    font-size: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+    opacity: 0.7;
+}
+
+.control-btn:hover {
+    opacity: 1;
+    transform: scale(1.1);
+}
+
+.control-btn:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.move-up-btn,
+.move-down-btn {
+    background-color: var(--button-bg);
+    color: white;
+}
+
+.move-up-btn:hover,
+.move-down-btn:hover {
+    background-color: var(--high-bg);
+}
+
+.delete-btn {
+    width: 16px;
+    height: 16px;
+    line-height: 14px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #ff4757;
+    color: white;
+}
+
+.delete-btn:hover {
+    background-color: #ff3742;
+}
+
 .action-item-content {
     display: flex;
     flex-direction: column;
     gap: 10px;
+    position: relative;
+    /* 为绝对定位的按钮提供定位上下文 */
 }
 
 .left-content {
@@ -963,5 +1171,122 @@ input[type="text"]:focus {
 
 .quick-button {
     font-size: 12px !important;
+}
+
+/* 颜色选择器样式 */
+.color-picker-container {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.color-picker-label {
+    font-size: 12px;
+    color: var(--text-color);
+    cursor: pointer;
+    user-select: none;
+    white-space: nowrap;
+}
+
+.color-picker-label:hover {
+    color: var(--high-text-color);
+}
+
+.character-tip {
+    font-size: 12px;
+    color: var(--text-color-secondary);
+    font-style: italic;
+}
+
+.name-input {
+    background-color: var(--bg);
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    padding: 4px 8px;
+    color: var(--text-color);
+    font-size: 12px;
+    width: 80px;
+}
+
+.name-input:focus {
+    outline: none;
+    border-color: var(--high-bg);
+    background-color: var(--high-hover-bg);
+}
+
+.name-edit {
+    cursor: pointer;
+    font-size: 14px;
+    opacity: 0.7;
+    transition: opacity 0.2s ease;
+}
+
+.name-edit:hover {
+    opacity: 1;
+}
+
+.advanced-mode-toggle {
+    display: flex;
+    align-items: center;
+}
+
+.advanced-label {
+    font-size: 12px;
+    color: var(--text-color);
+    cursor: pointer;
+    user-select: none;
+}
+
+.advanced-label:hover {
+    color: var(--high-text-color);
+}
+
+/* 拖拽相关样式 */
+.drag-handle {
+    position: absolute;
+    left: -10px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 16px;
+    height: 26px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: grab;
+    color: var(--placeholder-color);
+    font-size: 14px;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+    user-select: none;
+}
+
+.action-item-content:hover .drag-handle {
+    opacity: 1;
+}
+
+.drag-handle:hover {
+    color: var(--text-color);
+}
+
+.drag-handle:active {
+    cursor: grabbing;
+}
+
+/* 拖拽状态样式 */
+.ghost-item {
+    opacity: 0.5;
+    background-color: var(--secondary-bg);
+    /* border: 2px dashed var(--border-color); */
+}
+
+.chosen-item {
+    background-color: var(--high-hover-bg);
+    /* border: 1px solid var(--high-bg); */
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.drag-item {
+    transform: rotate(5deg);
+    opacity: 0.8;
 }
 </style>

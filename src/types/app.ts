@@ -139,6 +139,7 @@ export interface Actions {
 }
 
 export interface DialogTextData {
+    id?: string; // 添加唯一标识符
     speakerColor: number,
     speaker: string,
     texts: {

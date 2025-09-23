@@ -3,14 +3,19 @@ import '@pixi/unsafe-eval';
 import App from "./App.vue";
 import './main.css';
 import { createPinia } from "pinia";
+import piniaPluginPersistedstate from 'pinia-plugin-persistedstate';
 import { i18n, initializeI18n, restoreLocaleFromStorage } from "./locales/i18n";
 
 // 创建应用实例
 const app = createApp(App);
 
+// 创建pinia实例并添加持久化插件
+const pinia = createPinia();
+pinia.use(piniaPluginPersistedstate);
+
 // 配置应用
 app.use(i18n)
-app.use(createPinia())
+app.use(pinia)
 
 // 异步初始化国际化系统
 async function initializeApp() {
