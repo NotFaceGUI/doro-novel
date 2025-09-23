@@ -20,7 +20,7 @@ const updater = useUpdater();
 
 const app = ref<DoroApp>({
   name: 'Doro Novel',
-  version: 'ver 0.3.5',
+  version: 'ver 0.3.6',
 });
 
 onMounted(() => {
