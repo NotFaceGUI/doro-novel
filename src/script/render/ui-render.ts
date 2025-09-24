@@ -13,6 +13,9 @@ import { DEFAULT_RESOLUTION } from '../var';
 import { Modification, PropertyPath } from '../common/snapshot';
 import { TextTagParser } from '../util/text-parser';
 import { executeTextTag, TagExecutionContext } from '../util/text-tag-handler';
+import { Raw } from 'vue';
+import { Spine } from 'pixi-spine';
+import { mode } from 'crypto-js';
 
 const t = i18n.global.t
 
@@ -32,6 +35,9 @@ export class UIRender {
     // 是否开始文本播放
     private isStart: boolean = false;
     private isTextAni: boolean = false;
+    
+    // 摄像机是否正在移动的标志
+    public static isCameraMoving: boolean = false;
 
     private textWriter: Sound | undefined = undefined;
 
@@ -303,11 +309,9 @@ export class UIRender {
 
         // 需要显示的UI元素
         const showUIs: (Sprite | Container)[] = uiMap[mode] || [];
-        console.log("需要显示的UI元素：", mode, showUIs.map(ui => ui.name));
 
         // 需要隐藏的UI元素
         const hideUIs = allUIs.filter(ui => !showUIs.includes(ui));
-        console.log("需要隐藏的UI元素：", hideUIs);
 
         // 只对当前不可见但需要显示的UI元素进行初始化
         showUIs.forEach(ui => {
@@ -369,6 +373,7 @@ export class UIRender {
 
                     // 如果是旁白容器，同时处理其子元素的阴影效果
                     if (ui === this.voiceoverTextAera) {
+                        console.log("需要隐藏的旁白容器透明度：", currentAlpha);
                         ui.children.forEach(child => {
                             if (child.filters && child.filters[0] instanceof DropShadowFilter) {
                                 (child.filters[0] as DropShadowFilter).alpha = 0.4 * currentAlpha;
@@ -529,7 +534,14 @@ export class UIRender {
 
 
     private lastPlayTime = 0;
+    private noiseOffset = 0; // 柏林噪声偏移量
+    private noiseScale = 0.01; // 噪声缩放因子，控制变化频率
+    private lastVolumeValue = 0.25; // 上一次的音量值，用于平滑插值
     private lastAnimationName = "idle";
+    private lastSpine : Raw<Spine> | undefined = undefined;
+
+    private lastMessage: DialogTextData | undefined = undefined;
+    private isUpdateVisibility = false;
 
     private async displayMessage(message: DialogTextData, modification: Map<PropertyPath, Modification>) {
         console.log("日志：", message)
@@ -554,8 +566,44 @@ export class UIRender {
                     xOffSet: message.parms.xOffSet,
                     yOffSet: message.parms.yOffSet,
                 })
+
+                // 设置一个标志，用于判断 摄像机是否还在移动
+                if (message.parms.isMove) {
+                    UIRender.isCameraMoving = true;
+                    setTimeout(() => {
+                        UIRender.isCameraMoving = false;
+                    }, message.parms?.duration || 0);
+                }
+                
             }
 
+            this.isUpdateVisibility = false;
+
+            // if(this.lastMessage){
+            //     if (this.lastMessage.mode !== message.mode) {
+            //         this.updateVisibility(message.mode)
+            //         this.isUpdateVisibility = true;
+            //     }
+            // }
+
+            // // 等待移动动画完成
+            // if (message.parms.isMove && (message.mode == DialogueType.COMMANDER || message.mode == DialogueType.NORMAL)) {
+            //     await new Promise(resolve => {
+            //         setTimeout(() => {
+            //             resolve(null);
+            //         }, message.parms?.duration || 0);
+            //     });
+            // }
+
+            // 记录说话的角色, 将当前说话的角色的zIndex设置为30, 其他角色的zIndex设置为10
+            if (message.parms.spine) {
+                if (this.lastSpine) {
+                    this.lastSpine.zIndex = 10;
+                }
+                this.lastSpine = message.parms.spine;
+                message.parms.spine.zIndex = 30;
+                CanvasManager.getInstance().viewport.sortChildren();
+            }
 
             if (message.parms.animation) {
                 // 如果有动画，播放指定的动画
@@ -657,7 +705,9 @@ export class UIRender {
             }
         }
 
-        this.updateVisibility(message.mode);
+        if (!this.isUpdateVisibility) {
+            this.updateVisibility(message.mode);
+        }
         let tempText: {
             title: Text;
             content: Text;
@@ -721,7 +771,7 @@ export class UIRender {
                 };
 
                 // 执行标签逻辑
-                executeTextTag(tag, context);
+                await executeTextTag(tag, context);
                 console.log(`在索引 ${i} 处执行标签 ${tag.name}，属性为 ${tag.attributes}`);
             }
 
@@ -735,16 +785,14 @@ export class UIRender {
                 break;
             }
 
-
-
             const char = fullText[i];
             currentText += char;
             tempText.content.text = currentText;
 
             const now = Date.now();
-            if (char !== ' ' && char.trim() !== '' && now - this.lastPlayTime >= minSoundInterval) {
+            if (char !== ' ' && char.trim() !== '' && now - this.lastPlayTime >= minSoundInterval && message.mode === DialogueType.NORMAL) {
                 try {
-                    const volume = this.getRandomVolume(0.4, 0.6);
+                    const volume = this.getRandomVolume(0.1, 0.4);
                     this.textWriter?.play({ volume });
                     this.lastPlayTime = now;
                 } catch (err) {
@@ -772,8 +820,61 @@ export class UIRender {
     }
 
 
+    /**
+     * 简化版柏林噪声实现
+     * @param x 输入值
+     * @returns 0-1之间的噪声值
+     */
+    private perlinNoise(x: number): number {
+        // 简化的1D柏林噪声
+        const fade = (t: number) => t * t * t * (t * (t * 6 - 15) + 10);
+        const lerp = (a: number, b: number, t: number) => a + t * (b - a);
+        
+        const xi = Math.floor(x) & 255;
+        const xf = x - Math.floor(x);
+        
+        // 使用简单的伪随机函数
+        const hash = (n: number) => {
+            n = ((n << 13) ^ n);
+            return (n * (n * n * 15731 + 789221) + 1376312589) & 0x7fffffff;
+        };
+        
+        const grad = (hash: number, x: number) => {
+            const h = hash & 15;
+            const grad = 1 + (h & 7);
+            if (h & 8) return -grad * x;
+            return grad * x;
+        };
+        
+        const a = grad(hash(xi), xf);
+        const b = grad(hash(xi + 1), xf - 1);
+        
+        return (lerp(a, b, fade(xf)) + 1) * 0.5; // 归一化到0-1
+    }
+
     private getRandomVolume(min: number, max: number): number {
-        return Math.random() * (max - min) + min;
+        // 使用时间作为噪声输入，创建平滑的音量变化
+        const currentTime = Date.now();
+        
+        // 根据时间间隔调整噪声偏移，使变化更自然
+        const timeDelta = currentTime - this.lastPlayTime;
+        const adaptiveScale = Math.min(this.noiseScale * (timeDelta / 100), 0.1); // 限制最大变化速度
+        this.noiseOffset += adaptiveScale;
+        
+        // 生成基于柏林噪声的平滑随机值
+        const noiseValue = this.perlinNoise(this.noiseOffset);
+        
+        // 计算目标音量值
+        const targetVolume = min + noiseValue * (max - min);
+        
+        // 使用平滑插值，避免音量突变
+        const smoothingFactor = 0.3; // 平滑因子，值越小变化越平滑
+        const smoothedVolume = this.lastVolumeValue + (targetVolume - this.lastVolumeValue) * smoothingFactor;
+        
+        // 更新上一次的音量值
+        this.lastVolumeValue = smoothedVolume;
+        
+        return smoothedVolume;
     }
 
     // 延迟函数，用于实现逐字显示

@@ -9,7 +9,8 @@ import { TextTag } from './text-parser';
 // 标签处理器接口
 export interface TagHandler {
     name: string;
-    execute(attributes: string, context: TagExecutionContext): void;
+    wait: boolean;
+    execute(attributes: string, context: TagExecutionContext): Promise<void>;
 }
 
 // 标签执行上下文
@@ -34,13 +35,17 @@ export class TextTagHandlerManager {
     }
 
     /**
-     * 执行标签
+     * 执行标签（异步）
      */
-    static executeTag(tag: TextTag, context: TagExecutionContext): void {
+    static async executeTag(tag: TextTag, context: TagExecutionContext): Promise<void> {
         const handler = TextTagHandlerManager.handlers.get(tag.name);
         if (handler) {
             try {
-                handler.execute(tag.attributes, context);
+                if (handler.wait) {
+                    await handler.execute(tag.attributes, context);
+                } else {
+                    handler.execute(tag.attributes, context);
+                }
             } catch (error) {
                 console.error(`执行标签 ${tag.name} 时出错:`, error);
             }
@@ -73,7 +78,16 @@ export class TextTagHandlerManager {
  */
 export const ShakeTagHandler: TagHandler = {
     name: 'shake',
-    execute(attributes: string, context: TagExecutionContext): void {
+    wait: false,
+    async execute(attributes: string, context: TagExecutionContext): Promise<void> {
+        // 导入UIRender类来检查摄像机状态
+        const { UIRender } = await import('../render/ui-render');
+
+        // 等待摄像机停止移动
+        while (UIRender.isCameraMoving) {
+            await new Promise(resolve => setTimeout(resolve, 50)); // 每50ms检查一次
+        }
+
         const params = parseTagAttributes(attributes);
 
         // 支持按key指定或按顺序指定震动的3个数值
@@ -86,7 +100,7 @@ export const ShakeTagHandler: TagHandler = {
             params.has('duration') ||
             params.has('frequency')) {
             intensity = parseFloat(params.get('intensity') || '0.3');
-            duration = parseFloat(params.get('duration')  || '1');
+            duration = parseFloat(params.get('duration') || '1');
             frequency = parseFloat(params.get('frequency') || '0.3');
         } else {
             // 按顺序解析：强度,持续时间,频率
@@ -98,23 +112,23 @@ export const ShakeTagHandler: TagHandler = {
 
         console.log(`执行震动效果: 强度=${intensity}, 持续时间=${duration}, 频率=${frequency}`);
 
-        // 实现震动效果
+        // 实现震动效果 - 不阻塞，立即返回
         const viewport = CanvasManager.getInstance().viewport;
         const originalCenter = { x: viewport.center.x, y: viewport.center.y };
-        
-        // 震动实现
+
+        // 震动实现 - 异步执行，不阻塞对话
         const startTime = Date.now();
         const shake = () => {
             const elapsed = (Date.now() - startTime) / 1000; // 转换为秒
-            
+
             if (elapsed < duration) {
                 // 计算震动偏移
                 const shakeX = (Math.random() - 0.5) * intensity * Math.sin(elapsed * frequency * Math.PI * 2);
                 const shakeY = (Math.random() - 0.5) * intensity * Math.sin(elapsed * frequency * Math.PI * 2);
-                
+
                 // 应用震动偏移
                 viewport.moveCenter(originalCenter.x + shakeX, originalCenter.y + shakeY);
-                
+
                 // 继续震动
                 requestAnimationFrame(shake);
             } else {
@@ -122,9 +136,12 @@ export const ShakeTagHandler: TagHandler = {
                 viewport.moveCenter(originalCenter.x, originalCenter.y);
             }
         };
-        
-        // 开始震动
+
+        // 开始震动 - 不等待完成，立即返回
         shake();
+
+        // 立即返回，不阻塞对话
+        return Promise.resolve();
     }
 };
 
@@ -135,7 +152,8 @@ export const ShakeTagHandler: TagHandler = {
  */
 export const ColorTagHandler: TagHandler = {
     name: 'color',
-    execute(attributes: string, context: TagExecutionContext): void {
+    wait: false,
+    async execute(attributes: string, context: TagExecutionContext): Promise<void> {
         const color = attributes.trim() || 'white';
 
         console.log(`设置文本颜色: ${color}`);
@@ -154,7 +172,8 @@ export const ColorTagHandler: TagHandler = {
  */
 export const FadeTagHandler: TagHandler = {
     name: 'fade',
-    execute(attributes: string, context: TagExecutionContext): void {
+    wait: false,
+    async execute(attributes: string, context: TagExecutionContext): Promise<void> {
         const params = parseTagAttributes(attributes);
         const direction = params.get('') || params.get('direction') || 'in';
         const duration = params.get('duration') || params.get('持续时间') || '1s';
@@ -175,7 +194,8 @@ export const FadeTagHandler: TagHandler = {
  */
 export const ScaleTagHandler: TagHandler = {
     name: 'scale',
-    execute(attributes: string, context: TagExecutionContext): void {
+    wait: false,
+    async execute(attributes: string, context: TagExecutionContext): Promise<void> {
         const params = parseTagAttributes(attributes);
         const scale = parseFloat(params.get('') || params.get('scale') || '1.0');
         const duration = params.get('duration') || params.get('持续时间') || '0.5s';
@@ -196,7 +216,8 @@ export const ScaleTagHandler: TagHandler = {
  */
 export const RotateTagHandler: TagHandler = {
     name: 'rotate',
-    execute(attributes: string, context: TagExecutionContext): void {
+    wait: false,
+    async execute(attributes: string, context: TagExecutionContext): Promise<void> {
         const params = parseTagAttributes(attributes);
         const angle = parseFloat(params.get('') || params.get('angle') || '0');
         const duration = params.get('duration') || params.get('持续时间') || '1s';
@@ -217,7 +238,8 @@ export const RotateTagHandler: TagHandler = {
  */
 export const SoundTagHandler: TagHandler = {
     name: 'sound',
-    execute(attributes: string, context: TagExecutionContext): void {
+    wait: false,
+    async execute(attributes: string, context: TagExecutionContext): Promise<void> {
         const soundFile = attributes.trim();
 
         console.log(`播放声音: ${soundFile}`);
@@ -234,13 +256,36 @@ export const SoundTagHandler: TagHandler = {
  */
 export const PauseTagHandler: TagHandler = {
     name: 'pause',
-    execute(attributes: string, context: TagExecutionContext): void {
+    wait: false,
+    async execute(attributes: string, context: TagExecutionContext): Promise<void> {
         const duration = attributes.trim() || '1s';
 
         console.log(`暂停文本显示: ${duration}`);
 
         // TODO: 实现具体的暂停逻辑
         // 例如: TextRenderer.pause(parseDuration(duration));
+    }
+};
+
+/**
+ * 等待标签处理器
+ * 用法: <wait:时间/>
+ * 示例: <wait:100/>, <wait:1000/>
+ */
+export const WaitTagHandler: TagHandler = {
+    name: 'wait',
+    wait: true,
+    async execute(attributes: string, context: TagExecutionContext): Promise<void> {
+        const waitTime = parseInt(attributes.trim()) || 100; // 默认100ms
+
+        console.log(`等待 ${waitTime}ms`);
+
+        // 返回Promise来阻塞对话指定时间
+        return new Promise<void>((resolve) => {
+            setTimeout(() => {
+                resolve();
+            }, waitTime);
+        });
     }
 };
 
@@ -283,6 +328,7 @@ TextTagHandlerManager.registerHandler(ScaleTagHandler);
 TextTagHandlerManager.registerHandler(RotateTagHandler);
 TextTagHandlerManager.registerHandler(SoundTagHandler);
 TextTagHandlerManager.registerHandler(PauseTagHandler);
+TextTagHandlerManager.registerHandler(WaitTagHandler);
 
 // 导出便捷函数
 export const executeTextTag = TextTagHandlerManager.executeTag;
