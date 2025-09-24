@@ -31,6 +31,9 @@ jobs:
       TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
     steps:
       - uses: actions/checkout@v4
+        with:
+            fetch-depth: 0
+            fetch-tags: true
 
       - name: setup node
         uses: actions/setup-node@v4
@@ -87,22 +90,26 @@ jobs:
       - name: Generate release notes
         id: release_notes
         run: |
-          # 获取当前标签
-          CURRENT_TAG=$(git describe --tags --exact-match HEAD 2>/dev/null || echo "")
+          # 获取当前标签（从GitHub ref获取，更可靠）
+          # 确保拉取完整历史和所有 tags
+          git fetch --tags --prune --unshallow || true
+          
+          # 获取当前标签（从 GitHub ref 获取，更可靠）
+          CURRENT_TAG=${GITHUB_REF#refs/tags/}
+          echo "Current tag: $CURRENT_TAG"
           
           # 获取上一个标签（排除当前标签）
-          if [ -n "$CURRENT_TAG" ]; then
-            PREVIOUS_TAG=$(git tag --sort=-version:refname | grep -v "^${CURRENT_TAG}$" | head -n 1 2>/dev/null || echo "")
-          else
-            PREVIOUS_TAG=$(git tag --sort=-version:refname | head -n 1 2>/dev/null || echo "")
-          fi
+          PREVIOUS_TAG=$(git tag --sort=-version:refname | grep -v "^${CURRENT_TAG}$" | head -n 1 2>/dev/null || echo "")
+          echo "Previous tag: $PREVIOUS_TAG"
           
           if [ -z "$PREVIOUS_TAG" ]; then
             # 如果没有上一个标签，获取所有提交
+            echo "No previous tag found, getting all commits"
             RELEASE_NOTES=$(git log --pretty=format:"- %s" --reverse)
           else
-            # 获取从上一个标签到当前的提交
-            RELEASE_NOTES=$(git log ${PREVIOUS_TAG}..HEAD --pretty=format:"- %s" --reverse)
+            # 获取从上一个标签到当前标签的提交
+            echo "Getting commits from $PREVIOUS_TAG to $CURRENT_TAG"
+            RELEASE_NOTES=$(git log ${PREVIOUS_TAG}..${CURRENT_TAG} --pretty=format:"- %s" --reverse)
           fi
           
           # 生成精简的发布说明
