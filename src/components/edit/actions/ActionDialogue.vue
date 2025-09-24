@@ -526,6 +526,7 @@ const deleteMessage = (index: number) => {
 };
 
 // 移动对话位置
+// @ts-ignore
 const moveMessage = (index: number, direction: 'up' | 'down') => {
     const newIndex = direction === 'up' ? index - 1 : index + 1;
 

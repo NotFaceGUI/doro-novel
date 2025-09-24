@@ -84,50 +84,30 @@ jobs:
           }
         shell: pwsh
 
-      - name: Generate release notes
-        id: release_notes
-        run: |
-          # 获取当前标签
-          CURRENT_TAG=$(git describe --tags --exact-match HEAD 2>/dev/null || echo "")
-          
-          # 获取上一个标签（排除当前标签）
-          if [ -n "$CURRENT_TAG" ]; then
-            PREVIOUS_TAG=$(git tag --sort=-version:refname | grep -v "^${CURRENT_TAG}$" | head -n 1 2>/dev/null || echo "")
-          else
-            PREVIOUS_TAG=$(git tag --sort=-version:refname | head -n 1 2>/dev/null || echo "")
-          fi
-          
-          if [ -z "$PREVIOUS_TAG" ]; then
-            # 如果没有上一个标签，获取所有提交
-            RELEASE_NOTES=$(git log --pretty=format:"- %s" --reverse)
-          else
-            # 获取从上一个标签到当前的提交
-            RELEASE_NOTES=$(git log ${PREVIOUS_TAG}..HEAD --pretty=format:"- %s" --reverse)
-          fi
-          
-          # 生成精简的发布说明
-          cat << EOF > release_notes.md
-          ## What's Changed
-          
-          $RELEASE_NOTES
-          
-          **Full Changelog**: https://github.com/NotFaceGUI/doro-novel/compare/${PREVIOUS_TAG}...${CURRENT_TAG}
-          EOF
-          
-          # 输出到 GitHub Actions 变量
-          echo "RELEASE_NOTES<<EOF" >> $GITHUB_OUTPUT
-          cat release_notes.md >> $GITHUB_OUTPUT
-          echo "EOF" >> $GITHUB_OUTPUT
-        shell: bash
+
 
       - uses: tauri-apps/tauri-action@v0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAURI_PRIVATE_KEY: ${{ secrets.TAURI_PRIVATE_KEY }}
+          TAURI_KEY_PASSWORD: ${{ secrets.TAURI_KEY_PASSWORD }}
         with:
-          tagName: v__VERSION__ # the action automatically replaces __VERSION__ with the app version.
-          releaseName: 'Doro Novel v__VERSION__'
-          releaseBody: ${{ steps.release_notes.outputs.RELEASE_NOTES }}
-          releaseDraft: false
+          tagName: app-v__VERSION__ # the action automatically replaces __VERSION__ with the app version
+          releaseName: 'App v__VERSION__'
+          releaseBody: |
+            ## 🎉 新版本发布
+
+            这是 Doro Novel v__VERSION__ 的发布版本。
+
+            ### 📋 变更日志
+            详细的变更日志将在发布后自动生成到 [CHANGELOG.md](https://github.com/NotFaceGUI/doro-novel/blob/main/CHANGELOG.md) 文件中。
+
+            ### 📦 下载
+            请从下方的 Assets 中下载适合您操作系统的安装包。
+
+            ---
+            > 💡 提示：完整的变更历史和详细说明请查看自动生成的 CHANGELOG.md 文件
+          releaseDraft: true
           prerelease: false
           includeUpdaterJson: true
           updaterJsonPreferNsis: false
