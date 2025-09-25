@@ -79,7 +79,7 @@ export class TextTagHandlerManager {
 export const ShakeTagHandler: TagHandler = {
     name: 'shake',
     wait: false,
-    async execute(attributes: string, context: TagExecutionContext): Promise<void> {
+    async execute(attributes: string, _context: TagExecutionContext): Promise<void> {
         // 导入UIRender类来检查摄像机状态
         const { UIRender } = await import('../render/ui-render');
 
