@@ -63,16 +63,25 @@
                     <div class="position-inputs">
                         <div class="position-input">
                             <label>X:</label>
-                            <input style="flex: 1;outline: none;border: 1px solid #ffffff11;" type="number" v-model.number="item.x" @change="updateCharacterPosition(index)" />
+                            <input style="flex: 1;outline: none;border: 1px solid #ffffff11;" type="number"
+                                v-model.number="item.x" @change="updateCharacterPosition(index)" />
                         </div>
                         <div class="position-input">
                             <label>Y:</label>
-                            <input style="flex: 1;outline: none;border: 1px solid #ffffff11;"  type="number" v-model.number="item.y" @change="updateCharacterPosition(index)" />
+                            <input style="flex: 1;outline: none;border: 1px solid #ffffff11;" type="number"
+                                v-model.number="item.y" @change="updateCharacterPosition(index)" />
                         </div>
                     </div>
                     动画：
                     <Dropdown v-model="item.selectAnimation" :options="item.animationOption"
                         @update:modelValue="onSelectAnimation(index)" :disabled="false"></Dropdown>
+
+                    <div class="character-control char-init">
+                        是否初始化显示：
+
+                        <ToggleSwitch v-model="item.isInitShow" @update:modelValue="onInitShowChange(index, $event)">
+                        </ToggleSwitch>
+                    </div>
                 </div>
 
 
@@ -114,6 +123,7 @@ import ResourceManager from '../../../script/resource-manager';
 import Tooltip from '../../common/Tooltip.vue';
 import Dropdown from '../../common/Dropdown.vue';
 import { useI18n } from 'vue-i18n';
+import { Spine } from 'pixi-spine';
 
 const canvasManager = CanvasManager.getInstance();
 let viewport = canvasManager.viewport;
@@ -210,14 +220,15 @@ const addCharacter = () => {
         console.log("添加的角色：", res);
         let obj = {
             character: res,
-            x: 0,
-            y: viewport.worldHeight + 100,
-            scale: 1
+            x: viewport.worldWidth / 2,
+            y: viewport.worldHeight + 200,
+            scale: 1,
+            isInitShow: true,
         }
 
-        setModification(modification, `characters.${res.path?.name}.x`, 0, "add");
-        setModification(modification, `characters.${res.path?.name}.y`, 0, "add");
-        setModification(modification, `characters.${res.path?.name}.scale`, 1, "add");
+        setModification(modification, `characters.${res.path?.name}.x`, obj.x, "add");
+        setModification(modification, `characters.${res.path?.name}.y`, obj.y, "add");
+        setModification(modification, `characters.${res.path?.name}.scale`, obj.scale, "add");
         // 组装key
         const key = ASSET_CHARACTER + res.path?.name + "/" + res.path?.skel;
         // 添加角色
@@ -233,6 +244,17 @@ const onSelectAnimation = (index: number) => {
     char.spine.state.setAnimation(0, ani, true);
 }
 
+const onInitShowChange = (index: number, value: boolean) => {
+    const character = action.maxCharacter[index];
+    character.isInitShow = value;
+
+    // 确保角色存在且有Spine对象
+    if (character && character.spine) {
+        // 设置角色是否可见
+        character.spine.visible = value;
+    }
+}
+
 
 // 更新角色位置的函数（替换原来的 onChangeX 和 onChangeY）
 const updateCharacterPosition = (index: number) => {
@@ -245,7 +267,7 @@ const updateCharacterPosition = (index: number) => {
     // 更新角色的位置
     if (character.spine) {
         character.spine.x = character.x;
-        character.spine.y = character.y + 100; // 保持与原来的偏移一致
+        character.spine.y = character.y; // 保持与原来的偏移一致
     }
 
     // 修改值
@@ -269,7 +291,7 @@ const startDrag = (event: MouseEvent, index: number) => {
     // 检查当前按键状态
     isShiftPressed = event.shiftKey;
     isCtrlPressed = event.ctrlKey;
-    
+
     // 设置初始拖拽模式
     if (isShiftPressed && !isCtrlPressed) {
         dragMode = 'horizontal';
@@ -278,20 +300,20 @@ const startDrag = (event: MouseEvent, index: number) => {
     } else {
         dragMode = 'free';
     }
-    
+
     isDragging = true;
     draggedCharacterIndex = index;
     dragStartX = event.clientX;
     dragStartY = event.clientY;
     lastDeltaX = 0;
     lastDeltaY = 0;
-    
+
     // 添加事件监听
     document.addEventListener('mousemove', onDrag);
     document.addEventListener('mouseup', stopDrag);
     document.addEventListener('keydown', onKeyDown);
     document.addEventListener('keyup', onKeyUp);
-    
+
     // 防止事件冒泡和默认行为
     event.preventDefault();
     event.stopPropagation();
@@ -301,16 +323,16 @@ const startDrag = (event: MouseEvent, index: number) => {
 const onKeyDown = (event: KeyboardEvent) => {
     // 只在拖拽过程中处理键盘事件
     if (!isDragging) return;
-    
+
     const oldShiftState = isShiftPressed;
     const oldCtrlState = isCtrlPressed;
-    
+
     if (event.key === 'Shift') {
         isShiftPressed = true;
     } else if (event.key === 'Control') {
         isCtrlPressed = true;
     }
-    
+
     // 如果修饰键状态改变，更新拖拽模式
     if (oldShiftState !== isShiftPressed || oldCtrlState !== isCtrlPressed) {
         if (isShiftPressed && !isCtrlPressed) {
@@ -320,7 +342,7 @@ const onKeyDown = (event: KeyboardEvent) => {
         } else {
             dragMode = 'free';
         }
-        
+
         // 重置累积的增量，避免突然跳变
         lastDeltaX = 0;
         lastDeltaY = 0;
@@ -331,16 +353,16 @@ const onKeyDown = (event: KeyboardEvent) => {
 const onKeyUp = (event: KeyboardEvent) => {
     // 只在拖拽过程中处理键盘事件
     if (!isDragging) return;
-    
+
     const oldShiftState = isShiftPressed;
     const oldCtrlState = isCtrlPressed;
-    
+
     if (event.key === 'Shift') {
         isShiftPressed = false;
     } else if (event.key === 'Control') {
         isCtrlPressed = false;
     }
-    
+
     // 如果修饰键状态改变，更新拖拽模式
     if (oldShiftState !== isShiftPressed || oldCtrlState !== isCtrlPressed) {
         if (isShiftPressed && !isCtrlPressed) {
@@ -350,7 +372,7 @@ const onKeyUp = (event: KeyboardEvent) => {
         } else {
             dragMode = 'free';
         }
-        
+
         // 重置累积的增量，避免突然跳变
         lastDeltaX = 0;
         lastDeltaY = 0;
@@ -360,12 +382,12 @@ const onKeyUp = (event: KeyboardEvent) => {
 // 拖拽中
 const onDrag = (event: MouseEvent) => {
     if (!isDragging || draggedCharacterIndex === -1) return;
-    
+
     // 检查事件中的修饰键状态，确保与我们跟踪的状态同步
     if (isShiftPressed !== event.shiftKey || isCtrlPressed !== event.ctrlKey) {
         isShiftPressed = event.shiftKey;
         isCtrlPressed = event.ctrlKey;
-        
+
         // 更新拖拽模式
         if (isShiftPressed && !isCtrlPressed) {
             dragMode = 'horizontal';
@@ -374,16 +396,16 @@ const onDrag = (event: MouseEvent) => {
         } else {
             dragMode = 'free';
         }
-        
+
         // 重置累积的增量
         lastDeltaX = 0;
         lastDeltaY = 0;
     }
-    
+
     const character = action.maxCharacter[draggedCharacterIndex];
     const deltaX = event.clientX - dragStartX;
     const deltaY = event.clientY - dragStartY;
-    
+
     // 根据拖拽模式决定移动方向
     switch (dragMode) {
         case 'horizontal':
@@ -400,14 +422,14 @@ const onDrag = (event: MouseEvent) => {
             character.y += deltaY - lastDeltaY;
             break;
     }
-    
+
     // 更新累积的增量
     lastDeltaX = deltaX;
     lastDeltaY = deltaY;
-    
+
     // 更新角色位置
     updateCharacterPosition(draggedCharacterIndex);
-    
+
     // 防止事件冒泡和默认行为
     event.preventDefault();
     event.stopPropagation();
@@ -416,7 +438,7 @@ const onDrag = (event: MouseEvent) => {
 // 停止拖拽
 const stopDrag = (event?: MouseEvent) => {
     if (!isDragging) return;
-    
+
     isDragging = false;
     draggedCharacterIndex = -1;
     lastDeltaX = 0;
@@ -424,13 +446,13 @@ const stopDrag = (event?: MouseEvent) => {
     dragMode = 'free';
     isShiftPressed = false;
     isCtrlPressed = false;
-    
+
     // 移除事件监听
     document.removeEventListener('mousemove', onDrag);
     document.removeEventListener('mouseup', stopDrag);
     document.removeEventListener('keydown', onKeyDown);
     document.removeEventListener('keyup', onKeyUp);
-    
+
     // 防止事件冒泡和默认行为
     if (event) {
         event.preventDefault();
@@ -494,8 +516,19 @@ const valueChange = (updateIndex: number) => {
 // 这个方法是用于将原状态过渡到目标状态的操作，用于播放模式或预览模式
 // e.g 我预览当前节点就需要执行这个方法从状态到这个状态之间要经历什么
 const targetAction = async () => {
-    await new Promise((resolve)=>{
-        setTimeout(()=>{
+    // 先初始化角色的一些属性
+    action.maxCharacter.forEach(character => {
+
+        
+
+       character.spine.visible = character.isInitShow;
+       character.spine.scale.set(character.scale)
+       character.spine.position.set(character.x, character.y);
+    })
+
+
+    await new Promise((resolve) => {
+        setTimeout(() => {
             resolve(true);
         }, 500)
     })
@@ -546,7 +579,7 @@ const targetAction = async () => {
     } else {
         canvasManager.initMask.alpha = 0;
     }
-   
+
 
 }
 
@@ -800,5 +833,12 @@ onMounted(() => {
     color: var(--text-color);
     padding: 3px 5px;
     width: 60px;
+}
+
+.char-init {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 10px;
 }
 </style>

@@ -13,7 +13,7 @@
                     Script</div>
             </div>
 
-            <div class="project-canvas" id="canvas" v-show="activeTab == 'canvas'">
+            <div class="project-canvas" :class="{'edit-mode': actionStore.isEditMode, 'editing': actionStore.isEditMode}" id="canvas" v-show="activeTab == 'canvas'">
                 <div id="canvas-info">
 
                 </div>
@@ -41,7 +41,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted, nextTick } from 'vue';
+import { ref, onMounted, onUnmounted, nextTick, watch } from 'vue';
 import LeftBar from '../components/LeftBar.vue';
 import ScriptEditor from '../components/edit/ScriptEditor.vue';
 import { ResType } from '../script/var';
@@ -169,6 +169,10 @@ onMounted(() => {
     window.addEventListener('resize', handelResizeCanvasToPreview);
 })
 
+watch(() => actionStore.isEditMode, () => {
+    handelResizeCanvasToPreview();
+})
+
 const handelResizeCanvasToPreview = () => {
     if (projectView.value) {
         const app = previewAPP.value?.application;
@@ -263,7 +267,11 @@ onUnmounted(() => {
     display: flex;
     justify-content: center;
     align-items: center;
+
+    transition: all .3s ease-in-out;
+    border: 0 solid transparent;
 }
+
 
 @keyframes popIn {
     0% {
@@ -368,5 +376,60 @@ onUnmounted(() => {
     top: 0;
     left: 0;
     z-index: 9999;
+}
+
+.project-canvas {
+    position: relative;
+}
+
+.project-canvas::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    border: 3px solid var(--error-color);
+    pointer-events: none;
+    z-index: 1;
+    opacity: 0;
+    transition: opacity .3s ease-in-out;
+}
+
+.project-canvas::after {
+    content: '正在编辑';
+    position: absolute;
+    bottom: 8px;
+    right: 12px;
+    background: var(--error-color);
+    color: #fff;
+    font-size: 12px;
+    padding: 2px 6px;
+    border-radius: 4px;
+    pointer-events: none;
+    z-index: 2;
+    opacity: 0;
+    transform: translateY(10px);
+    transition: all 0.3s ease-in-out;
+}
+
+.edit-mode::after {
+    opacity: 1;
+    transform: translateY(0);
+    animation: blink 1.5s infinite 0.4s;
+}
+
+.edit-mode::before {
+    opacity: 1;
+}
+
+/* 闪烁效果 */
+@keyframes blink {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.6;
+    }
 }
 </style>

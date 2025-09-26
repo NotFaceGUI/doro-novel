@@ -611,9 +611,9 @@ const targetAction = async () => {
     const ui = canvasManager.uiRender;
     console.log("previewSnapshot", action.previewSnapshot)
 
-    viewport.setZoom(action.previewSnapshot.camera.zoom);
-    viewport.moveCenter(action.previewSnapshot.camera.x, action.previewSnapshot.camera.y);
-    viewport.emit('moved');
+    // viewport.setZoom(action.previewSnapshot.camera.zoom);
+    // viewport.moveCenter(action.previewSnapshot.camera.x, action.previewSnapshot.camera.y);
+    // viewport.emit('moved');
 
     // 对话结束后，保存当前摄像机状态到快照
     await ui.startDialogue(messages.value, modification, hideUIAfterDialogue.value, hideUIDelay.value);

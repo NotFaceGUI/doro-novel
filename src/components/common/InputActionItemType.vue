@@ -104,7 +104,7 @@ const options = [
     { value: "分隔符", label: "初始化" },
     { value: ASIType.SCENE, label: "初始化 场景", icon: '🎬', desc: "重置场景状态" },
     { value: "分隔符", label: "常用" },
-    { value: ASIType.BACKGROUND, label: "操作 角色[x]", icon: '👯', desc: "移动/缩放/动作/表情" },
+    { value: ASIType.CHARACTER, label: "操作 角色", icon: '👯', desc: "移动/缩放/动作/表情" },
     { value: ASIType.OPERATINGCAMERA, label: "操作 摄像机", icon: '🎥', desc: "调整摄像机视角" },
     { value: ASIType.DIALOGUE, label: "添加 对话", icon: '💬', desc: "添加角色台词" },
     { value: ASIType.BACKGROUND, label: "添加 分支对话[x]", icon: '💬', desc: "创建多条分支对话" },

@@ -96,8 +96,9 @@ const getTypeDisplayName = (type: ASIType): string => {
         [ASIType.OPERATINGCAMERA]: '摄像机操作',
         [ASIType.TRANSITION]: '过渡效果',
         [ASIType.WAIT]: '等待/阻塞',
-        [ASIType.CHECKDIALOGUE]: '',
-        [ASIType.EFFECT]: ''
+        [ASIType.CHECKDIALOGUE]: '分支对话',
+        [ASIType.EFFECT]: '特效',
+        [ASIType.CHARACTER]: '操作角色'
     };
     return typeMap[type] || '未知类型';
 };

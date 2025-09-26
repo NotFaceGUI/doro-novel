@@ -39,12 +39,15 @@ class CanvasManager {
     public inSceneCharacterMap: Spine[] = [];
 
     public setMode(mode: GameMode = GameMode.PLAY) {
-        useActionStore().gameMode = mode;
+        const action = useActionStore();
+        action.gameMode = mode;
         // 如果切换的模式为这些就需要移除viewport的的插件
         if (mode === GameMode.PREVIEW || mode === GameMode.PLAY) {
             this.viewport.plugins.remove('drag');
             this.viewport.plugins.remove('wheel');
             this.viewport.plugins.remove('clampZoom');
+
+            action.isEditMode = false;
         } else {
             this.viewport.drag({
                 wheel: false,
@@ -54,8 +57,11 @@ class CanvasManager {
                 minScale: 1,
                 maxScale: 3,
             })
+
+            action.isEditMode = true;
         }
         this.mode = mode;
+
     }
 
     public getMode(): GameMode {
@@ -254,7 +260,7 @@ class CanvasManager {
         this.viewport.sortableChildren = true;
     }
 
-    public addCharacterSpine(key: string, characterInfo: { character: CharacterType, x: number, y: number, scale: number }) {
+    public addCharacterSpine(key: string, characterInfo: { character: CharacterType, x: number, y: number, scale: number, isInitShow: boolean }) {
         // const characterURL = ResourceManager.allResUrl[key];
         // 确保资源已加载
         let spine = ResourceManager.getResource<Spine>(key, ResType.Spine) as Spine
@@ -266,7 +272,8 @@ class CanvasManager {
             scale: characterInfo.scale,
             spine: markRaw(spine),
             selectAnimation: 0,
-            animationOption: []
+            animationOption: [],
+            isInitShow: characterInfo.isInitShow,
         }
 
         // 检查场景中是否有这个角色了 > 有就clone一个新的spine出来（无法使用getResource获取了）
@@ -286,10 +293,14 @@ class CanvasManager {
             info.spine = markRaw(spine);
         }
 
+
+        spine.scale.set(/* (this.app.view.height / (spine.height / 0.9)) - 0.05 */DEFAULT_SPINE_SCALE);
+
+        info.scale = spine.scale.x;
+
         this.action.maxCharacter.push(info);
         this.viewport.addChild(spine);
 
-        spine.scale.set(/* (this.app.view.height / (spine.height / 0.9)) - 0.05 */DEFAULT_SPINE_SCALE);
 
         // 所有spine的统一层级为10
         spine.zIndex = 10;

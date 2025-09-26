@@ -12,6 +12,9 @@ import CanvasManager from '../script/render/canvas-manager';
 
 
 export const useActionStore = defineStore('action', () => {
+
+  const isEditMode = ref<boolean>(false);
+
   // 使用 Record 结构存储 LoadRes
   const loadResMap = ref<Record<string, LoadRes>>({});
 
@@ -61,7 +64,7 @@ export const useActionStore = defineStore('action', () => {
   };
 
   // 预览快照
-  let previewSnapshot: Snapshot = {
+  const previewSnapshot = ref<Snapshot>({
     camera: {
       x: 0,
       y: 0,
@@ -76,7 +79,7 @@ export const useActionStore = defineStore('action', () => {
       bgm: '',
       sfx: []
     }
-  };
+  });
 
   let setLastSnapshot: boolean = true;
 
@@ -84,7 +87,7 @@ export const useActionStore = defineStore('action', () => {
   function applyPreviewSnapshot(endIndex: number, actionTitle: string, startIndex: number = 0) {
     console.log(`开始：${startIndex}，结束：${endIndex}`);
     setPreviewSnapshotAll(endIndex, actionTitle, startIndex);
-    console.log("应用的数据：", previewSnapshot);
+    console.log("应用的数据：", previewSnapshot.value);
   }
 
   function getCurrentModification(actionTitle: string, actionItemId: number): Map<PropertyPath, Modification> {
@@ -108,7 +111,7 @@ export const useActionStore = defineStore('action', () => {
 
     // 如果是第一个无论如何都是初始值
     if (endIndex == 0) {
-      previewSnapshot = Object.assign(previewSnapshot, {
+      previewSnapshot.value = Object.assign(previewSnapshot.value, {
         camera: { ...initialSnapshot.camera },
         characters: new Map<string, { x: number; y: number; scale: number }>(),
         background: { ...initialSnapshot.background },
@@ -126,7 +129,7 @@ export const useActionStore = defineStore('action', () => {
         setPreviewSnapshot(modification);
       });
     }
-    console.log("构造后的数据：", previewSnapshot);
+    console.log("构造后的数据：", previewSnapshot.value);
 
   }
 
@@ -135,7 +138,7 @@ export const useActionStore = defineStore('action', () => {
    * @returns {Promise<void>} 
    * */
   async function runAllActions() {
-     CanvasManager.getInstance().initMask.alpha = 1;
+    CanvasManager.getInstance().initMask.alpha = 1;
     // 开始播放前端必要初始化
     initAny();
     // 设置播放状态为 true
@@ -174,7 +177,7 @@ export const useActionStore = defineStore('action', () => {
     }
 
     const pathParts = modification.path.split('.');
-    let target: any = previewSnapshot;
+    let target: any = previewSnapshot.value;
 
     // 处理 characters.<id>.x/y/scale
     if (pathParts[0] === 'characters' && pathParts.length === 3) {
@@ -183,12 +186,12 @@ export const useActionStore = defineStore('action', () => {
 
       if (modification.action === 'remove') {
         // 删除整个角色
-        previewSnapshot.characters.delete(charId);
+        previewSnapshot.value.characters.delete(charId);
       } else {
-        if (!previewSnapshot.characters.has(charId)) {
-          previewSnapshot.characters.set(charId, { x: 0, y: 0, scale: 1 });
+        if (!previewSnapshot.value.characters.has(charId)) {
+          previewSnapshot.value.characters.set(charId, { x: 0, y: 0, scale: 1 });
         }
-        previewSnapshot.characters.get(charId)![property] = modification.value;
+        previewSnapshot.value.characters.get(charId)![property] = modification.value;
       }
       return;
     }
@@ -199,7 +202,7 @@ export const useActionStore = defineStore('action', () => {
       const arrayKey = arrayMatch[1]; // e.g., "sound.sfx"
       const index = parseInt(arrayMatch[2], 10); // e.g., 0
 
-      let targetArray: any = previewSnapshot;
+      let targetArray: any = previewSnapshot.value;
       for (const key of arrayKey.split('.')) {
         targetArray = targetArray[key];
       }
@@ -358,6 +361,7 @@ export const useActionStore = defineStore('action', () => {
     realTimePreview,
     maxCharacter,
     isPlaying,
+    isEditMode,
     applyPreviewSnapshot,
     setPreviewSnapshotAll,
     getCurrentModification,
@@ -372,7 +376,6 @@ export const useActionStore = defineStore('action', () => {
     removeAction,
     getAction,
     runAllActions,
-
     initAny,
   };
 });

@@ -78,7 +78,8 @@ export enum ASIType {
     OPERATINGCAMERA = "OperatingCamera", // 操作摄像机
     AUDIO = "Audio", // 音频播放
     TRANSITION = "Transition", // 过渡效果
-    WAIT = "Wait" // 等待
+    WAIT = "Wait", // 等待
+    CHARACTER = "Character" // 操作角色
 }
 
 export interface LoadRes {
@@ -204,6 +205,7 @@ export interface sceneCharacter {
     scale: number,
     selectAnimation: number,
     animationOption: DropdownOption[], 
+    isInitShow: boolean,
     spine: Raw<Spine> // 使用原始数据 不加入响应式 Spine对象数据非常复杂
 }
 
