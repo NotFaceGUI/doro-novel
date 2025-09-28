@@ -2,7 +2,7 @@
 import { Application, Container, Filter, Graphics, Sprite, Text, TextStyle, Texture } from 'pixi.js';
 import { loadShader } from './tmep-loader';
 import { DialogTextData, DialogueType } from '../../types/app';
-import { textWriterSound } from './default-load';
+import { textWriterSound, checkWaitTexture } from './default-load';
 import { Sound } from '@pixi/sound';
 
 import { DropShadowFilter } from 'pixi-filters';
@@ -15,7 +15,8 @@ import { TextTagParser } from '../util/text-parser';
 import { executeTextTag, TagExecutionContext } from '../util/text-tag-handler';
 import { Raw } from 'vue';
 import { Spine } from 'pixi-spine';
-import { mode } from 'crypto-js';
+import { ButtonComponent } from '../ui/button-component';
+import { Action } from 'pixijs-actions';
 
 const t = i18n.global.t
 
@@ -31,11 +32,13 @@ export class UIRender {
     public currentDisplayText: { title: Text, content: Text }
     public currentSideText: { title: Text, content: Text }
     public titleCharacterColorLeftBar: Graphics;
+    public waitIcon: Sprite = new Sprite(); // 等待图标
+    public waitSideIcon: Sprite = new Sprite(); // 等待图标
 
     // 是否开始文本播放
     private isStart: boolean = false;
     private isTextAni: boolean = false;
-    
+
     // 摄像机是否正在移动的标志
     public static isCameraMoving: boolean = false;
 
@@ -68,7 +71,7 @@ export class UIRender {
         const contentStyle = new TextStyle({
             fill: '#DDDDDD',
             fontSize: Math.max(16, 40 * scaleFactor), // 最小字体16px
-            lineHeight: 45 * scaleFactor,
+            lineHeight: 60 * scaleFactor,
             fontFamily: 'Noto Sans SC',
             fontWeight: '600',
             breakWords: true,
@@ -94,6 +97,9 @@ export class UIRender {
         titleText.y = app.screen.height - (500 * scaleFactor);
         chatText.x = 80 * scaleFactor;
         chatText.y = app.screen.height - (430 * scaleFactor);
+
+        // 初始化等待图标
+        this.initWaitIcon(scaleFactor);
 
         this.currentDisplayText = {
             title: titleText,
@@ -197,6 +203,118 @@ export class UIRender {
         textWriterSound().then((res) => {
             this.textWriter = res;
         });
+
+        // // 测试按钮数组
+        // this.createButtonArray([
+        //     '我觉得这件事你可以在考虑一下\n我觉得不妥\n何出此言',
+        //     '最后一个选择'
+        // ], {
+        //     startX: this.app.view.width / 2,
+        //     startY: this.app.view.height - 450 * scaleFactor,
+        //     spacing: 200 * scaleFactor,
+        //     buttonWidth: 457,
+        //     buttonHeight: 90,
+        //     minWidth: 457,
+        //     useBottomCenterAnchor: true,
+        // });
+    }
+
+    /**
+     * 创建按钮数组，垂直排列
+     * @param texts 文本数组，每个文本对应一个按钮
+     * @param options 可选的按钮配置选项
+     */
+    public createButtonArray(texts: string[], options?: {
+        startX?: number;
+        startY?: number;
+        spacing?: number;
+        buttonWidth?: number;
+        buttonHeight?: number;
+        minWidth?: number;
+        onButtonClick?: (text: string, index: number) => void;
+        playEntrySound?: boolean;
+        /** 是否使用底部中心定位（内容增多时向上扩展） */
+        useBottomCenterAnchor?: boolean;
+    }): ButtonComponent[] {
+        const scaleFactor = this.app.screen.width / 1920; // 基于屏幕尺寸的缩放因子
+
+        // 默认配置
+        const config = {
+            startX: options?.startX ?? this.app.view.width / 2,
+            startY: options?.startY ?? this.app.view.height / 2,
+            spacing: options?.spacing ?? 100,
+            buttonWidth: options?.buttonWidth ?? 457,
+            buttonHeight: options?.buttonHeight ?? 90,
+            minWidth: options?.minWidth ?? 457,
+            playEntrySound: options?.playEntrySound ?? true,
+            useBottomCenterAnchor: options?.useBottomCenterAnchor ?? false,
+            onButtonClick: options?.onButtonClick ?? ((text: string, index: number) => {
+                console.log(`按钮 ${index + 1} 被点击: ${text}`);
+            })
+        };
+
+        const buttons: ButtonComponent[] = [];
+        let hasPlayedEntrySound = false; // 标记是否已播放过入场音效
+
+        // 如果使用底部中心定位，需要计算总高度并调整起始位置
+        let adjustedStartY = config.startY;
+        if (config.useBottomCenterAnchor) {
+            // 计算所有按钮的总高度
+            const totalHeight = (texts.length - 1) * config.spacing;
+            // 从底部中心向上偏移总高度，使整个按钮组以底部中心为锚点
+            adjustedStartY = config.startY - totalHeight;
+        }
+
+        texts.forEach((text, index) => {
+            const button = new ButtonComponent({
+                scaleFactor: scaleFactor,
+                width: config.buttonWidth,
+                height: config.buttonHeight,
+                minWidth: config.minWidth,
+                text: text,
+                orderNumber: index + 1,
+                soundOptions: {
+                    enableEntry: index === 0 && config.playEntrySound && !hasPlayedEntrySound, // 只有第一个按钮播放入场音效
+                    enableHover: false,
+                    enableSelect: true,
+                },
+                onClick: () => {
+                    // 只执行用户自定义的点击回调，不在这里隐藏其他按钮
+                    config.onButtonClick(text, index);
+                },
+                onRelease: () => {
+                    // 在按钮释放时隐藏其他按钮
+                    buttons.forEach((otherButton, otherIndex) => {
+                        if (otherIndex !== index) {
+                            // 使用淡出动画隐藏其他按钮
+                            otherButton.alpha = 1;
+                            const action = Action.group([
+                                Action.fadeOut(0.25).easeInOut(),
+                                Action.moveToY(otherButton.y + 50, 0.4)
+                            ])
+                            otherButton.run(action);
+                        }
+                    });
+                }
+            });
+
+            // 如果是第一个按钮且需要播放入场音效，标记已播放
+            if (index === 0 && config.playEntrySound) {
+                hasPlayedEntrySound = true;
+            }
+
+            // 设置按钮位置 - 垂直排列
+            button.x = config.startX + button.width / 2;
+            button.y = adjustedStartY + (index * config.spacing);
+            button.zIndex = 9999;
+            button.scale.set(button.scale.x * scaleFactor);
+
+            // 添加到舞台
+            this.stage.addChild(button);
+            buttons.push(button);
+        });
+
+        return buttons;
     }
 
     /**
@@ -466,6 +584,7 @@ export class UIRender {
      */
     public async startDialogue(messages: DialogTextData[], modification: Map<PropertyPath, Modification>, isEndVisible: boolean = false, hideDelay: number = 0) {
         this.isStart = true; // 开始处理文本
+        this.hideWaitIcon();
 
         if (messages.length > 0) {
             if (messages[0].mode === DialogueType.NORMAL || messages[0].mode === DialogueType.COMMANDER) {
@@ -510,6 +629,8 @@ export class UIRender {
             // 遍历 message.text 数组中的每一项
             const currentMode = message.mode;
             for (const line of message.texts) {
+                this.hideWaitIcon();
+
                 // 显示文本行
                 await this.displayMessage({
                     speakerColor: message.speakerColor,
@@ -524,6 +645,7 @@ export class UIRender {
                     parms: message.parms,
                 }, modification);
 
+                this.showWaitIcon(message.mode);
                 // 等待用户点击，显示下一行
                 await this.waitForClick();
             }
@@ -538,9 +660,8 @@ export class UIRender {
     private noiseScale = 0.01; // 噪声缩放因子，控制变化频率
     private lastVolumeValue = 0.25; // 上一次的音量值，用于平滑插值
     private lastAnimationName = "idle";
-    private lastSpine : Raw<Spine> | undefined = undefined;
+    private lastSpine: Raw<Spine> | undefined = undefined;
 
-    private lastMessage: DialogTextData | undefined = undefined;
     private isUpdateVisibility = false;
 
     private async displayMessage(message: DialogTextData, modification: Map<PropertyPath, Modification>) {
@@ -574,7 +695,7 @@ export class UIRender {
                         UIRender.isCameraMoving = false;
                     }, message.parms?.duration || 0);
                 }
-                
+
             }
 
             this.isUpdateVisibility = false;
@@ -829,51 +950,51 @@ export class UIRender {
         // 简化的1D柏林噪声
         const fade = (t: number) => t * t * t * (t * (t * 6 - 15) + 10);
         const lerp = (a: number, b: number, t: number) => a + t * (b - a);
-        
+
         const xi = Math.floor(x) & 255;
         const xf = x - Math.floor(x);
-        
+
         // 使用简单的伪随机函数
         const hash = (n: number) => {
             n = ((n << 13) ^ n);
             return (n * (n * n * 15731 + 789221) + 1376312589) & 0x7fffffff;
         };
-        
+
         const grad = (hash: number, x: number) => {
             const h = hash & 15;
             const grad = 1 + (h & 7);
             if (h & 8) return -grad * x;
             return grad * x;
         };
-        
+
         const a = grad(hash(xi), xf);
         const b = grad(hash(xi + 1), xf - 1);
-        
+
         return (lerp(a, b, fade(xf)) + 1) * 0.5; // 归一化到0-1
     }
 
     private getRandomVolume(min: number, max: number): number {
         // 使用时间作为噪声输入，创建平滑的音量变化
         const currentTime = Date.now();
-        
+
         // 根据时间间隔调整噪声偏移，使变化更自然
         const timeDelta = currentTime - this.lastPlayTime;
         const adaptiveScale = Math.min(this.noiseScale * (timeDelta / 100), 0.1); // 限制最大变化速度
         this.noiseOffset += adaptiveScale;
-        
+
         // 生成基于柏林噪声的平滑随机值
         const noiseValue = this.perlinNoise(this.noiseOffset);
-        
+
         // 计算目标音量值
         const targetVolume = min + noiseValue * (max - min);
-        
+
         // 使用平滑插值，避免音量突变
         const smoothingFactor = 0.3; // 平滑因子，值越小变化越平滑
         const smoothedVolume = this.lastVolumeValue + (targetVolume - this.lastVolumeValue) * smoothingFactor;
-        
+
         // 更新上一次的音量值
         this.lastVolumeValue = smoothedVolume;
-        
+
         return smoothedVolume;
     }
 
@@ -944,6 +1065,133 @@ export class UIRender {
         textObj.y = y;
         this.stage.addChild(textObj);
         return textObj;
+    }
+
+    /**
+     * 初始化等待图标
+     * @param scaleFactor 缩放因子
+     */
+    private async initWaitIcon(scaleFactor: number): Promise<void> {
+        try {
+            // 加载等待图标纹理
+            const texture = await checkWaitTexture();
+            this.waitIcon = new Sprite(texture);
+
+            // 设置普通对话框等待图标属性
+            this.waitIcon.anchor.set(0.5);
+            this.waitIcon.x = this.app.screen.width - 150 * scaleFactor;
+            this.waitIcon.y = this.app.screen.height - ((this.waitIcon.height + 50) * scaleFactor);
+
+            // 初始化旁白框等待图标
+            this.waitSideIcon = new Sprite(texture);
+            this.waitSideIcon.anchor.set(0.5);
+
+            // 根据旁白框的位置设置等待图标位置
+            // 旁白框参数：width = this.app.view.width - 800, x = 400, y = this.app.view.height - height - 65 * DEFAULT_RESOLUTION
+            const sideBoxWidth = this.app.view.width - 800;
+            const sideBoxHeight = 175 * DEFAULT_RESOLUTION;
+            const sideBoxX = 400;
+            const sideBoxY = this.app.view.height - sideBoxHeight - 65 * DEFAULT_RESOLUTION;
+
+            // 将等待图标放在旁白框的右下角，边距15
+            this.waitSideIcon.x = sideBoxX + sideBoxWidth - 15 - ((this.waitSideIcon.width + 20) * scaleFactor);
+            this.waitSideIcon.y = sideBoxY + sideBoxHeight - 15 - ((this.waitSideIcon.height + 15) * scaleFactor);
+
+
+            // 设置初始缩放
+            this.waitIcon.scale.set(1.2 * scaleFactor);
+            this.waitSideIcon.scale.set(1.2 * scaleFactor);
+
+            // 添加到文本区域
+            this.normalTextAera.addChild(this.waitIcon);
+            this.voiceoverTextAera.addChild(this.waitSideIcon);
+
+            // 开始动画
+            this.startWaitIconAnimation();
+
+        } catch (error) {
+            console.error('Failed to load wait icon:', error);
+            // 如果加载失败，创建简单的占位符
+            this.createFallbackWaitIcon(scaleFactor);
+        }
+    }
+
+    /**
+     * 创建备用等待图标（当图片加载失败时）
+     * @param scaleFactor 缩放因子
+     */
+    private createFallbackWaitIcon(scaleFactor: number): void {
+        // 创建一个简单的圆形作为备用图标
+        const graphics = new Graphics();
+        graphics.beginFill(0xffffff, 0.8);
+        graphics.drawCircle(0, 0, 10 * scaleFactor);
+        graphics.endFill();
+
+        // 转换为纹理并创建 Sprite
+        const texture = this.app.renderer.generateTexture(graphics);
+        this.waitIcon = new Sprite(texture);
+
+        this.waitIcon.anchor.set(0.5);
+        this.waitIcon.x = this.app.screen.width - 100 * scaleFactor;
+        this.waitIcon.y = this.app.screen.height - (430 * scaleFactor);
+
+        this.normalTextAera.addChild(this.waitIcon);
+        this.startWaitIconAnimation();
+    }
+
+    /**
+     * 开始等待图标的上下晃动动画
+     */
+    private startWaitIconAnimation(): void {
+        const originalY = this.waitIcon.y;
+        const originalSideY = this.waitSideIcon.y;
+
+        const amplitude = 10; // 晃动幅度
+        const speed = 0.05; // 动画速度
+        let time = 0;
+
+        // 使用 PIXI 的 ticker 来创建动画循环
+        const animate = () => {
+            time += speed;
+            this.waitIcon.y = originalY + Math.sin(time) * amplitude;
+            this.waitSideIcon.y = originalSideY + Math.sin(time) * amplitude;
+        };
+
+        // 添加到应用的 ticker
+        this.app.ticker.add(animate);
+
+        // 保存动画函数的引用，以便后续可以停止动画
+        (this.waitIcon as any).animationFunction = animate;
+        (this.waitSideIcon as any).animationFunction = animate;
+    }
+
+    /**
+     * 停止等待图标动画
+     */
+    public stopWaitIconAnimation(): void {
+        if ((this.waitIcon as any).animationFunction) {
+            this.app.ticker.remove((this.waitIcon as any).animationFunction);
+            (this.waitIcon as any).animationFunction = null;
+        }
+    }
+
+    /**
+     * 显示等待图标
+     */
+    public showWaitIcon(mode?: DialogueType): void {
+        if (mode === DialogueType.VOICEOVER) {
+            this.waitSideIcon.visible = true;
+        } else if (mode === DialogueType.NORMAL) {
+            this.waitIcon.visible = true;
+        }
+    }
+
+    /**
+     * 隐藏等待图标
+     */
+    public hideWaitIcon(): void {
+        this.waitIcon.visible = false;
+        this.waitSideIcon.visible = false;
     }
 
     /**

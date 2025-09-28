@@ -2,7 +2,11 @@
     <div class="project-content">
         <LeftBar @render-file="handleRenderType"></LeftBar>
         <div ref="projectView" class="project-content-view"
-            :class="{ 'active-bg': activeTab === 'canvas', 'project-view-full-screen': isFullScreen }" >
+            :class="{ 'active-bg': activeTab === 'canvas', 'project-view-full-screen': isFullScreen }">
+            <div class="project-tab-image">
+                <img src="/img/sprite/nv_tab.png" width="100%" alt="">
+
+            </div>
 
             <div class="project-tab" v-if="!isFullScreen">
                 <div class="tab-card" :class="{ 'tab-active': activeTab === 'canvas' }" @click="activeTab = 'canvas'">
@@ -13,7 +17,9 @@
                     Script</div>
             </div>
 
-            <div class="project-canvas" :class="{'edit-mode': actionStore.isEditMode, 'editing': actionStore.isEditMode}" id="canvas" v-show="activeTab == 'canvas'">
+            <div class="project-canvas"
+                :class="{ 'edit-mode': actionStore.isEditMode, 'editing': actionStore.isEditMode }" id="canvas"
+                v-show="activeTab == 'canvas'">
                 <div id="canvas-info">
 
                 </div>
@@ -27,13 +33,11 @@
             </div>
 
             <div class="project-script" v-show="activeTab == 'script'">
-                <ScriptEditor 
-                    v-model="scriptContent"
-                    placeholder="在这里编写剧情脚本..."
-                />
+                <ScriptEditor v-model="scriptContent" placeholder="在这里编写剧情脚本..." />
             </div>
 
-            <div class="full-screen" v-if="activeTab != 'script'" :style="'opacity:' + (isFullScreen ? 0.2 : 0.8)" @click="fullScreen">
+            <div class="full-screen" v-if="activeTab != 'script'" :style="'opacity:' + (isFullScreen ? 0.2 : 0.8)"
+                @click="fullScreen">
                 🔲
             </div>
         </div>
@@ -313,6 +317,21 @@ onUnmounted(() => {
     pointer-events: none;
 }
 
+.project-tab-image {
+    position: absolute;
+    z-index: 9999;
+    right: 0;
+    width: 325px;
+    margin: 20px;
+    margin-top: 15px;
+}
+
+.project-tab-image img {
+    image-rendering: -webkit-optimize-contrast;
+    image-rendering: crisp-edges;
+
+}
+
 .project-content-view:hover .project-tab,
 .project-content-view .project-tab.show-during-play {
     animation: popIn 0.3s cubic-bezier(0.22, 1, 0.36, 1) forwards;
@@ -425,9 +444,12 @@ onUnmounted(() => {
 
 /* 闪烁效果 */
 @keyframes blink {
-    0%, 100% {
+
+    0%,
+    100% {
         opacity: 1;
     }
+
     50% {
         opacity: 0.6;
     }
