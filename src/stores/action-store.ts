@@ -8,6 +8,7 @@ import ResourceManager from '../script/resource-manager';
 import { resolveResource } from '@tauri-apps/api/path';
 import { convertFileSrc } from '@tauri-apps/api/core';
 import CanvasManager from '../script/render/canvas-manager';
+import { UIRender } from '../script/render/ui-render';
 
 
 
@@ -321,6 +322,11 @@ export const useActionStore = defineStore('action', () => {
     cm.uiRender.normalTextAera.visible = false;
 
     cm.uiRender.stage.sortChildren()
+
+    UIRender.buttonAllArrays.forEach(button => {
+      button.destroy()
+    });
+    UIRender.buttonAllArrays = [];
   }
 
 

@@ -4,6 +4,7 @@ import { buttonEntrySound, buttonHoverSound, buttonSelectSound, nvButtonTexture,
 import { AdvancedBloomFilter } from 'pixi-filters';
 import { Action } from 'pixijs-actions';
 import { KeyboardManager } from './keyboard-manager';
+import { set } from 'lodash';
 
 /**
  * 按钮配置选项
@@ -541,11 +542,13 @@ export class ButtonComponent extends Container {
         this.eventMode = 'static';
         this.cursor = 'pointer';
 
-        this.on('pointerdown', this.onPointerDown.bind(this));
-        this.on('pointerup', this.onPointerUp.bind(this));
-        this.on('pointerupoutside', this.onPointerUpOutside.bind(this));
-        this.on('pointerover', this.onPointerOver.bind(this));
-        this.on('pointerout', this.onPointerOut.bind(this));
+        setTimeout(() => {
+            this.on('pointerdown', this.onPointerDown.bind(this));
+            this.on('pointerup', this.onPointerUp.bind(this));
+            this.on('pointerupoutside', this.onPointerUpOutside.bind(this));
+            this.on('pointerover', this.onPointerOver.bind(this));
+            this.on('pointerout', this.onPointerOut.bind(this));
+        }, 200);
     }
 
     /**
@@ -726,6 +729,7 @@ export class ButtonComponent extends Container {
      * 销毁按钮组件
      */
     public destroy(): void {
+        console.log('按钮组件销毁', this.name);
         // 注销键盘事件
         if (this.keyboardManager) {
             this.keyboardManager.unregisterButton(this.options.orderNumber);
@@ -749,5 +753,6 @@ export class ButtonComponent extends Container {
             texture: false, // 保留纹理，可能被其他组件使用
             baseTexture: false
         });
+
     }
 }

@@ -21,6 +21,7 @@ import { Action } from 'pixijs-actions';
 const t = i18n.global.t
 
 export class UIRender {
+    public static buttonAllArrays : ButtonComponent[] = [];
     public stage: Container;
     public app: Application;
 
@@ -406,20 +407,13 @@ export class UIRender {
 
         console.log("对话模式变化：", this.currentDialogueMode, "→", mode);
 
-        // 暂时这样处理
-        if (mode === DialogueType.COMMANDER && this.currentDialogueMode === DialogueType.NORMAL) {
-            mode = DialogueType.NORMAL;
-            this.currentDialogueMode = mode;
-            return
-        }
-
         // 更新当前状态
         this.currentDialogueMode = mode;
 
         const uiMap: Record<DialogueType, (Sprite | Container)[]> = {
             [DialogueType.NORMAL]: [this.normalDialog, this.normalTextAera],
             [DialogueType.VOICEOVER]: [this.voiceoverTextAera],
-            [DialogueType.COMMANDER]: [this.normalDialog, this.normalTextAera]
+            [DialogueType.COMMANDER]: []
         };
 
         // 获取所有UI元素
@@ -626,29 +620,45 @@ export class UIRender {
     private async playDialogue(messages: DialogTextData[], modification: Map<PropertyPath, Modification>) {
         console.log("对话开始:", messages);
         for (const message of messages) {
+            console.log("当前对话:", message);
             // 遍历 message.text 数组中的每一项
             const currentMode = message.mode;
-            for (const line of message.texts) {
+            if (currentMode === DialogueType.COMMANDER) {
                 this.hideWaitIcon();
-
                 // 显示文本行
                 await this.displayMessage({
                     speakerColor: message.speakerColor,
                     speaker: message.speaker,
-                    texts: [{
-                        text: line.text,
-                        isCameraProxy: line.isCameraProxy,
-                        cameraParms: line.cameraParms
-                    }],  // 将当前行包装成一个数组传递
+                    texts: message.texts,
                     mode: currentMode,
                     isBind: message.isBind,
                     parms: message.parms,
                 }, modification);
-
                 this.showWaitIcon(message.mode);
-                // 等待用户点击，显示下一行
-                await this.waitForClick();
+            } else {
+                for (const line of message.texts) {
+                    this.hideWaitIcon();
+
+                    // 显示文本行
+                    await this.displayMessage({
+                        speakerColor: message.speakerColor,
+                        speaker: message.speaker,
+                        texts: [{
+                            text: line.text,
+                            isCameraProxy: line.isCameraProxy,
+                            cameraParms: line.cameraParms
+                        }],  // 将当前行包装成一个数组传递
+                        mode: currentMode,
+                        isBind: message.isBind,
+                        parms: message.parms,
+                    }, modification);
+
+                    this.showWaitIcon(message.mode);
+                    // 等待用户点击，显示下一行
+                    await this.waitForClick();
+                }
             }
+
         }
         console.log("对话结束");
     }
@@ -842,8 +852,9 @@ export class UIRender {
                 tempText = this.currentSideText
                 break;
             case DialogueType.COMMANDER:
-                tempText = this.currentDisplayText
-                break;
+                // COMMANDER模式使用按钮渲染
+                await this.renderCommanderButtons(message);
+                return; // 直接返回，不执行后续的文本渲染逻辑
             default:
                 tempText = this.currentDisplayText
                 break;
@@ -1224,5 +1235,46 @@ export class UIRender {
      */
     clearStage(): void {
         this.stage.removeChildren();
+    }
+
+    // 添加COMMANDER模式的按钮渲染方法
+    private async renderCommanderButtons(message: DialogTextData) {
+        // 基于屏幕尺寸的响应式设计
+        const scaleFactor = this.app.screen.width / 1920;
+
+        // 解析文本，支持多行文本作为多个按钮选项
+        const buttonTexts = message.texts.map(textData => textData.text).filter(text => text.trim() !== '');
+
+        if (buttonTexts.length === 0) {
+            console.warn('COMMANDER模式下没有有效的文本内容');
+            return;
+        }
+
+        // 创建一个专门的Promise来等待按钮点击，不使用全局的waitForClick
+        return new Promise<void>((resolve) => {
+            // 创建按钮数组
+            const buttonArray = this.createButtonArray(buttonTexts, {
+                startX: this.app.view.width / 2,
+                startY: this.app.view.height - 450 * scaleFactor,
+                spacing: 200 * scaleFactor,
+                buttonWidth: 457,
+                buttonHeight: 90,
+                minWidth: 457,
+                useBottomCenterAnchor: true,
+                onButtonClick: (text: string, index: number) => {
+                    console.log(`COMMANDER选择了选项 ${index}: ${text}`);
+                    // 清理按钮
+                    // 继续对话流程
+                    setTimeout(() => {
+                        resolve();
+                    }, 300);
+                },
+            });
+
+            console.log('COMMANDER模式下创建了按钮数组', buttonArray);
+
+            // 加入按钮数组
+            UIRender.buttonAllArrays.push(...buttonArray);
+        });
     }
 }
