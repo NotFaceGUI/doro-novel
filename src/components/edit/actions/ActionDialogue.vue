@@ -42,7 +42,7 @@
                             @update:modelValue="updateSpeakerColor(messageIndex, $event)" />
                     </div>
                     <div class="character-name" v-if="!editing[messageIndex]" @click="editName(messageIndex)">
-                        {{ t(message.speaker) }}
+                        {{ t(message.speaker).split('：')[0] }}
                         <span class="dialogue-type-tag" :class="getDialogueTypeClass(message.mode)">
                             {{ getDialogueTypeLabel(message.mode) }}
                         </span>
