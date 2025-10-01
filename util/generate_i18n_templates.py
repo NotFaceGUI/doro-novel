@@ -4,7 +4,7 @@ import json
 # 源目录，用于获取所有需要的keys
 base_dir = r'E:\SelfProject\Nikke-db.github.io\l2d' 
 # 目标目录，存放多语言文件的位置
-locales_dir = r'E:\SelfProject\doro-novel\src\locales'
+locales_dir = r'E:\SelfProject\doro-novel\src-tauri\resources\locales'
 
 languages = {
     "zh-CN": "zh-CN.json",
