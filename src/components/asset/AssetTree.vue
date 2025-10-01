@@ -24,7 +24,7 @@
         <li v-for="char in characters" :key="char.characterName">
             <div @click="toggleSpine(char)" class="el no-wrap" draggable="true"
                 @dragstart="handleDragStart($event, char)">
-                {{ t(char.characterName) }}
+                {{ formatI18nKey(t(char.characterName), char.characterName) }} <span style="font-size: 10px;color: #888;" v-if="char.characterName.startsWith('c')">{{ t(char.characterName) }}</span>
             </div>
         </li>
     </ul>
@@ -55,10 +55,30 @@ const characters = ref<CharacterType[]>([]);
 onMounted(async () => {
     if (props.type == ResType.Spine) {
         AssetManager.getInstance().getResConfig().then(res => {
-            characters.value = res;
+            // 对角色进行排序：游戏角色（c+数字）优先，然后按名称排序
+            characters.value = res.sort((a, b) => {
+                // 使用正则表达式匹配游戏角色 (c + 数字)
+                const gameCharacterRegex = /^c\d+/;
+                const aIsGameChar = gameCharacterRegex.test(a.characterName);
+                const bIsGameChar = gameCharacterRegex.test(b.characterName);
+                
+                // 优先显示游戏角色
+                if (aIsGameChar && !bIsGameChar) return -1;
+                if (!aIsGameChar && bIsGameChar) return 1;
+                
+                // 然后按名称排序
+                return a.characterName.localeCompare(b.characterName);
+            });
         })
     }
 });
+
+// 如果名称以 c 开头（角色标识），则按中文冒号或英文冒号分割，取第一段作为 i18n 键
+const formatI18nKey = (name: string, key: string) => {
+    if (!name) return '';
+    return key.startsWith('c') ? name.split(/[:：]/)[0] : name;
+}
+
 
 const handleDragStart = (event: DragEvent, file: dirs | CharacterType) => {
     event.stopPropagation();
