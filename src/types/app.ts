@@ -54,6 +54,12 @@ export interface CharacterType {
     };
 }
 
+export interface CharacterUrls {
+    main: string;
+    aim?: string;
+    cover?: string;
+}
+
 export enum DragType {
     ACTION = "Action",
     ACTION_ITEM = "ActionItem",

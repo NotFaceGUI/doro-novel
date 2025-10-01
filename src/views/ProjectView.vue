@@ -33,24 +33,23 @@
                     <!-- 动画选择下拉框 -->
                     <div class="animation-selector" v-if="showCanvas && animationOptions.length > 0">
                         <label>选择动画:</label>
-                        <Dropdown 
-                            v-model="selectedAnimationIndex"
-                            @update:modelValue="handleAnimationChange"
-                            :options="animationOptions" 
-                            :disabled="false"
-                        />
+                        <Dropdown v-model="selectedAnimationIndex" @update:modelValue="handleAnimationChange"
+                            :options="animationOptions" :disabled="false" />
                     </div>
                     <!-- 皮肤选择下拉框 -->
                     <div class="skin-selector" v-if="showCanvas && skinOptions.length > 0">
                         <label>选择皮肤:</label>
-                        <Dropdown 
-                            v-model="selectedSkinIndex"
-                            @update:modelValue="handleSkinChange"
-                            :options="skinOptions" 
-                            :disabled="false"
-                        />
+                        <Dropdown v-model="selectedSkinIndex" @update:modelValue="handleSkinChange"
+                            :options="skinOptions" :disabled="false" />
                     </div>
-                    
+
+                    <!-- 角色类型选择下拉框 -->
+                    <div class="character-type-selector" v-if="showCanvas && hasCharacterAssets">
+                        <label>角色类型:</label>
+                        <Dropdown v-model="selectedCharacterType" @update:modelValue="handleCharacterTypeChange"
+                            :options="characterTypeOptions" :disabled="false" />
+                    </div>
+
                     <!-- 动画混合配置 -->
                     <!-- <div class="animation-mix-config" v-if="showCanvas && animationOptions.length > 0">
                         <div class="mix-duration-control">
@@ -117,16 +116,43 @@
                         </div>
                     </div> -->
                 </div>
-                
+
                 <!-- 插槽控制组件 -->
-                <SlotControl 
-                    v-if="showCanvas && slotOptions.length > 0"
-                    :slots="slotOptions"
-                    @toggle-slot="handleSlotToggle"
-                    @update-alpha="handleSlotAlphaUpdate"
-                    @show-all="handleShowAllSlots"
-                    @hide-all="handleHideAllSlots"
-                />
+                <div>
+                    <SlotControl v-if="showCanvas && slotOptions.length > 0" :slots="slotOptions"
+                        @toggle-slot="handleSlotToggle" @update-alpha="handleSlotAlphaUpdate"
+                        @show-all="handleShowAllSlots" @hide-all="handleHideAllSlots" @slot-hover="handleSlotHover"
+                        @slot-leave="handleSlotLeave" />
+                </div>
+
+
+                <!-- Shader特效控制 -->
+                <!-- <div v-if="showCanvas">
+                    <div class="shader-toggle-section">
+                        <div @click="toggleShaderEditor" class="shader-btn shader-btn-primary">
+                            <span class="btn-icon">{{ showShaderEditor ? '▲' : '▼' }}</span>
+                            {{ showShaderEditor ? '隐藏' : '显示' }}
+                        </div>
+
+                    </div>
+                </div> -->
+
+                <!-- Shader编辑器浮动面板 -->
+                <Transition name="shader-overlay">
+                    <div v-if="showShaderEditor && showCanvas" class="shader-editor-overlay"
+                        @click.self="toggleShaderEditor">
+                        <Transition name="shader-panel">
+                            <div class="shader-editor-panel" v-if="showShaderEditor">
+                                <div class="shader-editor-header">
+                                    <h3>Shader 特效编辑器</h3>
+                                    <button @click="toggleShaderEditor" class="close-btn">×</button>
+                                </div>
+                                <ShaderEditor :ref="shaderEditorRef" @apply-shader="handleApplyShader"
+                                    @reset-shader="handleResetShader" />
+                            </div>
+                        </Transition>
+                    </div>
+                </Transition>
             </div>
 
             <div class="project-script" v-show="activeTab == 'script'">
@@ -138,9 +164,9 @@
                 🔲
             </div>
         </div>
-        
+
         <!-- 操作提示 -->
-        <ControlHint  v-if=" activeTab === 'preview'" />
+        <ControlHint v-if="activeTab === 'preview'" />
     </div>
 </template>
 
@@ -151,13 +177,17 @@ import ScriptEditor from '../components/edit/ScriptEditor.vue';
 import Dropdown from '../components/common/Dropdown.vue';
 import ControlHint from '../components/common/ControlHint.vue';
 import SlotControl from '../components/common/SlotControl.vue';
+import ShaderEditor from '../components/common/ShaderEditor.vue';
 import { ResType } from '../script/var';
-import { createPixiApp, IApp, load } from '../script/render/preview-canvas';
+import { createPixiApp, IApp, load, setupSpineInteraction } from '../script/render/preview-canvas';
 import { Spine } from 'pixi-spine';
+import * as PIXI from 'pixi.js';
 import CanvasManager from '../script/render/canvas-manager';
 import { useActionStore } from '../stores/action-store';
-import type { DropdownOption } from '../types/app';
+import type { CharacterUrls, DropdownOption } from '../types/app';
 import { applyUIAnimationConfig, type UIAnimationConfig, type UIMixConfig } from '../script/render/animation-config';
+import { app } from '@tauri-apps/api';
+import { OutlineFilter } from 'pixi-filters';
 
 
 const imgRef = ref<HTMLImageElement | null>(null);
@@ -173,6 +203,9 @@ const previewAPP = ref<IApp>()
 
 const previewSpine = ref<Spine>();
 
+// 角色资源存储 (使用普通变量避免响应式开销)
+let characterAssets: any = null;
+
 // 动画选择相关的响应式数据
 const animationOptions = ref<DropdownOption[]>([]);
 const selectedAnimationIndex = ref<number>(0);
@@ -180,6 +213,15 @@ const selectedAnimationIndex = ref<number>(0);
 // 皮肤选择相关的响应式数据
 const skinOptions = ref<DropdownOption[]>([]);
 const selectedSkinIndex = ref<number>(0);
+
+// 角色类型切换相关的响应式数据
+const hasCharacterAssets = ref<boolean>(false);
+const selectedCharacterType = ref<number>(0);
+const characterTypeOptions = ref<DropdownOption[]>([
+    { label: 'Default', value: 'default' },
+    { label: 'Aim', value: 'aim' },
+    { label: 'Cover', value: 'cover' }
+]);
 
 // 动画混合配置相关的响应式数据
 const mixDuration = ref<number>(0.3);
@@ -206,11 +248,28 @@ const currentMixConfigs = ref<MixConfig[]>([]);
 
 // 插槽控制相关的响应式数据
 interface SlotData {
-  name: string;
-  visible: boolean;
-  alpha: number;
+    name: string;
+    visible: boolean;
+    alpha: number;
 }
 const slotOptions = ref<SlotData[]>([]);
+
+// Shader控制相关的响应式数据
+const showShaderEditor = ref<boolean>(false);
+const hasActiveShaders = ref<boolean>(false);
+const currentShaderFilters = ref<any[]>([]);
+const shaderEditorRef = ref<any>(null);
+
+// Shader编辑器状态保存
+const savedShaderState = ref<{
+    selectedPreset: string;
+    fragmentShader: string;
+    uniforms: any[];
+}>({
+    selectedPreset: '',
+    fragmentShader: '',
+    uniforms: []
+});
 
 let _last_url = '';
 
@@ -221,7 +280,7 @@ const actionStore = useActionStore();
 // Script 相关的响应式数据
 const scriptContent = ref<string>('');
 
-const handleRenderType = (data: { url: string, type: ResType }) => {
+const handleRenderType = (data: { url: string, type: ResType, characterUrls?: CharacterUrls }) => {
     console.log("点击");
     if (_last_url == data.url) {
         console.log("两者的url相同");
@@ -274,16 +333,37 @@ const handleRenderType = (data: { url: string, type: ResType }) => {
                 if (previewSpine.value) {
                     previewSpine.value.destroy();
                 }
-                load(previewAPP.value.application, data.url).then((spine) => {
-                    previewSpine.value = spine;
+                load(previewAPP.value.application, data).then((result) => {
+                    // 检查返回的是角色资源还是单个Spine
+                    if (data.characterUrls) {
+                        // 角色资源模式
+                        const assets = result as any;
+                        previewSpine.value = assets.main;
+
+                        // 存储角色资源到组件级别
+                        characterAssets = assets;
+
+                    } else {
+                        // 单个Spine模式
+                        const spine = result as any;
+                        previewSpine.value = spine;
+                    }
+
+                    // 检查是否有角色资源
+                    hasCharacterAssets.value = !!(data.characterUrls && (data.characterUrls.aim || data.characterUrls.cover));
+
                     // 获取动画列表并设置下拉框选项
-                    updateAnimationOptions(spine);
+                    updateAnimationOptions(previewSpine.value);
                     // 获取皮肤列表并设置下拉框选项
-                    updateSkinOptions(spine);
+                    updateSkinOptions(previewSpine.value);
                     // 获取插槽列表并设置选项
-                    updateSlotOptions(spine);
+                    updateSlotOptions(previewSpine.value);
                     // 应用初始混合配置
                     applyCurrentMixConfig();
+
+                    if (previewSpine.value && previewAPP.value) {
+                        cleanup = setupSpineInteraction(previewSpine.value, previewAPP.value?.application);
+                    }
                 });
             }
             break;
@@ -358,28 +438,28 @@ const updateAnimationOptions = (spine: Spine | undefined) => {
             label: animation.name,
             value: index
         }));
-        
+
         // 动画默认是idle，如果没有就是第一个
         if (animations.length > 0) {
             let selectedIndex = 0;
-            
+
             // 查找idle动画
-            const idleAnimationIndex = animations.findIndex((animation: any) => 
+            const idleAnimationIndex = animations.findIndex((animation: any) =>
                 animation.name.toLowerCase().includes('idle')
             );
-            
+
             if (idleAnimationIndex !== -1) {
                 selectedIndex = idleAnimationIndex;
             }
-            
+
             selectedAnimationIndex.value = selectedIndex;
             spine.state.setAnimation(0, animations[selectedIndex].name, true);
         }
     }
-    
+
     // 同时更新皮肤选项列表
     updateSkinOptions(spine);
-    
+
     // 同时更新插槽选项列表
     updateSlotOptions(spine);
 };
@@ -392,22 +472,22 @@ const updateSkinOptions = (spine: Spine | undefined) => {
             label: skin.name,
             value: index
         }));
-        
+
         // 如果有非默认的皮肤就用非默认的，否则使用第一个
         if (skins.length > 0) {
             let selectedIndex = 0;
-            
+
             // 查找非默认皮肤（通常默认皮肤名为 "default" 或包含 "default"）
-            const nonDefaultSkinIndex = skins.findIndex((skin: any, index: number) => 
+            const nonDefaultSkinIndex = skins.findIndex((skin: any, index: number) =>
                 index > 0 && // 跳过第一个皮肤（通常是默认的）
                 !skin.name.toLowerCase().includes('default') &&
                 !skin.name.toLowerCase().includes('默认')
             );
-            
+
             if (nonDefaultSkinIndex !== -1) {
                 selectedIndex = nonDefaultSkinIndex;
             }
-            
+
             selectedSkinIndex.value = selectedIndex;
             spine.skeleton.setSkinByName(skins[selectedIndex].name);
             spine.skeleton.setSlotsToSetupPose();
@@ -422,6 +502,16 @@ const handleAnimationChange = (animationIndex: number) => {
         const animations = previewSpine.value.spineData.animations;
         if (animations[animationIndex]) {
             previewSpine.value.state.setAnimation(0, animations[animationIndex].name, true);
+            
+            // 重新应用用户设置的透明度
+            slotOptions.value.forEach(slotData => {
+                if (previewSpine.value && previewSpine.value.skeleton) {
+                    const slot = previewSpine.value.skeleton.findSlot(slotData.name);
+                    if (slot) {
+                        slot.color.a = slotData.alpha;
+                    }
+                }
+            });
         }
     }
 };
@@ -434,7 +524,93 @@ const handleSkinChange = (skinIndex: number) => {
         if (skins[skinIndex]) {
             previewSpine.value.skeleton.setSkinByName(skins[skinIndex].name);
             previewSpine.value.skeleton.setSlotsToSetupPose();
+            
+            // 重新应用用户设置的透明度
+            slotOptions.value.forEach(slotData => {
+                if (previewSpine.value && previewSpine.value.skeleton) {
+                    const slot = previewSpine.value.skeleton.findSlot(slotData.name);
+                    if (slot) {
+                        slot.color.a = slotData.alpha;
+                    }
+                }
+            });
         }
+    }
+};
+
+let cleanup: () => void;
+
+// 处理角色类型切换
+const handleCharacterTypeChange = (typeIndex: number) => {
+    selectedCharacterType.value = typeIndex;
+
+    // 根据索引获取对应的类型值
+    const characterType = characterTypeOptions.value[typeIndex]?.value;
+
+    if (!previewSpine.value || !previewAPP.value) {
+        console.warn('Spine或PIXI应用未初始化');
+        return;
+    }
+
+
+
+    // 获取存储在组件级别的角色资源
+    const assets = characterAssets;
+    if (!assets) {
+        console.warn('未找到角色资源');
+        return;
+    }
+
+
+    // 移除当前显示的Spine
+    if (previewSpine.value.parent) {
+        previewSpine.value.parent.removeChild(previewSpine.value);
+    }
+
+    // 根据选择的类型切换到对应的Spine
+    let targetSpine: any = null;
+    switch (characterType) {
+        case 'default':
+            targetSpine = assets.main;
+            break;
+        case 'aim':
+            targetSpine = assets.aim || assets.main;
+            break;
+        case 'cover':
+            targetSpine = assets.cover || assets.main;
+            break;
+        default:
+            targetSpine = assets.main;
+    }
+
+    if (targetSpine) {
+        // 清理之前的交互
+        if (cleanup) {
+            cleanup();
+        }
+
+        // 添加到舞台
+        previewAPP.value.application.stage.addChild(targetSpine);
+
+        // 设置位置和缩放
+        targetSpine.x = previewAPP.value.application.view.width / 2;
+        const lastScale = targetSpine.scale.x;
+        targetSpine.y = previewAPP.value.application.view.height * 0.93;
+        targetSpine.scale.set((previewAPP.value.application.view.height / (targetSpine.height / lastScale / 0.90)));
+
+        // 更新当前Spine引用
+        previewSpine.value = targetSpine;
+
+        if (previewSpine.value) {
+            cleanup = setupSpineInteraction(previewSpine.value, previewAPP.value.application);
+        }
+
+        // 重新初始化动画、皮肤和插槽选项
+        updateAnimationOptions(targetSpine);
+        updateSkinOptions(targetSpine);
+        updateSlotOptions(targetSpine);
+
+        console.log(`切换到角色类型: ${characterType}`);
     }
 };
 
@@ -446,7 +622,7 @@ const handleMixDurationChange = () => {
 // 处理混合预设变化
 const handleMixPresetChange = (presetIndex: number) => {
     selectedMixPresetIndex.value = presetIndex;
-    
+
     // 根据预设设置混合时长
     switch (presetIndex) {
         case 0: // 默认混合
@@ -462,7 +638,7 @@ const handleMixPresetChange = (presetIndex: number) => {
             // 保持当前设置
             break;
     }
-    
+
     if (presetIndex !== 3) {
         // 非自定义预设时，清空自定义混合配置
         currentMixConfigs.value = [];
@@ -481,19 +657,19 @@ const addCustomMix = () => {
         const animations = previewSpine.value.spineData.animations;
         const fromAnim = animations[customMixFromIndex.value];
         const toAnim = animations[customMixToIndex.value];
-        
+
         if (fromAnim && toAnim) {
             const newMix: MixConfig = {
                 from: fromAnim.name,
                 to: toAnim.name,
                 duration: customMixDuration.value
             };
-            
+
             // 检查是否已存在相同的混合配置
             const existingIndex = currentMixConfigs.value.findIndex(
                 mix => mix.from === newMix.from && mix.to === newMix.to
             );
-            
+
             if (existingIndex !== -1) {
                 // 更新现有配置
                 currentMixConfigs.value[existingIndex] = newMix;
@@ -501,7 +677,7 @@ const addCustomMix = () => {
                 // 添加新配置
                 currentMixConfigs.value.push(newMix);
             }
-            
+
             applyCurrentMixConfig();
         }
     }
@@ -518,14 +694,14 @@ const applyCurrentMixConfig = () => {
     if (!previewSpine.value || !previewSpine.value.state || !previewSpine.value.state.data) {
         return;
     }
-    
+
     // 创建UI配置对象
     const uiConfig: UIAnimationConfig = {
         mixDuration: mixDuration.value,
         presetIndex: selectedMixPresetIndex.value,
         customMixConfigs: currentMixConfigs.value
     };
-    
+
     // 使用新的UI配置函数
     applyUIAnimationConfig(previewSpine.value, uiConfig);
 };
@@ -547,26 +723,29 @@ const handleSlotToggle = (slotName: string, visible: boolean) => {
     const slotData = slotOptions.value.find(slot => slot.name === slotName);
     if (slotData) {
         slotData.visible = visible;
-        
+
         if (previewSpine.value && previewSpine.value.skeleton) {
             const skeleton = previewSpine.value.skeleton;
             const slot = skeleton.findSlot(slotName);
             if (slot) {
                 if (visible) {
                     // 恢复插槽的attachment - 通过skeleton的setAttachment方法
-                    const slotData = skeleton.data.findSlot(slotName);
-                    if (slotData && slotData.attachmentName) {
-                        skeleton.setAttachment(slotName, slotData.attachmentName);
+                    const slotDataFromSkeleton = skeleton.data.findSlot(slotName);
+                    if (slotDataFromSkeleton && slotDataFromSkeleton.attachmentName) {
+                        skeleton.setAttachment(slotName, slotDataFromSkeleton.attachmentName);
+                    } else if ((slot as any).originalAttachment) {
+                        // 如果有保存的原始attachment，恢复它
+                        skeleton.setAttachment(slotName, (slot as any).originalAttachment.name);
+                        delete (slot as any).originalAttachment;
                     }
                 } else {
-                    // 隐藏插槽 - 使用slot.setAttachment(null)方法
+                    // 隐藏插槽 - 使用skeleton.setAttachment(null)方法
                     const attachment = slot.getAttachment();
-                    attachment
                     if (attachment) {
-                        // 保存当前attachment名称以便恢复
+                        // 保存当前attachment以便恢复
                         (slot as any).originalAttachment = attachment;
                         // 使用正确的Spine API方法隐藏插槽
-                        (slot as any).setAttachment(null);
+                        (skeleton as any).setAttachment(slotName, null);
                     }
                 }
             }
@@ -579,7 +758,7 @@ const handleSlotAlphaUpdate = (slotName: string, alpha: number) => {
     const slotData = slotOptions.value.find(slot => slot.name === slotName);
     if (slotData) {
         slotData.alpha = alpha;
-        
+
         if (previewSpine.value && previewSpine.value.skeleton) {
             const slot = previewSpine.value.skeleton.findSlot(slotName);
             if (slot) {
@@ -593,8 +772,8 @@ const handleSlotAlphaUpdate = (slotName: string, alpha: number) => {
 const handleShowAllSlots = () => {
     slotOptions.value.forEach(slot => {
         slot.visible = true;
-        slot.alpha = 1.0;
-        
+        // 不要重置透明度，保持用户设置的值
+
         if (previewSpine.value && previewSpine.value.skeleton) {
             const skeleton = previewSpine.value.skeleton;
             const spineSlot = skeleton.findSlot(slot.name);
@@ -604,7 +783,8 @@ const handleShowAllSlots = () => {
                 if (slotData && slotData.attachmentName) {
                     skeleton.setAttachment(slot.name, slotData.attachmentName);
                 }
-                spineSlot.color.a = 1.0;
+                // 使用用户设置的透明度而不是强制设为1.0
+                spineSlot.color.a = slot.alpha;
             }
         }
     });
@@ -614,22 +794,189 @@ const handleShowAllSlots = () => {
 const handleHideAllSlots = () => {
     slotOptions.value.forEach(slot => {
         slot.visible = false;
-        
+
         if (previewSpine.value && previewSpine.value.skeleton) {
             const skeleton = previewSpine.value.skeleton;
             const spineSlot = skeleton.findSlot(slot.name);
             if (spineSlot) {
-                // 隐藏插槽 - 使用slot.setAttachment(null)方法
+                // 隐藏插槽 - 使用skeleton.setAttachment(null)方法
                 const attachment = spineSlot.getAttachment();
                 if (attachment) {
                     // 保存当前attachment以便恢复
                     (spineSlot as any).originalAttachment = attachment;
                     // 使用正确的Spine API方法隐藏插槽
-                    (spineSlot as any).setAttachment(null);
+                    (skeleton as any).setAttachment(slot.name, null);
                 }
             }
         }
     });
+};
+
+// 悬停时
+const handleSlotHover = (slotName: string) => {
+    if (!previewSpine.value?.skeleton) return;
+
+    const slot = previewSpine.value.skeleton.findSlot(slotName);
+    if (!slot) return;
+
+    // Spine slot 实际渲染的对象，可能是 sprite 或 mesh
+    const target = (slot as any).currentSprite || (slot as any).currentMesh;
+    if (!target) return;
+
+    // 保存原始状态（只保存一次）
+    if (!(slot as any)._originalColor) {
+        (slot as any)._originalColor = { 
+            r: slot.color.r,
+            g: slot.color.g,
+            b: slot.color.b,
+            a: slot.color.a
+        };
+    }
+    if (!(slot as any)._originalFilters) {
+        (slot as any)._originalFilters = target.filters || [];
+    }
+
+    // ✅ 高亮（变成亮黄色），但保持用户设置的透明度
+    const slotData = slotOptions.value.find(s => s.name === slotName);
+    const userAlpha = slotData ? slotData.alpha : slot.color.a;
+    
+    slot.color.r = 1.0;
+    slot.color.g = 1.0;
+    slot.color.b = 0.3; // 偏金黄
+    slot.color.a = userAlpha; // 保持用户设置的透明度
+
+    // ✅ 添加描边
+    const outline = new OutlineFilter(4, 0xffd700, 1); // 4px，金黄色，强度1
+    target.filters = [...(slot as any)._originalFilters, outline];
+};
+
+// 离开时
+const handleSlotLeave = () => {
+    if (!previewSpine.value?.skeleton) return;
+
+    previewSpine.value.skeleton.slots.forEach((slot: any) => {
+        const target = slot.currentSprite || slot.currentMesh;
+        if (!target) return;
+
+        // 恢复颜色，但保持用户设置的透明度
+        if (slot._originalColor) {
+            // 查找用户设置的透明度值
+            const slotData = slotOptions.value.find(s => s.name === slot.data.name);
+            const userAlpha = slotData ? slotData.alpha : slot._originalColor.a;
+            
+            slot.color.r = slot._originalColor.r;
+            slot.color.g = slot._originalColor.g;
+            slot.color.b = slot._originalColor.b;
+            slot.color.a = userAlpha; // 使用用户设置的透明度而不是原始透明度
+            delete slot._originalColor;
+        }
+
+        // 恢复滤镜
+        if (slot._originalFilters) {
+            target.filters = slot._originalFilters;
+            delete slot._originalFilters;
+        }
+    });
+};
+// Shader编辑器相关方法
+const toggleShaderEditor = () => {
+    if (showShaderEditor.value) {
+        // 关闭时保存状态
+        if (shaderEditorRef.value) {
+            savedShaderState.value = {
+                selectedPreset: shaderEditorRef.value.selectedPreset || '',
+                fragmentShader: shaderEditorRef.value.fragmentShader || '',
+                uniforms: shaderEditorRef.value.uniforms ? JSON.parse(JSON.stringify(shaderEditorRef.value.uniforms)) : []
+            };
+        }
+    } else {
+        // 打开时恢复状态
+        nextTick(() => {
+            if (shaderEditorRef.value && savedShaderState.value.selectedPreset) {
+                shaderEditorRef.value.restoreState(savedShaderState.value);
+            }
+        });
+    }
+    showShaderEditor.value = !showShaderEditor.value;
+};
+
+// 应用Shader到Spine角色
+const handleApplyShader = (shaderData: any) => {
+    if (!previewSpine.value || !previewAPP.value) {
+        console.warn('Spine或PIXI应用未初始化');
+        return;
+    }
+
+    try {
+        // 创建自定义滤镜
+        const filter = new PIXI.Filter(undefined, shaderData.fragmentShader, shaderData.uniforms);
+
+        // 清除之前的滤镜
+        if (previewSpine.value.filters) {
+            previewSpine.value.filters = [];
+        }
+
+        // 应用新滤镜
+        previewSpine.value.filters = [filter];
+        currentShaderFilters.value = [filter];
+        hasActiveShaders.value = true;
+
+        // 如果Shader包含时间uniform，启动动画循环
+        if (shaderData.uniforms.iTime !== undefined || shaderData.uniforms.uTime !== undefined) {
+            startShaderAnimation(filter, shaderData.uniforms);
+        }
+
+        console.log('Shader应用成功:', shaderData.name);
+    } catch (error) {
+        console.error('应用Shader失败:', error);
+    }
+};
+
+// Shader动画循环
+let shaderAnimationId: number | null = null;
+const startShaderAnimation = (filter: PIXI.Filter, initialUniforms: any) => {
+    if (shaderAnimationId) {
+        cancelAnimationFrame(shaderAnimationId);
+    }
+
+    const startTime = Date.now();
+    const animate = () => {
+        const currentTime = (Date.now() - startTime) / 1000; // 转换为秒
+
+        // 更新时间uniform
+        if (filter.uniforms.iTime !== undefined) {
+            filter.uniforms.iTime = currentTime;
+        }
+        if (filter.uniforms.uTime !== undefined) {
+            filter.uniforms.uTime = currentTime;
+        }
+
+        shaderAnimationId = requestAnimationFrame(animate);
+    };
+
+    animate();
+};
+
+// 重置Shader效果
+const handleResetShader = () => {
+    if (previewSpine.value) {
+        previewSpine.value.filters = [];
+        currentShaderFilters.value = [];
+        hasActiveShaders.value = false;
+
+        // 停止动画循环
+        if (shaderAnimationId) {
+            cancelAnimationFrame(shaderAnimationId);
+            shaderAnimationId = null;
+        }
+
+        console.log('Shader效果已重置');
+    }
+};
+
+// 清除所有Shader效果
+const clearAllShaders = () => {
+    handleResetShader();
 };
 </script>
 
@@ -927,6 +1274,25 @@ const handleHideAllSlots = () => {
     white-space: nowrap;
 }
 
+.character-type-selector {
+    position: absolute;
+    top: 130px;
+    right: 10px;
+    z-index: 10;
+    background: rgba(0, 0, 0, 0.7);
+    padding: 10px;
+    border-radius: 5px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.character-type-selector label {
+    color: white;
+    font-size: 14px;
+    white-space: nowrap;
+}
+
 .animation-mix-config {
     position: absolute;
     top: 130px;
@@ -1047,5 +1413,183 @@ const handleHideAllSlots = () => {
 
 .remove-mix-btn:hover {
     background: #c82333;
+}
+
+/* Shader控制样式 */
+.shader-controls {
+    margin-top: 15px;
+    padding: 15px;
+    background: var(--secondary-bg);
+    border-radius: var(--border-radius);
+    border: 1px solid var(--main-border-color);
+}
+
+.shader-toggle-section {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+.shader-btn {
+    padding: 8px 16px;
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+    background: var(--button-bg);
+    color: var(--text-color);
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.shader-btn:hover {
+    background: var(--button-hover-bg);
+    border-color: var(--accent-color);
+}
+
+.shader-btn-primary {
+    background: var(--accent-color);
+    color: white;
+    border-color: var(--accent-color);
+    flex: 1;
+}
+
+.shader-btn-primary:hover {
+    background: var(--accent-hover-color);
+    border-color: var(--accent-hover-color);
+}
+
+.shader-btn-danger {
+    background: var(--danger-color);
+    color: white;
+    border-color: var(--danger-color);
+    flex: 0 0 auto;
+}
+
+.shader-btn-danger:hover {
+    background: var(--danger-hover-color);
+    border-color: var(--danger-hover-color);
+}
+
+.btn-icon {
+    font-size: 10px;
+    font-weight: bold;
+}
+
+/* Shader编辑器浮动面板样式 */
+.shader-editor-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: var(--overlay-bg);
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+.shader-editor-panel {
+    background: var(--primary-bg);
+    border: 1px solid var(--main-border-color);
+    border-radius: var(--border-radius);
+    width: 90%;
+    max-width: 800px;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+}
+
+/* 自定义滚动条样式 */
+.shader-editor-panel::-webkit-scrollbar {
+    background-color: transparent;
+    width: 8px;
+    height: 8px;
+}
+
+.shader-editor-panel::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.shader-editor-panel::-webkit-scrollbar-thumb {
+    border-radius: 10px;
+    border: 2px solid transparent;
+    background-color: var(--deep-border-color);
+}
+
+.shader-editor-panel:hover::-webkit-scrollbar-thumb {
+    background-color: var(--deep-border-color);
+}
+
+.shader-editor-panel::-webkit-scrollbar-thumb:hover {
+    background-color: var(--high-hover-bg);
+}
+
+.shader-editor-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 20px;
+    border-bottom: 1px solid var(--main-border-color);
+    background: var(--secondary-bg);
+}
+
+.shader-editor-header h3 {
+    color: var(--text-color);
+    margin: 0;
+    font-size: 16px;
+    font-weight: 600;
+}
+
+.close-btn {
+    background: none;
+    border: none;
+    color: var(--text-color);
+    font-size: 24px;
+    cursor: pointer;
+    padding: 0;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: background-color 0.2s;
+}
+
+.close-btn:hover {
+    background: var(--high-hover-bg);
+}
+
+/* Shader 编辑器动画 */
+.shader-overlay-enter-active,
+.shader-overlay-leave-active {
+    transition: all 0.3s ease;
+}
+
+.shader-overlay-enter-from,
+.shader-overlay-leave-to {
+    opacity: 0;
+}
+
+.shader-panel-enter-active,
+.shader-panel-leave-active {
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+.shader-panel-enter-from,
+.shader-panel-leave-to {
+    opacity: 0;
+    transform: scale(0.9) translateY(-20px);
+}
+
+.shader-panel-enter-to,
+.shader-panel-leave-from {
+    opacity: 1;
+    transform: scale(1) translateY(0);
 }
 </style>

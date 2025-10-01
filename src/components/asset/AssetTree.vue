@@ -24,7 +24,9 @@
         <li v-for="char in characters" :key="char.characterName">
             <div @click="toggleSpine(char)" class="el no-wrap" draggable="true"
                 @dragstart="handleDragStart($event, char)">
-                {{ formatI18nKey(t(char.characterName), char.characterName) }} <span style="font-size: 10px;color: #888;" v-if="char.characterName.startsWith('c')">{{ t(char.characterName) }}</span>
+                {{ formatI18nKey(t(char.characterName), char.characterName) }} <span
+                    style="font-size: 10px;color: #888;" v-if="char.characterName.startsWith('c')">{{
+                        t(char.characterName) }}</span>
             </div>
         </li>
     </ul>
@@ -33,7 +35,7 @@
 
 <script setup lang="ts">
 import { ref, watch, onMounted } from 'vue';
-import { CharacterType, dirs, DragType } from '../../types/app';
+import { CharacterType, CharacterUrls, dirs, DragType } from '../../types/app';
 import { ASSET_CHARACTER, ResType } from '../../script/var';
 import { resolveResource } from '@tauri-apps/api/path';
 import { convertFileSrc } from '@tauri-apps/api/core';
@@ -61,11 +63,11 @@ onMounted(async () => {
                 const gameCharacterRegex = /^c\d+/;
                 const aIsGameChar = gameCharacterRegex.test(a.characterName);
                 const bIsGameChar = gameCharacterRegex.test(b.characterName);
-                
+
                 // 优先显示游戏角色
                 if (aIsGameChar && !bIsGameChar) return -1;
                 if (!aIsGameChar && bIsGameChar) return 1;
-                
+
                 // 然后按名称排序
                 return a.characterName.localeCompare(b.characterName);
             });
@@ -120,26 +122,66 @@ const toggle = (file: dirs) => {
 
 const toggleSpine = async (char: CharacterType) => {
     const path = ASSET_CHARACTER + char.path?.name + "/" + char.path?.skel;
-    lookFile(path, {
+
+    // 构建文件数据对象，包含主要的 skel 文件信息
+    const fileData = {
         name: char.characterName,
         isDirectory: false,
         isFile: true,
         isSymlink: false
-    })
+    };
+
+    // 构建角色资源 URLs 对象
+    const characterUrls: CharacterUrls = {
+        main: path,
+        aim: undefined,
+        cover: undefined
+    };
+
+    // 如果角色有 aimSkel，添加到 URLs 中
+    if (char.path?.aimSkel) {
+        const aimPath = ASSET_CHARACTER + char.path.name + "/aim/" + char.path.aimSkel;
+        characterUrls.aim = aimPath;
+    }
+
+    // 如果角色有 coverSkel，添加到 URLs 中
+    if (char.path?.coverSkel) {
+        const coverPath = ASSET_CHARACTER + char.path.name + "/cover/" + char.path.coverSkel;
+        characterUrls.cover = coverPath;
+    }
+
+    ;
+
+    // 调用 lookFile 处理主要的 skel 文件
+    lookFile(path, fileData, characterUrls);
 }
 
-const lookFile = async (filePath: string, fileData: DirEntry) => {
+const lookFile = async (filePath: string, fileData: DirEntry, characterUrls: CharacterUrls = {
+    main: ''
+}) => {
     const allPath = await resolveResource(filePath);
     // console.log(filePath);
     const resUrl = convertFileSrc(allPath);
+    if (characterUrls) {
+        const { aim, cover } = characterUrls || {};
+
+        if (aim) {
+            characterUrls.aim = convertFileSrc(await resolveResource(aim));
+            console.log("加载角色Aim: ", characterUrls.aim, aim);
+        }
+        if (cover) {
+            characterUrls.cover = convertFileSrc(await resolveResource(cover));
+            console.log("加载角色Cover: ", characterUrls.cover, cover);
+        }
+    }
 
     // 向父组件抛出事件
-    emit('look-file', { url: resUrl, type: props.type, file: fileData });
+    emit('look-file', { url: resUrl, type: props.type, file: fileData, characterUrls: characterUrls });
 }
 
 // 抛出事件让最外层处理
-const throwEvent = (data: { url: string, type: ResType, file: DirEntry }) => {
-    emit('look-file', { url: data.url, type: data.type, file: data.file });
+const throwEvent = (data: { url: string, type: ResType, file: DirEntry, characterUrls: CharacterUrls | undefined }) => {
+    emit('look-file', { url: data.url, type: data.type, file: data.file, characterUrls: data.characterUrls });
 }
 
 // 在组件挂载时加载展开状态

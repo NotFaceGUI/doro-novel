@@ -26,7 +26,9 @@
           v-for="slot in slots" 
           :key="slot.name"
           class="slot-item"
-          :class="{ 'disabled': !slot.visible }"
+          :class="{ 'disabled': !slot.visible, 'highlighted': slot.name === hoveredSlot }"
+          @mouseenter="handleSlotHover(slot.name)"
+          @mouseleave="handleSlotLeave()"
         >
           <label class="slot-label">
             <input 
@@ -76,7 +78,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue';
+import { ref } from 'vue';
 
 interface SlotData {
   name: string;
@@ -93,15 +95,28 @@ interface Emits {
   (e: 'update-alpha', slotName: string, alpha: number): void;
   (e: 'show-all'): void;
   (e: 'hide-all'): void;
+  (e: 'slot-hover', slotName: string): void;
+  (e: 'slot-leave'): void;
 }
 
-const props = defineProps<Props>();
+defineProps<Props>();
 const emit = defineEmits<Emits>();
 
 const isExpanded = ref(false);
+const hoveredSlot = ref<string | null>(null);
 
 const toggleExpanded = () => {
   isExpanded.value = !isExpanded.value;
+};
+
+const handleSlotHover = (slotName: string) => {
+  hoveredSlot.value = slotName;
+  emit('slot-hover', slotName);
+};
+
+const handleSlotLeave = () => {
+  hoveredSlot.value = null;
+  emit('slot-leave');
 };
 
 const toggleSlot = (slotName: string, visible: boolean) => {
@@ -140,8 +155,8 @@ const formatSlotName = (name: string) => {
 <style scoped>
 .slot-control {
   position: absolute;
-  top: 130px;
-  right: 10px;
+  top: 10px;
+  right: 270px;
   z-index: 10;
   background: rgba(0, 0, 0, 0.85);
   backdrop-filter: blur(10px);
@@ -178,7 +193,7 @@ const formatSlotName = (name: string) => {
 }
 
 .slot-control-content {
-  max-height: 400px;
+  max-height: 80vh;
   overflow-y: auto;
 }
 
@@ -192,6 +207,7 @@ const formatSlotName = (name: string) => {
   border-radius: 6px;
   background: rgba(255, 255, 255, 0.05);
   transition: all 0.2s ease;
+  border: 1px solid transparent;
 }
 
 .slot-item:hover {
@@ -200,6 +216,12 @@ const formatSlotName = (name: string) => {
 
 .slot-item.disabled {
   opacity: 0.6;
+}
+
+.slot-item.highlighted {
+  background: rgba(76, 175, 80, 0.2);
+  border: 1px solid rgba(76, 175, 80, 0.5);
+  box-shadow: 0 0 8px rgba(76, 175, 80, 0.3);
 }
 
 .slot-label {
@@ -260,7 +282,6 @@ const formatSlotName = (name: string) => {
   background: #333;
   border-radius: 2px;
   outline: none;
-  -webkit-appearance: none;
 }
 
 .opacity-slider::-webkit-slider-thumb {
@@ -351,7 +372,7 @@ const formatSlotName = (name: string) => {
 /* 响应式设计 */
 @media (max-width: 768px) {
   .slot-control {
-    top: 110px;
+    top: 170px;
     right: 5px;
     min-width: 180px;
     max-width: 220px;

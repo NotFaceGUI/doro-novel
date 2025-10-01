@@ -124,6 +124,12 @@ onUnmounted(() => {
   --error-color: #99392e;
   --info-color: #20436b;
   --success-color: #155c33;
+  
+  /* 新增按钮相关颜色变量 */
+  --accent-color: #ff9900;
+  --accent-hover-color: #e68a00;
+  --danger-color: #dc3545;
+  --danger-hover-color: #c82333;
 
   --border-radius: 5px;
   --padding: 10px;

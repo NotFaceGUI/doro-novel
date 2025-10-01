@@ -1,6 +1,9 @@
 import { Spine } from 'pixi-spine';
 import { applyAnimationConfig, DEFAULT_ANIMATION_CONFIG } from './animation-config';
 import * as PIXI from 'pixi.js';
+import { ResType } from '../var';
+import { CharacterUrls } from '../../types/app';
+import { ref } from 'vue';
 // import { ease } from 'pixi-ease'
 
 export type ContainerDictionary = Record<string, PIXI.Container>;
@@ -40,10 +43,110 @@ export function createPixiApp(width: number | undefined, height: number | undefi
 
 
 
-export function load(app: PIXI.Application, url: string): Promise<Spine | undefined> {
-    console.log(url);
+// 角色资源管理接口
+interface CharacterAssets {
+    main: Spine;
+    aim?: Spine;
+    cover?: Spine;
+}
+
+// 加载单个Spine文件的辅助函数
+async function loadSingleSpine(app: PIXI.Application, url: string): Promise<Spine> {
+    const resource = await PIXI.Assets.load(url);
+    const animation = new Spine(resource.spineData);
+    
+    // 强制设置默认皮肤
+    if (!animation.skeleton.skin && resource.spineData.skins.length > 1) {
+        resource.spineData.skins.forEach((skin: { name: string; }) => {
+            console.log(skin.name);
+        });
+        animation.skeleton.setSkinByName(resource.spineData.skins[1].name);
+    }
+    
+    console.log("Spine 版本：", resource.spineData.version);
+    
+    animation.visible = true;
+    animation.alpha = 1;
+    
+    return animation;
+}
+
+// 加载角色的所有资源（main, aim, cover）
+async function loadCharacterAssets(app: PIXI.Application, data: { url: string, type: ResType, characterUrls?: CharacterUrls }): Promise<CharacterAssets> {
+    console.log("加载角色资源: ", data.characterUrls);
+    
+    // 加载主体动画
+    const mainAnimation = await loadSingleSpine(app, data.url);
+    
+    const assets: CharacterAssets = {
+        main: mainAnimation
+    };
+    
+    // 如果有 characterUrls，尝试加载 aim 和 cover
+    if (data.characterUrls) {
+        // 尝试加载 aim 文件
+        if (data.characterUrls.aim) {
+            try {
+                assets.aim = await loadSingleSpine(app, data.characterUrls.aim);
+                console.log("成功加载 aim 资源");
+            } catch (error) {
+                console.warn("无法加载 aim 资源:", error);
+            }
+        }
+        
+        // 尝试加载 cover 文件
+        if (data.characterUrls.cover) {
+            try {
+                assets.cover = await loadSingleSpine(app, data.characterUrls.cover);
+                console.log("成功加载 cover 资源");
+            } catch (error) {
+                console.warn("无法加载 cover 资源:", error);
+            }
+        }
+    }
+    
+    return assets;
+}
+
+
+export function load(app: PIXI.Application, data: { url: string, type: ResType, characterUrls?: CharacterUrls }): Promise<Spine | CharacterAssets | undefined> {
+    console.log("加载Spine动画: ", data.url);
+    
+    // 如果有 characterUrls，使用新的加载逻辑
+    if (data.characterUrls) {
+        return loadCharacterAssets(app, data).then((assets) => {
+            const mainAnimation = assets.main;
+            
+            // 设置主动画的位置和缩放
+            app.stage.addChild(mainAnimation);
+            mainAnimation.x = app.view.width / 2;
+            const lastScale = mainAnimation.scale.x;
+            mainAnimation.y = app.view.height * 0.93;
+            mainAnimation.scale.set((app.view.height / (mainAnimation.height / lastScale / 0.90)));
+            
+            console.log(mainAnimation.state.data.skeletonData.animations);
+            console.log(mainAnimation.skeleton);
+            
+            // 使用配置化的动画设置
+            applyAnimationConfig(mainAnimation, DEFAULT_ANIMATION_CONFIG, false);
+            
+            // 添加鼠标交互功能
+            // const cleanup = setupSpineInteraction(mainAnimation, app);
+            
+            // 将清理函数存储到主动画对象上
+            // (mainAnimation as any).interactionCleanup = cleanup;
+            
+            // 返回完整的角色资源对象，而不是只返回主动画
+            return assets;
+        }).catch((error) => {
+            console.log("角色加载错误: ", error);
+            return undefined;
+        });
+    }
+    
+    // 原有的单文件加载逻辑
     return new Promise((resolve, reject) => {
-        PIXI.Assets.load(url).then((resource) => {
+        PIXI.Assets.load(data.url).then((resource) => {
             const animation = new Spine(resource.spineData);
             // 强制设置默认皮肤
             if (!animation.skeleton.skin && resource.spineData.skins.length > 1) {
@@ -79,7 +182,10 @@ export function load(app: PIXI.Application, url: string): Promise<Spine | undefi
             applyAnimationConfig(animation, DEFAULT_ANIMATION_CONFIG, false);
 
             // 添加鼠标交互功能
-            setupSpineInteraction(animation, app);
+            const cleanup = setupSpineInteraction(animation, app);
+            
+            // 将清理函数存储到动画对象上
+            (animation as any).interactionCleanup = cleanup;
 
             // 加载完成，返回动画对象
             resolve(animation);
@@ -91,7 +197,7 @@ export function load(app: PIXI.Application, url: string): Promise<Spine | undefi
 }
 
 // 设置Spine动画的交互功能
-function setupSpineInteraction(animation: Spine, app: PIXI.Application) {
+export function setupSpineInteraction(animation: Spine, app: PIXI.Application) {
     // WASD键盘移动相关变量
     const keys: { [key: string]: boolean } = {};
     const moveSpeed = 5; // 移动速度
