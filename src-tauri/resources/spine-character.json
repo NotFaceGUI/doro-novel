@@ -436,6 +436,18 @@
         }
     },
     {
+        "dirName": "c041_01",
+        "characterName": "c041_01",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c041_01",
+            "skel": "c041_01_00.skel",
+            "aimSkel": "c041_01_aim_00.skel",
+            "coverSkel": "c041_01_cover_00.skel"
+        }
+    },
+    {
         "dirName": "c043",
         "characterName": "c043",
         "quality": "sr",
@@ -457,6 +469,18 @@
             "skel": "c043_01_00.skel",
             "aimSkel": "c043_01_aim_00.skel",
             "coverSkel": "c043_01_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c043_02",
+        "characterName": "c043_02",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c043_02",
+            "skel": "c043_02_00.skel",
+            "aimSkel": "c043_02_aim_00.skel",
+            "coverSkel": "c043_02_cover_00.skel"
         }
     },
     {
@@ -4014,6 +4038,90 @@
         }
     },
     {
+        "dirName": "c840",
+        "characterName": "c840",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c840",
+            "skel": "c840_00.skel",
+            "aimSkel": "c840_aim_00.skel",
+            "coverSkel": "c840_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c840_01",
+        "characterName": "c840_01",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c840_01",
+            "skel": "c840_01_00.skel",
+            "aimSkel": "c840_01_aim_00.skel",
+            "coverSkel": "c840_01_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c840_02",
+        "characterName": "c840_02",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c840_02",
+            "skel": "c840_02_00.skel",
+            "aimSkel": "c840_02_aim_00.skel",
+            "coverSkel": "c840_02_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c841",
+        "characterName": "c841",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c841",
+            "skel": "c841_00.skel",
+            "aimSkel": "c841_aim_00.skel",
+            "coverSkel": "c841_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c841_01",
+        "characterName": "c841_01",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c841_01",
+            "skel": "c841_01_00.skel",
+            "aimSkel": "c841_01_aim_00.skel",
+            "coverSkel": "c841_01_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c841_02",
+        "characterName": "c841_02",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c841_02",
+            "skel": "c841_02_00.skel",
+            "aimSkel": "c841_02_aim_00.skel",
+            "coverSkel": "c841_02_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c842",
+        "characterName": "c842",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c842",
+            "skel": "c842_00.skel",
+            "aimSkel": "c842_aim_00.skel",
+            "coverSkel": "c842_cover_00.skel"
+        }
+    },
+    {
         "dirName": "c850",
         "characterName": "c850",
         "quality": "sr",
@@ -4247,6 +4355,16 @@
         "path": {
             "name": "c9005_01",
             "skel": "c9005_01_00.skel"
+        }
+    },
+    {
+        "dirName": "c9006",
+        "characterName": "c9006",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c9006",
+            "skel": "c9006_00.skel"
         }
     },
     {
@@ -5103,6 +5221,16 @@
         "path": {
             "name": "claymore",
             "skel": "claymore_00.skel"
+        }
+    },
+    {
+        "dirName": "coinsinrush",
+        "characterName": "coinsinrush",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "coinsinrush",
+            "skel": "coinsinrush_00.skel"
         }
     },
     {
