@@ -77,7 +77,7 @@ export class UIRender {
             fontWeight: '600',
             breakWords: true,
             wordWrap: true,
-            wordWrapWidth: app.screen.width - (140 * scaleFactor),
+            wordWrapWidth: app.screen.width - (140 * (scaleFactor <= 1 ? 1.4 : scaleFactor)),
         });
 
         const titleStyle = new TextStyle({
@@ -145,7 +145,7 @@ export class UIRender {
 
         // 初始化旁边对话框
 
-        const side = this.initSideDialogTemplate();
+        const side = this.initSideDialogTemplate(scaleFactor);
 
         // 设置文字锚点为中心
         this.currentSideText.content.anchor.set(0.5);
@@ -226,6 +226,7 @@ export class UIRender {
      * @param options 可选的按钮配置选项
      */
     public createButtonArray(texts: string[], options?: {
+        scaleFactor: number;
         startX?: number;
         startY?: number;
         spacing?: number;
@@ -237,7 +238,7 @@ export class UIRender {
         /** 是否使用底部中心定位（内容增多时向上扩展） */
         useBottomCenterAnchor?: boolean;
     }): ButtonComponent[] {
-        const scaleFactor = this.app.screen.width / 1920; // 基于屏幕尺寸的缩放因子
+ 
 
         // 默认配置
         const config = {
@@ -268,7 +269,7 @@ export class UIRender {
 
         texts.forEach((text, index) => {
             const button = new ButtonComponent({
-                scaleFactor: scaleFactor,
+                scaleFactor: options?.scaleFactor!,
                 width: config.buttonWidth,
                 height: config.buttonHeight,
                 minWidth: config.minWidth,
@@ -308,7 +309,7 @@ export class UIRender {
             button.x = config.startX + button.width / 2;
             button.y = adjustedStartY + (index * config.spacing);
             button.zIndex = 9999;
-            button.scale.set(button.scale.x * scaleFactor);
+            button.scale.set(button.scale.x * options?.scaleFactor!);
 
             // 添加到舞台
             this.stage.addChild(button);
@@ -356,10 +357,10 @@ export class UIRender {
     /**
     * 初始化 Nikke UI 侧边模板：黑色半透明背景 + 黑色描边 + 阴影
     */
-    public initSideDialogTemplate(): Graphics {
-        const width = this.app.view.width - 800;   // 可以根据需要设置宽度
+    public initSideDialogTemplate(scaleFactor: number): Graphics {
+        const width = this.app.view.width - 600 / scaleFactor;   // 可以根据需要设置宽度
         const height = 175 * DEFAULT_RESOLUTION;
-        const x = 400;
+        const x = 600 / scaleFactor / 2;
         const y = this.app.view.height - height - 65 * DEFAULT_RESOLUTION;
 
         // 创建一个 Graphics 对象
@@ -1099,9 +1100,9 @@ export class UIRender {
 
             // 根据旁白框的位置设置等待图标位置
             // 旁白框参数：width = this.app.view.width - 800, x = 400, y = this.app.view.height - height - 65 * DEFAULT_RESOLUTION
-            const sideBoxWidth = this.app.view.width - 800;
+            const sideBoxWidth = this.app.view.width - 600 / scaleFactor;
             const sideBoxHeight = 175 * DEFAULT_RESOLUTION;
-            const sideBoxX = 400;
+            const sideBoxX = 600 / scaleFactor / 2;
             const sideBoxY = this.app.view.height - sideBoxHeight - 65 * DEFAULT_RESOLUTION;
 
             // 将等待图标放在旁白框的右下角，边距15
@@ -1240,7 +1241,14 @@ export class UIRender {
     // 添加COMMANDER模式的按钮渲染方法
     private async renderCommanderButtons(message: DialogTextData) {
         // 基于屏幕尺寸的响应式设计
-        const scaleFactor = this.app.screen.width / 1920;
+        let scaleFactor = this.app.screen.width / 1920;
+        let orgFactor = scaleFactor;
+        // 这个是适配一些x响应式的无奈举动
+        if (scaleFactor <= 1.4 ) {
+            scaleFactor = 1.3
+        }
+
+        console.log("project scaleFactor", scaleFactor);
 
         // 解析文本，支持多行文本作为多个按钮选项
         const buttonTexts = message.texts.map(textData => textData.text).filter(text => text.trim() !== '');
@@ -1254,11 +1262,12 @@ export class UIRender {
         return new Promise<void>((resolve) => {
             // 创建按钮数组
             const buttonArray = this.createButtonArray(buttonTexts, {
+                scaleFactor: scaleFactor,
                 startX: this.app.view.width / 2,
-                startY: this.app.view.height - 450 * scaleFactor,
-                spacing: 200 * scaleFactor,
+                startY: this.app.view.height - 450 * orgFactor,
+                spacing: 200 * orgFactor,
                 buttonWidth: 457,
-                buttonHeight: 90,
+                buttonHeight: 90 ,
                 minWidth: 457,
                 useBottomCenterAnchor: true,
                 onButtonClick: (text: string, index: number) => {

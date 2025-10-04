@@ -1,7 +1,7 @@
 [package]
 name = "doro-novel"
-version = "0.1.0"
-description = "A Tauri App"
+version = "0.4.1"
+description = "A visual novel editor designed for creating Nikke-style interactive visual novels"
 authors = ["you"]
 edition = "2021"
 
