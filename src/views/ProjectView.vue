@@ -3,7 +3,7 @@
         <LeftBar @render-file="handleRenderType"></LeftBar>
         <div ref="projectView" class="project-content-view"
             :class="{ 'active-bg': activeTab === 'canvas', 'project-view-full-screen': isFullScreen }">
-            <div class="project-tab-image">
+            <div v-if="isFullScreen" class="project-tab-image">
                 <img src="/img/sprite/nv_tab.png" v-if="activeTab === 'canvas'" width="100%" alt="">
 
             </div>
@@ -1098,11 +1098,12 @@ const clearAllShaders = () => {
     pointer-events: none;
 }
 
+/* 普通分辨率设备 */
 .project-tab-image {
     position: absolute;
     z-index: 9999;
     right: 0;
-    width: 325px;
+    width: 300px;
     margin: 20px;
     margin-top: 15px;
 }

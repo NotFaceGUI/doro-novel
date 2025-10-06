@@ -1,8 +1,8 @@
 [package]
 name = "doro-novel"
-version = "0.4.1"
+version = "0.4.2"
 description = "A visual novel editor designed for creating Nikke-style interactive visual novels"
-authors = ["you"]
+authors = ["ghost"]
 edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html

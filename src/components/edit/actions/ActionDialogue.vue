@@ -249,6 +249,7 @@ const characterConfigStore = useCharacterConfigStore()
 const { action, actionItem } = useCommonState(props.title, props.id);
 const canvasManager = CanvasManager.getInstance();
 
+// 获取当前viewport
 let viewport = canvasManager.viewport;
 
 // 生成唯一ID的函数
