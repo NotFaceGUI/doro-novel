@@ -152,6 +152,7 @@ export interface DialogTextData {
     texts: {
         text: string; // 话语内容
         isCameraProxy?: boolean; // 是否是摄像机代理
+        branchTag?: string; // 分支标签，用于指挥官回答的选项标识
         cameraParms?: {
             targetX: number; // 摄像机的目标X轴坐标
             targetY: number; // 摄像机的目标Y轴坐标
@@ -166,6 +167,7 @@ export interface DialogTextData {
     }[];
     mode: DialogueType,
     isBind?: boolean; // 是否绑定角色
+    requiredBranchTag?: string; // 需要的分支标签，只有选择了对应标签的才显示此对话
     parms?: {
         CharacterName: string; // 绑定的角色名
         yOffSet: number; // 摄像机的Y轴偏移

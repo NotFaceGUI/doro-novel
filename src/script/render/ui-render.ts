@@ -17,11 +17,13 @@ import { Raw } from 'vue';
 import { Spine } from 'pixi-spine';
 import { ButtonComponent } from '../ui/button-component';
 import { Action } from 'pixijs-actions';
+import { useBranchStore } from '../../stores/branch-store';
 
 const t = i18n.global.t
 
+
 export class UIRender {
-    public static buttonAllArrays : ButtonComponent[] = [];
+    public static buttonAllArrays: ButtonComponent[] = [];
     public stage: Container;
     public app: Application;
 
@@ -238,7 +240,7 @@ export class UIRender {
         /** 是否使用底部中心定位（内容增多时向上扩展） */
         useBottomCenterAnchor?: boolean;
     }): ButtonComponent[] {
- 
+
 
         // 默认配置
         const config = {
@@ -622,7 +624,13 @@ export class UIRender {
         console.log("对话开始:", messages);
         for (const message of messages) {
             console.log("当前对话:", message);
-            // 遍历 message.text 数组中的每一项
+            
+            // 检查分支条件，如果不满足则跳过此对话
+            if (message.requiredBranchTag && !useBranchStore().canShowDialogue(message.requiredBranchTag)) {
+                console.log(`跳过对话，不满足分支条件: ${message.requiredBranchTag}`);
+                continue;
+            }
+            
             const currentMode = message.mode;
             if (currentMode === DialogueType.COMMANDER) {
                 this.hideWaitIcon();
@@ -1244,7 +1252,7 @@ export class UIRender {
         let scaleFactor = this.app.screen.width / 1920;
         let orgFactor = scaleFactor;
         // 这个是适配一些x响应式的无奈举动
-        if (scaleFactor <= 1.4 ) {
+        if (scaleFactor <= 1.4) {
             scaleFactor = 1.3
         }
 
@@ -1267,15 +1275,34 @@ export class UIRender {
                 startY: this.app.view.height - 450 * orgFactor,
                 spacing: 200 * orgFactor,
                 buttonWidth: 457,
-                buttonHeight: 90 ,
+                buttonHeight: 90,
                 minWidth: 457,
                 useBottomCenterAnchor: true,
                 onButtonClick: (text: string, index: number) => {
                     console.log(`COMMANDER选择了选项 ${index}: ${text}`);
+
+                    // 保存选择的分支标签到store
+                    const selectedText = message.texts[index];
+                    if (selectedText && selectedText.branchTag) {
+                        // 支持多标签设置：A,B 代表同时设置 A 和 B 两个标签
+                        const tags = selectedText.branchTag.split(',').map(tag => tag.trim()).filter(tag => tag);
+                        const branchStore = useBranchStore();
+                        
+                        tags.forEach(tag => {
+                            branchStore.addTag(tag);
+                        });
+                        
+                        console.log(`添加分支标签到用户标签集合: ${selectedText.branchTag} -> [${tags.join(', ')}]`);
+                        console.log(`用户当前拥有的标签:`, branchStore.getUserTags());
+                    }
+
                     // 清理按钮
                     // 继续对话流程
                     setTimeout(() => {
                         resolve();
+                        buttonArray.forEach(button => {
+                            button.destroy();
+                        });
                     }, 300);
                 },
             });

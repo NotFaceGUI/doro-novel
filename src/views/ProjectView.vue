@@ -185,8 +185,7 @@ import * as PIXI from 'pixi.js';
 import CanvasManager from '../script/render/canvas-manager';
 import { useActionStore } from '../stores/action-store';
 import type { CharacterUrls, DropdownOption } from '../types/app';
-import { applyUIAnimationConfig, type UIAnimationConfig, type UIMixConfig } from '../script/render/animation-config';
-import { app } from '@tauri-apps/api';
+import { applyUIAnimationConfig, type UIAnimationConfig } from '../script/render/animation-config';
 import { OutlineFilter } from 'pixi-filters';
 
 

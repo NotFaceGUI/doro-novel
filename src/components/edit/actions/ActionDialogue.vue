@@ -25,7 +25,8 @@
         </div>
         <VueDraggable v-model="messages" :animation="200" ghostClass="ghost-item" chosenClass="chosen-item"
             dragClass="drag-item" handle=".drag-handle" @start="onDragStart" @end="onDragEnd">
-            <div class="action-item-content" v-for="(message, messageIndex) in messages" :key="message.id || messageIndex">
+            <div  class="action-item-content dialogue-item" v-for="(message, messageIndex) in messages"
+                :key="message.id || messageIndex">
                 <!-- 拖拽手柄 -->
                 <div class="drag-handle" title="拖拽排序">⋮⋮</div>
 
@@ -58,6 +59,7 @@
                         <label @click="message.advancedMode = !message.advancedMode"
                             class="advanced-label">🔧高级模式</label>
                     </div>
+
                     <!-- 对话操作按钮 -->
                     <div class="message-controls">
                         <!-- <button class="control-btn move-up-btn" 
@@ -80,13 +82,54 @@
                         v-if="message.speaker === '请选择角色' && message.mode === DialogueType.NORMAL">
                         点击头像绑定角色</div>
                 </div>
+                <!-- 分支条件设置，在高级模式下显示 -->
+                <div class="branch-condition-setting" v-if="message.advancedMode">
+                    <div>
+                        <label class="branch-condition-label">🏷️分支条件：</label>
+                        <input type="text" v-model="message.requiredBranchTag" placeholder="A 或 A,B&C 或 (A,B)&C"
+                            class="branch-condition-input" @input="updateRequiredBranchTag(messageIndex, $event)" />
+                    </div>
+
+                    <Tooltip position="left">
+                        <div>
+                            设置此对话需要的<span style="color: var(--button-bg);">分支标签</span>
+                            <div style="text-align: left;font-size: 10px;margin-top: 5px;">
+                                支持多种格式：
+                                <p><strong>A</strong> - 单个标签</p>
+                                <p><strong>A,B,C</strong> - 任意一个标签（OR逻辑）</p>
+                                <p><strong>A&B&C</strong> - 所有标签（AND逻辑）</p>
+                                <p><strong>A,B&C</strong> - 混合逻辑（A 或者 B且C）</p>
+                                <p><strong>(A,B)&C</strong> - 括号优先级（(A或B) 且 C）</p>
+                                <p>只有满足条件的玩家才能看到此对话</p>
+                            </div>
+                        </div>
+                    </Tooltip>
+                </div>
                 <div class="right-content">
-                    <div class="text-input" v-for="(text, textIndex) in message.texts" :key="message.id || (text + textIndex.toString())">
+                    <div class="text-input" v-for="(text, textIndex) in message.texts"
+                        :key="message.id || (text + textIndex.toString())">
                         <div class="editable-div" contenteditable="true" @input="updateTextContent($event, text)"
                             @paste="handlePaste($event)" :data-placeholder="'请输入文本……'"></div>
                         <div class="text-controls" v-if="message.advancedMode">
                             <label class="text-control-label">摄像机代理：</label>
                             <ToggleSwitch v-model="(text.isCameraProxy as boolean)"></ToggleSwitch>
+                        </div>
+                        <!-- 分支标签设置，只在指挥官回答且有多个选项时显示 -->
+                        <div class="text-controls"
+                            v-if="message.mode === DialogueType.COMMANDER && message.texts.length >= 2">
+                            <div>
+                                <label class="text-control-label">分支标签：</label>
+                                <input type="text" v-model="text.branchTag" placeholder="输入分支标签 (如: A, B)"
+                                    class="branch-tag-input"
+                                    @input="updateBranchTag(messageIndex, textIndex, $event)" />
+                            </div>
+
+                            <Tooltip position="left">
+                                <div>
+                                    为指挥官的每个选项设置<span style="color: var(--button-bg);">分支标签</span>
+                                    <div>根据选择的标签来<span style="color: var(--button-bg);">显示不同内容</span></div>
+                                </div>
+                            </Tooltip>
                         </div>
                         <div class="action-item-content">
                             <!-- 使用Dropdown组件的摄像机控制选项，只在高级模式开启且为最后一个文本条目时显示 -->
@@ -227,6 +270,7 @@ import CanvasManager from '../../../script/render/canvas-manager';
 import ToggleSwitch from '../../common/ToggleSwitch.vue';
 import { useI18n } from 'vue-i18n';
 import { useCharacterConfigStore } from '../../../stores/character-config-store';
+import { useBranchStore } from '../../../stores/branch-store';
 // 添加机位相关导入
 import { CameraStandType, getEasingFunctionOptions, EasingFunction } from '../../../script/camera-stand';
 import Dropdown from '../../common/Dropdown.vue';
@@ -245,7 +289,8 @@ const { t } = useI18n()
 
 // 使用角色配置store
 const characterConfigStore = useCharacterConfigStore()
-
+// 使用分支选择store
+const branchStore = useBranchStore()
 const { action, actionItem } = useCommonState(props.title, props.id);
 const canvasManager = CanvasManager.getInstance();
 
@@ -616,6 +661,16 @@ const targetAction = async () => {
     // viewport.moveCenter(action.previewSnapshot.camera.x, action.previewSnapshot.camera.y);
     // viewport.emit('moved');
 
+    // // 根据分支条件过滤对话
+    // const filteredMessages = messages.value.filter(message => {
+    //     // 如果没有设置分支条件，直接显示
+    //     if (!message.requiredBranchTag) {
+    //         return true;
+    //     }
+    //     // 检查是否满足分支条件
+    //     return branchStore.canShowDialogue(message.requiredBranchTag);
+    // });
+
     // 对话结束后，保存当前摄像机状态到快照
     await ui.startDialogue(messages.value, modification, hideUIAfterDialogue.value, hideUIDelay.value);
 
@@ -645,6 +700,18 @@ const autoResize = (textarea: HTMLTextAreaElement) => {
 const updateTextContent = (event: Event, textObj: any) => {
     const target = event.target as HTMLDivElement;
     textObj.text = target.innerText || '';
+};
+
+// 更新分支标签
+const updateBranchTag = (messageIndex: number, textIndex: number, event: Event) => {
+    const target = event.target as HTMLInputElement;
+    messages.value[messageIndex].texts[textIndex].branchTag = target.value;
+};
+
+// 更新分支条件
+const updateRequiredBranchTag = (messageIndex: number, event: Event) => {
+    const target = event.target as HTMLInputElement;
+    messages.value[messageIndex].requiredBranchTag = target.value;
 };
 
 // 处理粘贴事件，只允许纯文本
@@ -744,6 +811,7 @@ onUnmounted(() => {
     flex-direction: column;
     gap: 10px;
     position: relative;
+
     /* 为绝对定位的按钮提供定位上下文 */
 }
 
@@ -1045,15 +1113,13 @@ textarea {
 .text-controls {
     display: flex;
     align-items: center;
+    justify-content: space-between;
     margin-top: 5px;
     margin-bottom: 5px;
-    padding-left: 5px;
 }
 
 .text-control-label {
-    font-size: 14px;
-    margin-right: 10px;
-    color: var(--text-color);
+    font-size: 12px;
 }
 
 textarea::placeholder {
@@ -1066,25 +1132,9 @@ textarea:focus {
     outline: none;
 }
 
-input[type="text"] {
-    width: 100%;
-    padding: 0px 5px;
-    height: 30px;
-    border: 1px solid transparent;
-    border-radius: 5px;
-    background: var(--input-bg);
-    color: var(--text-color);
-    font-size: 16px;
-    transition: border-color 0.3s;
-}
-
-input[type="text"]::placeholder {
-    color: var(--placeholder-color);
-}
-
-input[type="text"]:focus {
-    border-color: var(--button-bg);
-    outline: none;
+.dialogue-item {
+    margin-bottom: 8px;
+    border-bottom: 1px dashed #8888881e;
 }
 
 .delay-input {
@@ -1115,10 +1165,57 @@ input[type="text"]:focus {
 }
 
 .character-tip {
-    font-size: 14px;
-    color: var(--placeholder-color);
-    opacity: 0;
-    transition: all .3s ease-in-out;
+    font-size: 12px;
+    color: var(--text-color-secondary);
+    font-style: italic;
+}
+
+/* 分支标签样式 */
+.branch-tag-input {
+    padding: 4px 8px;
+    outline: none;
+    border: 1px solid transparent;
+    border-radius: 4px;
+    background-color: var(--primary-bg);
+    color: var(--text-color);
+    font-size: 12px;
+    width: 150px;
+    transition: border-color 0.3s;
+}
+
+.branch-tag-input:focus {
+    outline: none;
+    border-color: var(--button-bg);
+}
+
+.branch-condition-setting {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    margin-top: 8px;
+}
+
+.branch-condition-label {
+    font-size: 12px;
+    white-space: nowrap;
+}
+
+.branch-condition-input {
+    outline: none;
+    padding: 4px 8px;
+    border: 1px solid transparent;
+    border-radius: 4px;
+    background-color: var(--primary-bg);
+    color: var(--text-color);
+    font-size: 12px;
+    width: 200px;
+    transition: border-color 0.3s;
+}
+
+.branch-condition-input:focus {
+    outline: none;
+    border-color: var(--button-bg);
 }
 
 .camera-controls {

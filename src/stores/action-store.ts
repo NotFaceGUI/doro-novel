@@ -9,6 +9,7 @@ import { resolveResource } from '@tauri-apps/api/path';
 import { convertFileSrc } from '@tauri-apps/api/core';
 import CanvasManager from '../script/render/canvas-manager';
 import { UIRender } from '../script/render/ui-render';
+import { useBranchStore } from './branch-store';
 
 
 
@@ -357,6 +358,9 @@ export const useActionStore = defineStore('action', () => {
       button.destroy()
     });
     UIRender.buttonAllArrays = [];
+
+    // 重置分支标签
+    useBranchStore().clearAllTags();
   }
 
 
