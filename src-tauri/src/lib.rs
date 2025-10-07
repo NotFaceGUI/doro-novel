@@ -1,6 +1,7 @@
 use std::fs;
 use std::path::Path;
 use tauri::command;
+use tauri_plugin_opener::OpenerExt;
 
 #[command]
 fn write_json_file(file_path: &str, json_data: &str) -> Result<String, String> {
@@ -34,6 +35,14 @@ fn check_path_is_file(path: String) -> Result<bool, String> {
     }
 }
 
+#[tauri::command]
+async fn open_folder(app: tauri::AppHandle, path: String) -> Result<(), String> {
+    app.opener()
+        .open_path(&path, None::<String>)
+        .map_err(|e| e.to_string())?;
+    Ok(())
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
@@ -42,8 +51,7 @@ pub fn run() {
         .plugin(tauri_plugin_fs::init())
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_opener::init())
-        .invoke_handler(tauri::generate_handler![write_json_file])
-        .invoke_handler(tauri::generate_handler![check_path_is_file])
+        .invoke_handler(tauri::generate_handler![write_json_file, check_path_is_file, open_folder])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }

@@ -431,12 +431,94 @@ const saveModification = () => {
     setModification(modification, `characters.${currentCharacter.value.character.path?.name}.scale`, targetState.value.scale);
 };
 
+// 序列化方法
+const serialization = () => {
+    return {
+        character: {
+            selectedCharacterIndex: selectedCharacterIndex.value,
+            operationMode: operationModeOptions.value[selectedOperationMode.value].value,
+            targetState: {
+                x: targetState.value.x,
+                y: targetState.value.y,
+                scale: targetState.value.scale
+            },
+            tweenSettings: {
+                duration: tweenDuration.value,
+                easeType: selectedEaseType.value
+            },
+            targetStateOptions: targetStateOptions.value.map(option => ({
+                label: option.label,
+                value: option.value,
+                type: option.type,
+                disabled: option.disabled
+            }))
+        }
+    };
+};
+
+// 反序列化方法
+const deserialization = (actionItem: any) => {
+    const actionData = actionItem.actionData;
+    if (!actionData || !actionData.character) {
+        return;
+    }
+
+    const characterData = actionData.character;
+
+    // 恢复选中的角色索引
+    if (characterData.selectedCharacterIndex !== undefined) {
+        selectedCharacterIndex.value = characterData.selectedCharacterIndex;
+    }
+
+    // 恢复操作模式
+    if (characterData.operationMode) {
+        const modeIndex = operationModeOptions.value.findIndex(mode => mode.value === characterData.operationMode);
+        if (modeIndex !== -1) {
+            selectedOperationMode.value = modeIndex;
+        }
+    }
+
+    // 恢复目标状态
+    if (characterData.targetState) {
+        targetState.value = {
+            x: characterData.targetState.x || 0,
+            y: characterData.targetState.y || 0,
+            scale: characterData.targetState.scale || 1
+        };
+    }
+
+    // 恢复补间设置
+    if (characterData.tweenSettings) {
+        tweenDuration.value = characterData.tweenSettings.duration || 1000;
+        selectedEaseType.value = characterData.tweenSettings.easeType || 'linear';
+    }
+
+    // 恢复目标状态选项
+    if (characterData.targetStateOptions && characterData.targetStateOptions.length === targetStateOptions.value.length) {
+        characterData.targetStateOptions.forEach((option: any, index: number) => {
+            if (targetStateOptions.value[index]) {
+                targetStateOptions.value[index].value = option.value;
+                targetStateOptions.value[index].disabled = option.disabled;
+            }
+        });
+    }
+
+    // 更新角色信息
+    updateCharacterInfo();
+};
+
 onMounted(() => {
     // 注册action回调
     actionItem.action = targetAction;
+    actionItem.serialize = serialization;
 
     // 初始化modification
     modification = action.getCurrentModification(props.title, props.id);
+
+    // 反序列化数据
+    const actionIndex = action.getAction(props.title).as.findIndex((item) => item.id === props.id);
+    const currentActionItem = action.getAction(props.title).as[actionIndex];
+    deserialization(currentActionItem);
 
     // 初始化角色信息
     updateCharacterInfo();

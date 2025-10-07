@@ -1,19 +1,19 @@
 <script setup lang="ts">
-import { onMounted, onUnmounted, ref } from 'vue';
+import { computed, onMounted, onUnmounted, ref, watchEffect } from 'vue';
 import { DoroApp, type Project } from './types/app';
 import WelcomeGuide from './components/WelcomeGuide.vue';
 import AppHeader from './components/AppHeader.vue';
-import { LOCAL_OPEN_KEY } from './script/var';
 import ProjectView from './views/ProjectView.vue';
 import AssetManager from './script/asset-manager';
 import InputActionItemType from './components/common/InputActionItemType.vue';
 import UpdateDialog from './components/UpdateDialog.vue';
 import { useSearchDialogStore } from './stores/search-dialog-store';
+import { useProjectStore } from './stores/project-store';
 import { useUpdater } from './composables/useUpdater';
+import { openProject } from './script/common/common-action-item';
 
-// 是否打开项目，用于判断显示引导界面还是项目界面
-const isOpenProject = ref(false);
 const searchStore = useSearchDialogStore();
+const projectStore = useProjectStore();
 
 // 初始化更新功能
 const updater = useUpdater();
@@ -23,28 +23,27 @@ const app = ref<DoroApp>({
   version: 'ver 0.4.2',
 });
 
-onMounted(() => {
-  const _open = localStorage.getItem(LOCAL_OPEN_KEY);
-  if (_open) {
-    isOpenProject.value = true;
-  } else {
-    isOpenProject.value = false;
-  }
+onMounted(async() => {
+  // 初始化项目状态
+  projectStore.initializeProjectState();
   window.addEventListener('keydown', handleSpacePress);
+
+  if (projectStore.isOpenProject && projectStore.currentProjectSavePath) {
+    await openProject(projectStore.currentProjectSavePath);
+  }
 });
 
 // 处理创建成功的事件
 const onCreateProject = (res: Project) => {
   console.log('Project created:', res);
-  localStorage.setItem(LOCAL_OPEN_KEY, res.projectName);
-  isOpenProject.value = true;
+  projectStore.openProject(res);
   // 初始化AssetManager
   AssetManager.getInstance();
 };
 
 const handleSpacePress = (event: KeyboardEvent) => {
-    if (event.code === 'Space') {
-    }
+  if (event.code === 'Space') {
+  }
 };
 
 // 更新相关事件处理
@@ -61,16 +60,17 @@ const handleUpdateError = (error: string) => {
   // 可以在这里显示错误提示
 };
 
+
 onUnmounted(() => {
-    window.removeEventListener('keydown', handleSpacePress);
-    // 清理更新功能
-    updater.cleanup();
+  window.removeEventListener('keydown', handleSpacePress);
+  // 清理更新功能
+  updater.cleanup();
 });
 </script>
 
 <template>
   <AppHeader :app="app" />
-  <template v-if="!isOpenProject">
+  <template v-if="!projectStore.isOpenProject">
     <main class="app-container">
       <WelcomeGuide @create="onCreateProject"></WelcomeGuide>
     </main>
@@ -80,26 +80,15 @@ onUnmounted(() => {
   <template v-else>
     <ProjectView></ProjectView>
   </template>
-  
+
   <!-- 全局搜索框 -->
-  <InputActionItemType 
-    :visible="searchStore.visible"
-    :mode="searchStore.mode"
-    :type="searchStore.type"
-    :fileName="searchStore.fileName"
-    @select="searchStore.handleSelect"
-    @close="searchStore.handleClose"
-  />
-  
+  <InputActionItemType :visible="searchStore.visible" :mode="searchStore.mode" :type="searchStore.type"
+    :fileName="searchStore.fileName" @select="searchStore.handleSelect" @close="searchStore.handleClose" />
+
   <!-- 更新对话框 -->
-  <UpdateDialog
-    :updateInfo="updater.updateInfo.value"
-    :showDialog="updater.showUpdateDialog.value"
-    @close="updater.hideUpdate"
-    @updateStarted="handleUpdateStarted"
-    @updateCompleted="handleUpdateCompleted"
-    @updateError="handleUpdateError"
-  />
+  <UpdateDialog :updateInfo="updater.updateInfo.value" :showDialog="updater.showUpdateDialog.value"
+    @close="updater.hideUpdate" @updateStarted="handleUpdateStarted" @updateCompleted="handleUpdateCompleted"
+    @updateError="handleUpdateError" />
 </template>
 
 <style scoped></style>
@@ -124,7 +113,7 @@ onUnmounted(() => {
   --error-color: #99392e;
   --info-color: #20436b;
   --success-color: #155c33;
-  
+
   /* 新增按钮相关颜色变量 */
   --accent-color: #ff9900;
   --accent-hover-color: #e68a00;

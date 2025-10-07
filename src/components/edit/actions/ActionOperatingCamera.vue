@@ -121,7 +121,7 @@ import ActionItemHead from './ActionItemHead.vue';
 import { Modification, PropertyPath } from '../../../script/common/snapshot';
 import CanvasManager from '../../../script/render/canvas-manager';
 import Dropdown from '../../common/Dropdown.vue';
-import { ControlPoint, DropdownOption, GameMode, InputOption } from '../../../types/app';
+import { ActionItems, ControlPoint, DropdownOption, GameMode, InputOption } from '../../../types/app';
 import Tooltip from '../../common/Tooltip.vue';
 import DynamicInputs from '../../common/DynamicInputs.vue';
 import massage from '../../../script/common/massage';
@@ -511,10 +511,136 @@ let callback: (t: number, b: number, c: number, d: number) => number = (
     return b + (c * t) / d;
 };
 
+// 序列化方法 - 保存组件数据
+const serialization = () => {
+    return {
+        selectedOption: selectedOption.value,
+        selectedEaseOption: selectedEaseOption.value,
+        customCurve: customCurve.value,
+        isCustomOpen: isCustomOpen.value,
+        targetFixedCameraValues: targetFixedCameraValues.value.map(setting => ({
+            label: setting.label,
+            value: setting.value,
+            type: setting.type,
+            disabled: setting.disabled
+        })),
+        timeDuration: timeDuration.value.map(setting => ({
+            label: setting.label,
+            value: setting.value,
+            type: setting.type,
+            disabled: setting.disabled
+        })),
+        customSourceTweenCameraValues: customSourceTweenCameraValues.value.map(setting => ({
+            label: setting.label,
+            value: setting.value,
+            type: setting.type,
+            disabled: setting.disabled
+        })),
+        targetTweenCameraValues: targetTweenCameraValues.value.map(setting => ({
+            label: setting.label,
+            value: setting.value,
+            type: setting.type,
+            disabled: setting.disabled
+        })),
+        points: points.value.map(point => ({
+            x: point.x,
+            y: point.y
+        }))
+    };
+};
+
+// 反序列化方法 - 加载组件数据
+const deserialization = (data: ActionItems) => {
+    const actionData = data.actionData;
+    if (!actionData) {
+        return;
+    }
+    console.log("deserialization", actionData)
+    if (actionData) {
+        if (typeof actionData.selectedOption === 'number') {
+            selectedOption.value = actionData.selectedOption;
+        }
+        
+        if (typeof actionData.selectedEaseOption === 'number') {
+            selectedEaseOption.value = actionData.selectedEaseOption;
+        }
+        
+        if (typeof actionData.customCurve === 'boolean') {
+            customCurve.value = actionData.customCurve;
+        }
+        
+        if (typeof actionData.isCustomOpen === 'boolean') {
+            isCustomOpen.value = actionData.isCustomOpen;
+        }
+        
+        if (Array.isArray(actionData.targetFixedCameraValues)) {
+            // 更新现有数组的属性，而不是重新创建数组
+            actionData.targetFixedCameraValues.forEach((setting: any, index: number) => {
+                if (targetFixedCameraValues.value[index]) {
+                    targetFixedCameraValues.value[index].label = setting.label || '';
+                    targetFixedCameraValues.value[index].value = setting.value || 0;
+                    targetFixedCameraValues.value[index].type = setting.type || 'number';
+                    targetFixedCameraValues.value[index].disabled = setting.disabled || false;
+                }
+            });
+        }
+        
+        if (Array.isArray(actionData.timeDuration)) {
+            // 更新现有数组的属性，而不是重新创建数组
+            actionData.timeDuration.forEach((setting: any, index: number) => {
+                if (timeDuration.value[index]) {
+                    timeDuration.value[index].label = setting.label || '持续时间(ms)';
+                    timeDuration.value[index].value = setting.value || 400;
+                    timeDuration.value[index].type = setting.type || 'number';
+                    timeDuration.value[index].disabled = setting.disabled || false;
+                }
+            });
+        }
+        
+        if (Array.isArray(actionData.customSourceTweenCameraValues)) {
+            // 更新现有数组的属性，而不是重新创建数组
+            actionData.customSourceTweenCameraValues.forEach((setting: any, index: number) => {
+                if (customSourceTweenCameraValues.value[index]) {
+                    customSourceTweenCameraValues.value[index].label = setting.label || '';
+                    customSourceTweenCameraValues.value[index].value = setting.value || 0;
+                    customSourceTweenCameraValues.value[index].type = setting.type || 'number';
+                    customSourceTweenCameraValues.value[index].disabled = setting.disabled || false;
+                }
+            });
+        }
+        
+        if (Array.isArray(actionData.targetTweenCameraValues)) {
+            // 更新现有数组的属性，而不是重新创建数组
+            actionData.targetTweenCameraValues.forEach((setting: any, index: number) => {
+                if (targetTweenCameraValues.value[index]) {
+                    targetTweenCameraValues.value[index].label = setting.label || '';
+                    targetTweenCameraValues.value[index].value = setting.value || 0;
+                    targetTweenCameraValues.value[index].type = setting.type || 'number';
+                    targetTweenCameraValues.value[index].disabled = setting.disabled || false;
+                }
+            });
+        }
+        
+        if (Array.isArray(actionData.points)) {
+            // 更新现有数组的属性，而不是重新创建数组
+            actionData.points.forEach((point: any, index: number) => {
+                if (points.value[index]) {
+                    points.value[index].x = point.x || 0;
+                    points.value[index].y = point.y || 0;
+                }
+            });
+        }
+    }
+};
+
 onMounted(() => {
-    // 想action中注册回调
+    // 想action中注册回调和序列化方法
     actionItem.action = targetAction;
+    actionItem.serialize = serialization;
     modification = action.getCurrentModification(props.title, props.id);
+
+    // 反序列化数据
+    deserialization(actionItem);
 
     viewport.on('drag-end', () => {
         if (canvas.getMode() != GameMode.SCENE) return;

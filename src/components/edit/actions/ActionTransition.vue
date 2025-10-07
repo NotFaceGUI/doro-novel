@@ -48,7 +48,7 @@ import { TransitionType, TransitionConfig, TRANSITION_OPTIONS } from '../../../t
 import { TransitionManager } from '../../../script/transition/transition-manager';
 import { useCommonState } from '../../../script/common/common-action-item';
 import Dropdown from '../../common/Dropdown.vue';
-import { DropdownOption } from '../../../types/app';
+import { ActionItems, DropdownOption } from '../../../types/app';
 import CanvasManager from '../../../script/render/canvas-manager';
 import { EasingFunction, getEasingFunctionOptions } from '../../../script/camera-stand';
 
@@ -145,10 +145,59 @@ const targetAction = async () => {
     await executeTransition();
 };
 
+// 序列化方法 - 保存组件数据
+const serialization = () => {
+    return {
+        selectedTransitionIndex: selectedTransitionIndex.value,
+        transitionType: transitionType.value,
+        duration: duration.value,
+        intensity: intensity.value,
+        delay: delay.value,
+        easingIndex: easingIndex.value
+    };
+};
+
+// 反序列化方法 - 加载组件数据
+const deserialization = (data: ActionItems) => {
+    const actionData = data.actionData;
+    if (!actionData) {
+        return;
+    }
+    if (actionData) {
+        if (typeof actionData.selectedTransitionIndex === 'number') {
+            selectedTransitionIndex.value = actionData.selectedTransitionIndex;
+        }
+        
+        if (typeof actionData.transitionType === 'string') {
+            transitionType.value = actionData.transitionType;
+        }
+        
+        if (typeof actionData.duration === 'number') {
+            duration.value = actionData.duration;
+        }
+        
+        if (typeof actionData.intensity === 'number') {
+            intensity.value = actionData.intensity;
+        }
+        
+        if (typeof actionData.delay === 'number') {
+            delay.value = actionData.delay;
+        }
+        
+        if (typeof actionData.easingIndex === 'number') {
+            easingIndex.value = actionData.easingIndex;
+        }
+    }
+};
+
 // 组件挂载时初始化
 onMounted(() => {
-    // 注册action回调
+    // 注册action回调和序列化方法
     actionItem.action = targetAction;
+    actionItem.serialize = serialization;
+
+    // 反序列化数据
+    deserialization(actionItem);
 
     // 初始化过渡管理器
     initTransitionManager();

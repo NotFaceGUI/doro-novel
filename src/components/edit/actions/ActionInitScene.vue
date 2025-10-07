@@ -115,15 +115,14 @@ import ToggleSwitch from '../../common/ToggleSwitch.vue';
 import { ASSET_CHARACTER, ResType } from '../../../script/var';
 import { selectCharacterType, selectImageType } from '../../../script/common/search-action';
 import { handleSceneState, useCommonState } from '../../../script/common/common-action-item';
-import { GameMode, InputOption, LoadRes } from '../../../types/app';
+import { ActionItems, GameMode, InputOption, LoadRes } from '../../../types/app';
 
-import { Point, Texture } from 'pixi.js';
+import { Texture } from 'pixi.js';
 import { Action } from 'pixijs-actions';
 import ResourceManager from '../../../script/resource-manager';
 import Tooltip from '../../common/Tooltip.vue';
 import Dropdown from '../../common/Dropdown.vue';
 import { useI18n } from 'vue-i18n';
-import { Spine } from 'pixi-spine';
 
 const canvasManager = CanvasManager.getInstance();
 let viewport = canvasManager.viewport;
@@ -137,7 +136,7 @@ const props = defineProps<{
 }>();
 
 // 拿到一些共同的属性
-const { action, actionItem } = useCommonState(props.title, props.id);
+const { action } = useCommonState(props.title, props.id);
 
 
 // 用于控制初始化场景的黑幕显影
@@ -583,12 +582,118 @@ const targetAction = async () => {
 
 }
 
+// 序列化方法 - 保存组件数据
+const serialization = () => {
+    return {
+        fade: fade.value,
+        currentBackground: {
+            name: currentBackground.value.name,
+            path: currentBackground.value.path,
+            type: currentBackground.value.type
+        },
+        backgroundUrl: backgroundUrl.value,
+        cameraValues: cameraValues.value.map(setting => ({
+            label: setting.label,
+            value: setting.value,
+            type: setting.type,
+            disabled: setting.disabled
+        })),
+        backgroundParallaxFactorValues: backgroundParallaxFactorValues.value.map(setting => ({
+            label: setting.label,
+            value: setting.value,
+            type: setting.type,
+            disabled: setting.disabled
+        })),
+        maxCharacter: action.maxCharacter.map(character => ({
+            character: character.character,
+            x: character.x,
+            y: character.y,
+            scale: character.scale,
+            isInitShow: character.isInitShow,
+            selectAnimation: character.selectAnimation,
+            animationOption: character.animationOption
+        }))
+    };
+};
+
+// 反序列化方法 - 加载组件数据
+const deserialization = (data: ActionItems) => {
+    const actionData = data.actionData;
+    if (!actionData) {
+        return;
+    }
+    if (actionData) {
+        if (typeof actionData.fade === 'boolean') {
+            fade.value = actionData.fade;
+        }
+        
+        if (actionData.currentBackground) {
+            currentBackground.value = {
+                name: actionData.currentBackground.name || "CommanderRoom.png",
+                path: actionData.currentBackground.path || "resources\\image\\Background\\CommanderRoom.png",
+                type: actionData.currentBackground.type || ResType.Image
+            };
+        }
+        
+        if (typeof actionData.backgroundUrl === 'string') {
+            backgroundUrl.value = actionData.backgroundUrl;
+        }
+        
+        if (Array.isArray(actionData.cameraValues)) {
+            // 不要重新创建数组，而是更新现有数组中的值以保持响应式绑定
+            actionData.cameraValues.forEach((setting: any, index: number) => {
+                if (cameraValues.value[index]) {
+                    cameraValues.value[index].label = setting.label || cameraValues.value[index].label;
+                    cameraValues.value[index].value = setting.value !== undefined ? setting.value : cameraValues.value[index].value;
+                    cameraValues.value[index].type = setting.type || cameraValues.value[index].type;
+                    cameraValues.value[index].disabled = setting.disabled !== undefined ? setting.disabled : cameraValues.value[index].disabled;
+                }
+            });
+        }
+        
+        if (Array.isArray(actionData.backgroundParallaxFactorValues)) {
+            // 不要重新创建数组，而是更新现有数组中的值以保持响应式绑定
+            actionData.backgroundParallaxFactorValues.forEach((setting: any, index: number) => {
+                if (backgroundParallaxFactorValues.value[index]) {
+                    backgroundParallaxFactorValues.value[index].label = setting.label || backgroundParallaxFactorValues.value[index].label;
+                    backgroundParallaxFactorValues.value[index].value = setting.value !== undefined ? setting.value : backgroundParallaxFactorValues.value[index].value;
+                    backgroundParallaxFactorValues.value[index].type = setting.type || backgroundParallaxFactorValues.value[index].type;
+                    backgroundParallaxFactorValues.value[index].disabled = setting.disabled !== undefined ? setting.disabled : backgroundParallaxFactorValues.value[index].disabled;
+                }
+            });
+        }
+        
+        if (Array.isArray(actionData.maxCharacter)) {
+            // 恢复角色数据到action.maxCharacter
+            actionData.maxCharacter.forEach((charData: any, index: number) => {
+                if (action.maxCharacter[index]) {
+                    action.maxCharacter[index].character = charData.character;
+                    action.maxCharacter[index].x = charData.x || viewport.worldWidth / 2;
+                    action.maxCharacter[index].y = charData.y || viewport.worldHeight + 200;
+                    action.maxCharacter[index].scale = charData.scale || 1;
+                    action.maxCharacter[index].isInitShow = charData.isInitShow !== undefined ? charData.isInitShow : true;
+                    action.maxCharacter[index].selectAnimation = charData.selectAnimation || 0;
+                    if (charData.animationOption) {
+                        action.maxCharacter[index].animationOption = charData.animationOption;
+                    }
+                    onSelectAnimation(index);
+                    onInitShowChange(index, action.maxCharacter[index].isInitShow);
+                }
+            });
+        }
+    }
+};
+
 onMounted(() => {
-    // 向action中注册回调
+    // 向action中注册回调和序列化方法
     const actionIndex = action.getAction(props.title).as.findIndex((item) => item.id === props.id);
     action.getAction(props.title).as[actionIndex].action = targetAction;
+    action.getAction(props.title).as[actionIndex].serialize = serialization;
 
     modification = action.getCurrentModification(props.title, props.id);
+
+    // 反序列化数据
+    deserialization(action.getAction(props.title).as[actionIndex]);
 
     setModification(modification, 'camera.x', cameraValues.value[0].value);
     setModification(modification, 'camera.y', cameraValues.value[1].value);

@@ -51,7 +51,7 @@ import ActionBottomLine from '../../common/ActionBottomLine.vue';
 import ResourceManager from '../../../script/resource-manager';
 import { setModification } from '../../../script/util/common';
 import { Sound } from '@pixi/sound';
-import { InputOption } from '../../../types/app';
+import { ActionItems, InputOption } from '../../../types/app';
 
 const selectedAudioOption = ref(0);
 const isPlaying = ref(false);
@@ -212,10 +212,49 @@ const onSelectAudio = () => {
 // 定时器引用
 let audioListTimer: number | null = null;
 
+// 序列化方法 - 保存组件数据
+const serialization = () => {
+    return {
+        selectedAudioOption: selectedAudioOption.value,
+        volumeSettings: volumeSettings.value.map(setting => ({
+            label: setting.label,
+            value: setting.value,
+            type: setting.type,
+            disabled: setting.disabled
+        }))
+    };
+};
+
+// 反序列化方法 - 加载组件数据
+const deserialization = (data: ActionItems) => {
+    const actionData = data.actionData;
+    if (!actionData) {
+        return;
+    }
+    if (actionData) {
+        if (typeof actionData.selectedAudioOption === 'number') {
+            selectedAudioOption.value = actionData.selectedAudioOption;
+        }
+        
+        if (Array.isArray(actionData.volumeSettings)) {
+            volumeSettings.value = actionData.volumeSettings.map((setting: any) => ({
+                label: setting.label || '音量 (0-1)',
+                value: setting.value || 1.0,
+                type: setting.type || 'number',
+                disabled: setting.disabled || false
+            }));
+        }
+    }
+};
+
 onMounted(() => {
-    // 注册action回调
+    // 注册action回调和序列化方法
     actionItem.action = targetAction;
+    actionItem.serialize = serialization;
     modification = action.getCurrentModification(props.title, props.id);
+
+    // 反序列化数据
+    deserialization(actionItem);
 
     // 确保selectedAudioOption在有效范围内
     if (selectedAudioOption.value >= availableSfxAudios.value.length) {

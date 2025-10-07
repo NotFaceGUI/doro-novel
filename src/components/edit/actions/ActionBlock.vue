@@ -15,7 +15,7 @@ import { onMounted, ref } from 'vue';
 import { useCommonState } from '../../../script/common/common-action-item';
 import ActionItemHead from './ActionItemHead.vue';
 import DynamicInputs from '../../common/DynamicInputs.vue';
-import { ASIType, InputOption } from '../../../types/app';
+import { ActionItems, ASIType, InputOption } from '../../../types/app';
 
 const props = defineProps<{
     title: string,
@@ -61,10 +61,57 @@ const targetAction = async () => {
     });
 };
 
+// 序列化方法
+const serialization = () => {
+    return {
+        block: {
+            blockTime: blockSettings.value[0].value,
+            blockSettings: blockSettings.value.map(setting => ({
+                label: setting.label,
+                value: setting.value,
+                type: setting.type,
+                disabled: setting.disabled
+            }))
+        }
+    };
+};
+
+// 反序列化方法
+const deserialization = (actionItem: ActionItems) => {
+    const actionData = actionItem.actionData;
+    if (!actionData || !actionData.block) {
+        return;
+    }
+
+    const blockData = actionData.block;
+
+    // 恢复阻塞时间
+    if (blockData.blockTime !== undefined) {
+        blockSettings.value[0].value = blockData.blockTime;
+    }
+
+    // 恢复阻塞设置
+    if (blockData.blockSettings && Array.isArray(blockData.blockSettings)) {
+        blockData.blockSettings.forEach((setting: any, index: number) => {
+            if (blockSettings.value[index]) {
+                blockSettings.value[index].value = setting.value;
+                blockSettings.value[index].disabled = setting.disabled;
+            }
+        });
+    }
+};
+
 onMounted(() => {
-    // 注册action回调
+    // 注册action回调和序列化方法
     actionItem.action = targetAction;
+    actionItem.serialize = serialization;
     actionItem.wait = true;
+
+    // 反序列化数据
+    const { action } = useCommonState(props.title, props.id);
+    const actionIndex = action.getAction(props.title).as.findIndex((item) => item.id === props.id);
+    const currentActionItem = action.getAction(props.title).as[actionIndex];
+    deserialization(currentActionItem);
 });
 
 </script>

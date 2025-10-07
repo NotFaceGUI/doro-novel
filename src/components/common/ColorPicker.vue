@@ -22,10 +22,10 @@
                             <div class="saturation-overlay"></div>
                             <div class="lightness-overlay"></div>
                             <div class="sl-cursor" 
-                                 :style="{ 
-                                     left: saturation * 100 + '%', 
-                                     top: (1 - lightness) * 100 + '%' 
-                                 }"></div>
+                                  :style="{ 
+                                      left: saturation * 100 + '%', 
+                                      top: (1 - value) * 100 + '%' 
+                                  }"></div>
                         </div>
                         
                         <!-- 色相条 -->
@@ -150,10 +150,10 @@ const alphaBarRef = ref<HTMLElement>();
 const showPicker = ref(false);
 const panelStyle = ref({});
 
-// HSV 颜色值
+// HSV 颜色值（修正变量名）
 const hue = ref(0);
 const saturation = ref(1);
-const lightness = ref(0.5);
+const value = ref(1); // 改为value（明度）而不是lightness（亮度）
 const alpha = ref(1);
 
 // 输入框值
@@ -165,61 +165,26 @@ const selectedColor = ref('#ff0000');
 const isDragging = ref(false);
 const dragType = ref<'sl' | 'hue' | 'alpha' | null>(null);
 
-// 预设颜色
-const presetColors = [
-    '#faaaaa', '#3399ff', '#ff6b6b', '#4ecdc4', 
-    '#45b7d1', '#96ceb4', '#ffeaa7', '#dda0dd',
-    '#f39c12', '#e74c3c', '#9b59b6', '#2ecc71',
-    '#34495e', '#95a5a6', '#ecf0f1', '#ffffff'
-];
-
 // 计算属性
 const hueColor = computed(() => {
     return `hsl(${hue.value}, 100%, 50%)`;
 });
 
 const hslColor = computed(() => {
-    return `hsl(${hue.value}, ${saturation.value * 100}%, ${lightness.value * 100}%)`;
+    // 使用HSV到HSL的转换来显示正确的颜色
+    const rgb = hsvToRgb(hue.value, saturation.value, value.value);
+    const hsl = rgbToHsl(rgb.r, rgb.g, rgb.b);
+    return `hsl(${hsl.h}, ${hsl.s * 100}%, ${hsl.l * 100}%)`;
 });
 
 const currentColor = computed(() => {
-    const rgb = hslToRgb(hue.value, saturation.value, lightness.value);
+    const rgb = hsvToRgb(hue.value, saturation.value, value.value);
     return `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${alpha.value})`;
 });
 
 const displayColor = computed(() => {
     return numberToHex(props.modelValue);
 });
-
-// HSL 到 RGB 转换
-function hslToRgb(h: number, s: number, l: number) {
-    h = h / 360;
-    const c = (1 - Math.abs(2 * l - 1)) * s;
-    const x = c * (1 - Math.abs((h * 6) % 2 - 1));
-    const m = l - c / 2;
-    
-    let r = 0, g = 0, b = 0;
-    
-    if (0 <= h && h < 1/6) {
-        r = c; g = x; b = 0;
-    } else if (1/6 <= h && h < 2/6) {
-        r = x; g = c; b = 0;
-    } else if (2/6 <= h && h < 3/6) {
-        r = 0; g = c; b = x;
-    } else if (3/6 <= h && h < 4/6) {
-        r = 0; g = x; b = c;
-    } else if (4/6 <= h && h < 5/6) {
-        r = x; g = 0; b = c;
-    } else if (5/6 <= h && h < 1) {
-        r = c; g = 0; b = x;
-    }
-    
-    return {
-        r: Math.round((r + m) * 255),
-        g: Math.round((g + m) * 255),
-        b: Math.round((b + m) * 255)
-    };
-}
 
 // RGB 到 HSL 转换
 function rgbToHsl(r: number, g: number, b: number) {
@@ -280,18 +245,18 @@ function rgbToHex(r: number, g: number, b: number): string {
 
 // 更新所有颜色值
 function updateAllValues() {
-    const rgb = hslToRgb(hue.value, saturation.value, lightness.value);
+    const rgb = hsvToRgb(hue.value, saturation.value, value.value);
     rgbInput.value = rgb;
     hexInput.value = rgbToHex(rgb.r, rgb.g, rgb.b);
     selectedColor.value = hexInput.value;
 }
 
-// 从RGB更新HSL
+// 从RGB更新HSV
 function updateFromRgb(r: number, g: number, b: number) {
-    const hsl = rgbToHsl(r, g, b);
-    hue.value = hsl.h;
-    saturation.value = hsl.s;
-    lightness.value = hsl.l;
+    const hsv = rgbToHsv(r, g, b);
+    hue.value = hsv.h;
+    saturation.value = hsv.s;
+    value.value = hsv.v;
     updateAllValues();
 }
 
@@ -397,7 +362,7 @@ function updateSaturationLightness(event: MouseEvent) {
     const y = Math.max(0, Math.min(1, (event.clientY - rect.top) / rect.height));
     
     saturation.value = x;
-    lightness.value = 1 - y;
+    value.value = 1 - y; // 修正：y=0时应该是最大明度（value=1），y=1时应该是最小明度（value=0）
     updateAllValues();
 }
 
@@ -463,12 +428,6 @@ function handleMouseUp() {
     document.removeEventListener('mouseup', handleMouseUp);
 }
 
-// 选择预设颜色
-function selectPresetColor(color: string) {
-    const rgb = hexToRgb(color);
-    updateFromRgb(rgb.r, rgb.g, rgb.b);
-}
-
 // 处理十六进制输入
 function onHexInput() {
     const hex = hexInput.value;
@@ -495,7 +454,7 @@ function onRgbInput() {
 
 // 确认颜色选择
 function confirmColor() {
-    const rgb = hslToRgb(hue.value, saturation.value, lightness.value);
+    const rgb = hsvToRgb(hue.value, saturation.value, value.value);
     const colorNumber = hexToNumber(rgbToHex(rgb.r, rgb.g, rgb.b));
     emit('update:modelValue', colorNumber);
     closePicker();
@@ -532,6 +491,64 @@ onUnmounted(() => {
     document.removeEventListener('mouseup', handleMouseUp);
     removePositionListeners();
 });
+
+// HSV 到 RGB 转换（修正算法）
+function hsvToRgb(h: number, s: number, v: number) {
+    const c = v * s;
+    const x = c * (1 - Math.abs(((h / 60) % 2) - 1));
+    const m = v - c;
+    
+    let r = 0, g = 0, b = 0;
+    
+    if (0 <= h && h < 60) {
+        r = c; g = x; b = 0;
+    } else if (60 <= h && h < 120) {
+        r = x; g = c; b = 0;
+    } else if (120 <= h && h < 180) {
+        r = 0; g = c; b = x;
+    } else if (180 <= h && h < 240) {
+        r = 0; g = x; b = c;
+    } else if (240 <= h && h < 300) {
+        r = x; g = 0; b = c;
+    } else if (300 <= h && h < 360) {
+        r = c; g = 0; b = x;
+    }
+    
+    return {
+        r: Math.round((r + m) * 255),
+        g: Math.round((g + m) * 255),
+        b: Math.round((b + m) * 255)
+    };
+}
+
+// RGB 到 HSV 转换（修正算法）
+function rgbToHsv(r: number, g: number, b: number) {
+    r /= 255;
+    g /= 255;
+    b /= 255;
+    
+    const max = Math.max(r, g, b);
+    const min = Math.min(r, g, b);
+    const diff = max - min;
+    
+    let h = 0;
+    const s = max === 0 ? 0 : diff / max;
+    const v = max;
+    
+    if (diff !== 0) {
+        if (max === r) {
+            h = ((g - b) / diff) % 6;
+        } else if (max === g) {
+            h = (b - r) / diff + 2;
+        } else {
+            h = (r - g) / diff + 4;
+        }
+        h *= 60;
+        if (h < 0) h += 360;
+    }
+    
+    return { h, s, v };
+}
 </script>
 
 <style scoped>

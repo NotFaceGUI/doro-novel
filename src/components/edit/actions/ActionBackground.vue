@@ -29,7 +29,7 @@ import { selectImageType } from '../../../script/common/search-action';
 import { useCommonState } from '../../../script/common/common-action-item';
 import { setModification } from '../../../script/util/common';
 import { Modification, PropertyPath } from '../../../script/common/snapshot';
-import { LoadRes, InputOption } from '../../../types/app';
+import { LoadRes, InputOption, ActionItems } from '../../../types/app';
 import { Texture } from 'pixi.js';
 import ResourceManager from '../../../script/resource-manager';
 import CanvasManager from '../../../script/render/canvas-manager';
@@ -105,10 +105,38 @@ const targetAction = async () => {
     canvasManager.setBackground(currentBackground.value.path, backgroundParallaxFactorValues.value[0].value);
 };
 
+const serialization = () => {
+    return {
+        background: {
+            image: currentBackground.value,
+            parallax: backgroundParallaxFactorValues.value[0].value
+        }
+    }
+}
+
+const deserialization = (actionItem: ActionItems) => {
+    const actionData = actionItem.actionData;
+    if (!actionData) {
+        return;
+    }
+
+    // 反序列化背景图片
+    currentBackground.value = actionData.background.image;
+    backgroundUrl.value = ResourceManager.allResUrl[currentBackground.value.path] || '';
+
+    // 反序列化视差因子
+    backgroundParallaxFactorValues.value[0].value = actionData.background.parallax;
+}
+
 onMounted(() => {
     const actionIndex = action.getAction(props.title).as.findIndex((item) => item.id === props.id);
+    const actionItem = action.getAction(props.title).as[actionIndex];
+    
     // 向action中注册回调
-    action.getAction(props.title).as[actionIndex].action = targetAction;
+    actionItem.action = targetAction;
+    actionItem.serialize = serialization;
+
+    deserialization(actionItem);
 
     modification = action.getCurrentModification(props.title, props.id);
 

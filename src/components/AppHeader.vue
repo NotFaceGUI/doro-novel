@@ -9,6 +9,9 @@
             <span data-tauri-drag-region class="app-version">
                 {{ app.version }}
             </span>
+            <span data-tauri-drag-region class="app-project-name">
+                -- {{ currentProjectName }}
+            </span>
         </div>
         <div data-tauri-drag-region class="app-header-buttons">
             <button @click="minimizeWindow">─</button>
@@ -20,13 +23,20 @@
 
 <script setup lang="ts">
 import { DoroApp } from '../types/app';
-
 defineProps<{
     app: DoroApp;
 }>();
 
+const projectStore = useProjectStore();
+
+const currentProjectName = computed(() => {
+    return projectStore.currentProjectName;
+});
+
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import ProjectMenu from './ProjectMenu.vue';
+import { computed } from 'vue';
+import { useProjectStore } from '../stores/project-store';
 const window = getCurrentWindow();
 const minimizeWindow = () => {
     window.minimize();
@@ -108,5 +118,10 @@ button:hover {
 
 button:active {
     background-color: rgba(255, 255, 255, 0.4);
+}
+
+.app-project-name {
+    font-size: 14px;
+    color: gray !important;
 }
 </style>

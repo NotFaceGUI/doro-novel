@@ -52,13 +52,12 @@ const createOneProject = () => {
 const saveJson = async () => {
     try {
         const resourcePath = await resolveResource(`project/${projectData.value.projectName}.doro`);
-        // await mkdir('project', { baseDir: BaseDirectory.Resource });
-        // const file = await create(resourcePath)
-        // await file.write(new TextEncoder().encode(JSON.stringify(projectData.value)));
-        // await file.close();
-        const isExists = await exists(resourcePath);
-
-        if (!isExists) {
+        
+        // 检查project目录是否存在，如果不存在则创建
+        const projectDirPath = await resolveResource('project');
+        const projectDirExists = await exists(projectDirPath);
+        
+        if (!projectDirExists) {
             await mkdir('project', { baseDir: BaseDirectory.Resource });
         }
 

@@ -18,6 +18,7 @@ export interface Project {
     createdAt: Date;
     updatedAt?: Date;
     tags?: string[];
+    projectData?: any;
 }
 
 export interface AssetPath {
@@ -132,9 +133,13 @@ export interface ActionItems {
     modification?: Map<PropertyPath, Modification>, // 当前ActionItem对快照的修改
     wait?: boolean
     action?: ActionCallback,
+    serialize?: () => any,
+    deserialize?: () => any,
  
     next?: string; // 下一个Action的ID
     nextActionTitle?: string; // 下一个Action的标题
+
+    actionData?: any, // 用于存储ActionItem的序列化数据
 }
 
 /**
@@ -169,6 +174,7 @@ export interface DialogTextData {
     isBind?: boolean; // 是否绑定角色
     requiredBranchTag?: string; // 需要的分支标签，只有选择了对应标签的才显示此对话
     parms?: {
+        character: CharacterType, // 绑定的角色
         CharacterName: string; // 绑定的角色名
         yOffSet: number; // 摄像机的Y轴偏移
         xOffSet: number; // 摄像机的X轴偏移

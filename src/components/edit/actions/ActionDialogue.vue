@@ -1,5 +1,5 @@
 <template>
-    <div class="action-item-main">
+    <div class="action-item-main" :data-component-id="id">
         <ActionItemHead content="💬 设置对话" :title="title" :id="id"></ActionItemHead>
         <div class="action-item-content">
             <div class="action-title">
@@ -260,8 +260,8 @@
 
 <script setup lang="ts">
 // 在 script setup 部分添加
-import { onMounted, onUnmounted, ref, watch } from 'vue';
-import { DialogTextData, DialogueType } from '../../../types/app';
+import { markRaw, onMounted, onUnmounted, ref, watch } from 'vue';
+import { ActionItems, DialogTextData, DialogueType } from '../../../types/app';
 import ActionItemHead from './ActionItemHead.vue';
 import massage from '../../../script/common/massage';
 import { selectCharacterType, selectSceneCharacterType } from '../../../script/common/search-action';
@@ -270,7 +270,6 @@ import CanvasManager from '../../../script/render/canvas-manager';
 import ToggleSwitch from '../../common/ToggleSwitch.vue';
 import { useI18n } from 'vue-i18n';
 import { useCharacterConfigStore } from '../../../stores/character-config-store';
-import { useBranchStore } from '../../../stores/branch-store';
 // 添加机位相关导入
 import { CameraStandType, getEasingFunctionOptions, EasingFunction } from '../../../script/camera-stand';
 import Dropdown from '../../common/Dropdown.vue';
@@ -279,6 +278,10 @@ import { DropdownOption } from '../../../types/app';
 import { Modification, PropertyPath } from '../../../script/common/snapshot';
 import Tooltip from '../../common/Tooltip.vue';
 import { VueDraggable } from 'vue-draggable-plus';
+// 添加ResourceManager和相关类型的导入
+import ResourceManager from '../../../script/resource-manager';
+import { ASSET_CHARACTER, ResType } from '../../../script/var';
+import { Spine } from 'pixi-spine';
 
 const props = defineProps<{
     title: string,
@@ -289,13 +292,11 @@ const { t } = useI18n()
 
 // 使用角色配置store
 const characterConfigStore = useCharacterConfigStore()
-// 使用分支选择store
-const branchStore = useBranchStore()
+
 const { action, actionItem } = useCommonState(props.title, props.id);
 const canvasManager = CanvasManager.getInstance();
 
-// 获取当前viewport
-let viewport = canvasManager.viewport;
+
 
 // 生成唯一ID的函数
 const generateUniqueId = () => {
@@ -376,6 +377,7 @@ const preBindCharacter = () => {
             characterName,
             speakerColor: savedConfig?.speakerColor ?? 0xfaaaaa, // 使用保存的颜色或默认颜色
             parms: {
+                character: res.character,
                 CharacterName: characterName,
                 yOffSet: savedConfig?.yOffSet ?? 0, // 使用保存的偏移或场景偏移
                 xOffSet: savedConfig?.xOffSet ?? 0, // 使用保存的偏移或场景偏移
@@ -517,6 +519,7 @@ const bindCharacter = (index: number) => {
         // 使用保存的配置或默认值
         messages.value[index].speakerColor = savedConfig?.speakerColor ?? 0xfaaaaa;
         messages.value[index].parms = {
+            character: res,
             CharacterName: characterName,
             yOffSet: savedConfig?.yOffSet ?? 0,
             xOffSet: savedConfig?.xOffSet ?? 0,
@@ -721,24 +724,127 @@ const handlePaste = (event: ClipboardEvent) => {
     document.execCommand('insertText', false, text);
 };
 
+// 序列化方法
+const serialization = () => {
+    return {
+        messages: messages.value.map(message => ({
+            ...message,
+            parms: message.parms ? {
+                ...message.parms,
+                // 不直接序列化spine对象，而是保存spine的资源key
+                spineResourceKey: message.parms.spine ? 
+                    (message.parms.CharacterName ? 
+                        ASSET_CHARACTER + message.parms.character.path?.name + "/" + message.parms.character.path?.skel : 
+                        undefined) : 
+                    undefined,
+                // 移除spine对象本身
+                spine: undefined
+            } : undefined
+        })),
+        hideUIAfterDialogue: hideUIAfterDialogue.value,
+        hideUIDelay: hideUIDelay.value,
+        preSelectedCharacter: preSelectedCharacter.value ? {
+            characterName: preSelectedCharacter.value.characterName,
+            speakerColor: preSelectedCharacter.value.speakerColor,
+            parms: preSelectedCharacter.value.parms ? {
+                ...preSelectedCharacter.value.parms,
+                // 同样处理预选角色的spine
+                spineResourceKey: preSelectedCharacter.value.parms.spine ? 
+                    (preSelectedCharacter.value.parms.CharacterName ? 
+                        ASSET_CHARACTER + preSelectedCharacter.value.parms.character.path?.name + "/" + preSelectedCharacter.value.parms.character.path?.skel : 
+                        undefined) : 
+                    undefined,
+                spine: undefined
+            } : undefined
+        } : null
+    };
+};
+
+// 反序列化方法
+const deserialization = (data: ActionItems) => {
+    const actionData = data.actionData;
+    if (!actionData) {
+        return;
+    }
+    console.log("deserialization", data)
+
+    // 恢复对话消息
+    if (actionData.messages) {
+        messages.value = actionData.messages.map((message: any) => ({
+            ...message,
+            parms: message.parms ? {
+                ...message.parms,
+                // 根据spineResourceKey重新获取spine实例
+                spine:  message.parms.spineResourceKey ? 
+                    markRaw(ResourceManager.getResource<Spine>(message.parms.spineResourceKey, ResType.Spine) ?? {}) :
+                    undefined
+            } : undefined
+        }));
+        console.log("deserialization messages", messages.value)
+    }
+
+    // 恢复UI隐藏设置
+    if (actionData.hideUIAfterDialogue !== undefined) {
+        hideUIAfterDialogue.value = actionData.hideUIAfterDialogue;
+    }
+    if (actionData.hideUIDelay !== undefined) {
+        hideUIDelay.value = actionData.hideUIDelay;
+    }
+
+    // 恢复预选角色
+    if (actionData.preSelectedCharacter) {
+        preSelectedCharacter.value = {
+            characterName: actionData.preSelectedCharacter.characterName,
+            speakerColor: actionData.preSelectedCharacter.speakerColor,
+            parms: actionData.preSelectedCharacter.parms ? {
+                ...actionData.preSelectedCharacter.parms,
+                // 同样根据spineResourceKey重新获取spine实例
+                spine: actionData.preSelectedCharacter.parms.spineResourceKey ? 
+                    markRaw(ResourceManager.getResource<Spine>(actionData.preSelectedCharacter.parms.spineResourceKey, ResType.Spine) ?? {}) : 
+                    undefined
+            } : undefined
+        };
+    }
+};
+
 // 在组件挂载后，初始化所有已有的div内容
 onMounted(() => {
-    // 保留现有的 onMounted 代码
+    // 注册action回调和序列化方法
     const actionIndex = action.getAction(props.title).as.findIndex((item) => item.id === props.id);
     action.getAction(props.title).as[actionIndex].action = targetAction;
+    action.getAction(props.title).as[actionIndex].serialize = serialization;
+    
     modification = action.getCurrentModification(props.title, props.id);
+
+    // 反序列化数据
+    const currentActionItem = action.getAction(props.title).as[actionIndex];
+    console.log("当前actionItem", currentActionItem)
+    deserialization(currentActionItem);
 
     // 添加键盘事件监听
     document.addEventListener('keydown', handleKeyDown);
 
-    // 初始化所有可编辑div的内容
+    // 初始化当前组件实例的可编辑div内容
     setTimeout(() => {
-        document.querySelectorAll('.text-input .editable-div').forEach((el, index) => {
-            const messageIndex = Math.floor(index / messages.value.length);
-            const textIndex = index % messages.value[messageIndex].texts.length;
-            const text = messages.value[messageIndex].texts[textIndex].text;
-            el.textContent = text;
-        });
+        // 获取当前组件的根元素
+        const currentComponent = document.querySelector(`[data-component-id="${props.id}"]`) || 
+                                document.querySelector('.action-item-main');
+        
+        if (currentComponent) {
+            // 只查询当前组件内的可编辑div
+            const editableDivs = currentComponent.querySelectorAll('.text-input .editable-div');
+            let globalIndex = 0;
+            
+            messages.value.forEach((message) => {
+                message.texts.forEach((textData) => {
+                    if (globalIndex < editableDivs.length) {
+                        const el = editableDivs[globalIndex];
+                        el.textContent = textData.text;
+                        globalIndex++;
+                    }
+                });
+            });
+        }
     }, 0);
 });
 

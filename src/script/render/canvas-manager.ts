@@ -80,6 +80,8 @@ class CanvasManager {
 
     public action;
 
+
+
     private constructor() {
         const container = document.getElementById("canvas") as HTMLDivElement;
         const info = document.getElementById("canvas-info") as HTMLDivElement;
@@ -839,8 +841,7 @@ class CanvasManager {
         return { particles, tickers };
     }
 
-    private adjustScale(container: HTMLDivElement, info: HTMLDivElement): void {
-        console.log("组都");
+    private adjustScale(container: HTMLDivElement, _info: HTMLDivElement): void {
         const canvas = this.app.view as HTMLCanvasElement;
         const containerHeight = container.clientHeight;
         const containerWidth = container.clientWidth;
@@ -879,6 +880,23 @@ class CanvasManager {
         return CanvasManager.instance;
     }
 
+    destroy() {
+        if (this.app) {
+            this.app.destroy(true, {
+                children: true,
+                texture: true,
+                baseTexture: true,
+            });
+        }
+    }
+
+    public static destroyInstance() {
+        if (CanvasManager.instance) {
+            CanvasManager.instance.destroy();
+            CanvasManager.instance = null!;
+        }
+    }
+
     public setSize(width: number, height: number): void {
         this.app.renderer.resize(width, height);
         this.adjustScale(document.getElementById("canvas") as HTMLDivElement, document.getElementById("info") as HTMLDivElement);
@@ -894,6 +912,72 @@ class CanvasManager {
 
     public clear(): void {
         this.app.stage.removeChildren();
+    }
+
+    /**
+     * 重新初始化画布内容，清理所有内容但保持实例存在
+     */
+    public reinitialize(): void {
+        // 清理角色
+        this.inSceneCharacterMap.forEach(spine => {
+            if (spine && spine.parent) {
+                spine.parent.removeChild(spine);
+                spine.destroy();
+            }
+        });
+        this.inSceneCharacterMap = [];
+
+        // 清理各层容器内容
+        Object.keys(this.layers).forEach(layerName => {
+            const layer = this.layers[layerName];
+            if (layer && layer.container) {
+                layer.container.removeChildren();
+            }
+        });
+
+        // 重置背景
+        if (this.defaultBackground) {
+            this.defaultBackground.texture = PIXI.Texture.WHITE;
+        }
+
+        // 重置视口位置和缩放
+        if (this.viewport) {
+            this.viewport.moveCenter(0, 0);
+            this.viewport.scale.set(1);
+        }
+
+        // 重置游戏模式
+        this.setMode(GameMode.PLAY);
+
+        // 重新创建默认层
+        this.createDefaultLayers();
+
+        // 重新添加层到舞台
+        for (let layerName in this.layers) {
+            if (this.layers[layerName].viewport) {
+                this.viewport.addChild(this.layers[layerName].container);
+            } else {
+                this.app.stage.addChild(this.layers[layerName].container);
+            }
+            this.layers[layerName].container.zIndex = this.layers[layerName].sortLayer;
+        }
+
+        this.viewport.sortChildren();
+        this.app.stage.sortChildren();
+
+        // 重新设置遮罩
+        this.setDefaultMaskEffect();
+
+        // 重新添加遮罩到UI层
+        if (this.initMask && this.layers['ui']) {
+            this.layers['ui'].container.addChild(this.initMask);
+        }
+
+        if (this.transitionMask && this.layers['ui']) {
+            this.layers['ui'].container.addChild(this.transitionMask);
+        }
+
+        console.log('CanvasManager 重新初始化完成');
     }
 }
 

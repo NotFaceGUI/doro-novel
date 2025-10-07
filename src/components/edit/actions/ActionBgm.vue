@@ -156,7 +156,7 @@ import { useCommonState } from '../../../script/common/common-action-item';
 import ActionItemHead from './ActionItemHead.vue';
 import { Modification, PropertyPath } from '../../../script/common/snapshot';
 import Dropdown from '../../common/Dropdown.vue';
-import { DropdownOption, InputOption } from '../../../types/app';
+import { ActionItems, DropdownOption, InputOption } from '../../../types/app';
 import DynamicInputs from '../../common/DynamicInputs.vue';
 import ToggleSwitch from '../../common/ToggleSwitch.vue';
 import ActionBottomLine from '../../common/ActionBottomLine.vue';
@@ -464,6 +464,122 @@ const clearAllFilters = () => {
     console.log("已清除所有音频过滤器");
 };
 
+// 序列化方法
+const serialization = () => {
+    return {
+        bgm: {
+            operationMode: AudioOperaMode.value[selectedOption.value].value,
+            selectedAudio: selectedAudioKey.value,
+            volume: volumeSettings.value[0].value,
+            isLoop: isLoop.value,
+            fadeIn: {
+                enabled: enableFadeIn.value,
+                duration: fadeInSettings.value[0].value
+            },
+            fadeOut: {
+                enabled: enableFadeOut.value,
+                duration: fadeOutSettings.value[0].value
+            },
+            stopFadeOut: {
+                enabled: enableStopFadeOut.value,
+                duration: stopFadeOutSettings.value[0].value
+            },
+            filters: {
+                enabled: enableFilters.value,
+                stereoSeparation: filterSettings.value[0].value,
+                distortion: filterSettings.value[1].value,
+                telephone: enableTelephone.value,
+                reverb: {
+                    enabled: enableReverb.value,
+                    time: reverbSettings.value[0].value,
+                    decay: reverbSettings.value[1].value
+                },
+                equalizer: {
+                    enabled: enableEqualizer.value,
+                    values: equalizerSettings.value.map(setting => setting.value)
+                }
+            }
+        }
+    };
+};
+
+// 反序列化方法
+const deserialization = (actionItem: ActionItems) => {
+    const actionData = actionItem.actionData;
+    if (!actionData || !actionData.bgm) {
+        return;
+    }
+
+    const bgmData = actionData.bgm;
+
+    // 恢复操作模式
+    const modeIndex = AudioOperaMode.value.findIndex(mode => mode.value === bgmData.operationMode);
+    if (modeIndex !== -1) {
+        selectedOption.value = modeIndex;
+    }
+
+    // 恢复选中的音频
+    if (bgmData.selectedAudio) {
+        const audioIndex = availableAudios.value.findIndex(audio => audio.value === bgmData.selectedAudio);
+        if (audioIndex !== -1) {
+            selectedAudioOption.value = audioIndex;
+        }
+    }
+
+    // 恢复音量设置
+    if (bgmData.volume !== undefined) {
+        volumeSettings.value[0].value = bgmData.volume;
+    }
+
+    // 恢复循环设置
+    if (bgmData.isLoop !== undefined) {
+        isLoop.value = bgmData.isLoop;
+    }
+
+    // 恢复淡入设置
+    if (bgmData.fadeIn) {
+        enableFadeIn.value = bgmData.fadeIn.enabled;
+        fadeInSettings.value[0].value = bgmData.fadeIn.duration;
+    }
+
+    // 恢复淡出设置
+    if (bgmData.fadeOut) {
+        enableFadeOut.value = bgmData.fadeOut.enabled;
+        fadeOutSettings.value[0].value = bgmData.fadeOut.duration;
+    }
+
+    // 恢复停止淡出设置
+    if (bgmData.stopFadeOut) {
+        enableStopFadeOut.value = bgmData.stopFadeOut.enabled;
+        stopFadeOutSettings.value[0].value = bgmData.stopFadeOut.duration;
+    }
+
+    // 恢复过滤器设置
+    if (bgmData.filters) {
+        enableFilters.value = bgmData.filters.enabled;
+        filterSettings.value[0].value = bgmData.filters.stereoSeparation;
+        filterSettings.value[1].value = bgmData.filters.distortion;
+        enableTelephone.value = bgmData.filters.telephone;
+
+        // 恢复混响设置
+        if (bgmData.filters.reverb) {
+            enableReverb.value = bgmData.filters.reverb.enabled;
+            reverbSettings.value[0].value = bgmData.filters.reverb.time;
+            reverbSettings.value[1].value = bgmData.filters.reverb.decay;
+        }
+
+        // 恢复均衡器设置
+        if (bgmData.filters.equalizer) {
+            enableEqualizer.value = bgmData.filters.equalizer.enabled;
+            if (bgmData.filters.equalizer.values && bgmData.filters.equalizer.values.length === equalizerSettings.value.length) {
+                bgmData.filters.equalizer.values.forEach((value: number, index: number) => {
+                    equalizerSettings.value[index].value = value;
+                });
+            }
+        }
+    }
+};
+
 const onSelectModel = () => {
     // 切换模式时停止预览
     previewStop();
@@ -480,7 +596,13 @@ let audioListTimer: number | null = null;
 onMounted(() => {
     // 注册action回调
     actionItem.action = targetAction;
+    actionItem.serialize = serialization;
     modification = action.getCurrentModification(props.title, props.id);
+
+    // 反序列化数据
+    const actionIndex = action.getAction(props.title).as.findIndex((item) => item.id === props.id);
+    const currentActionItem = action.getAction(props.title).as[actionIndex];
+    deserialization(currentActionItem);
 
     // 确保selectedAudioOption在有效范围内
     if (selectedAudioOption.value >= availableAudios.value.length) {

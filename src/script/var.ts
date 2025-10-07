@@ -1,4 +1,5 @@
 export const LOCAL_OPEN_KEY = "__PROJECT__OPNE__STATE__";
+export const LOCAL_OPEN_PROJECT_SAVEPATH_KEY = "__PROJECT__SAVE__PATH__";
 
 export const DEFAULT_WIDTH = 300;
 export const MIN_WIDTH = 200;
