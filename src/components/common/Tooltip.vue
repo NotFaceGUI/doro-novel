@@ -39,7 +39,7 @@ const tooltipStyle = computed<CSSProperties>(() => {
     const baseStyle: CSSProperties = {
         padding: '6px 12px',
         whiteSpace: 'nowrap', // 让 Tooltip 不换行
-        maxWidth: '200px', // 限制最大宽度，避免过长
+        maxWidth: '300px', // 限制最大宽度，避免过长
         width: 'max-content', // 让内容撑开
         textAlign: 'center',
     };

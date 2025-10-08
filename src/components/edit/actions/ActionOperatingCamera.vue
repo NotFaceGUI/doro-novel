@@ -56,7 +56,7 @@
                     </div>
 
                     <Dropdown v-model="selectedEaseOption" @update:modelValue="onSelectModel"
-                        :options="easingFunctionOptions" :disabled="false" />
+                        :options="(easingFunctionOptions as any)" :disabled="false" />
                 </template>
             </template>
 

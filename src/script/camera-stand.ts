@@ -7,6 +7,7 @@ import { Raw } from 'vue';
 import { DEFAULT_RESOLUTION } from "./var";
 import { setModification } from "./util/common";
 import { Modification, PropertyPath } from "./common/snapshot";
+import { Timing } from 'pixijs-actions';
 
 // 存储 spine 实例的初始高度
 const spineHeightCache = new Map<string, number>();
@@ -147,7 +148,7 @@ export const EasingFunctionLabels: Record<EasingFunction, string> = {
 export function getEasingFunctionOptions() {
     return Object.values(EasingFunction).map(value => ({
         label: EasingFunctionLabels[value],
-        value: value
+        value: Timing[value as keyof typeof Timing] // 使用 Timing 对象中的实际函数
     }));
 }
 

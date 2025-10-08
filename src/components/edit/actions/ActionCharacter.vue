@@ -15,6 +15,20 @@
                         <div class="mode-description">
                             选择场景中已存在的角色进行操作
                         </div>
+                        <div style="line-height: 1.6; font-size: 10px;">
+                            <p>
+                                <span style="color: red; font-weight: bold;">⚠ 注意：</span>
+                            <p></p>
+                            <span>切换角色将会</span>
+                            <span style="color: #d9534f; font-weight: bold;">失去当前角色的目标状态</span>。
+                            </p>
+                            <p>
+                                切换角色后，当前角色的 <span style="color: #d9534f; font-weight: bold;">目标状态将被清空</span>。
+                            </p>
+                            <p>
+                                当你切回该角色时，系统会自动 <span style="color: #5cb85c; font-weight: bold;">重置为角色在场景中的原位置</span>。
+                            </p>
+                        </div>
                     </div>
                 </Tooltip>
             </div>
@@ -48,24 +62,43 @@
 
             <!-- 补间模式的额外设置 -->
             <template v-if="operationModeOptions[selectedOperationMode].value === 'tween'">
-                <div class="action-title">
-                    持续时间
-                </div>
-                <div class="input-group">
-                    <input type="number" v-model="tweenDuration" min="100" step="100" />
-                    <span>毫秒</span>
+                <div>
+                    <DynamicInputs v-model="timeDuration" :columns="timeDuration.length">
+                    </DynamicInputs>
                 </div>
 
-                <div class="action-title">
-                    缓动类型
+                <!-- <div class="action-title">
+                    自定义缓动曲线
+                    <ToggleSwitch v-model="customCurve"></ToggleSwitch>
                 </div>
-                <!-- 暂时使用简单的下拉选择，后续可以扩展 -->
-                <select v-model="selectedEaseType">
-                    <option value="linear">线性</option>
-                    <option value="ease-in">缓入</option>
-                    <option value="ease-out">缓出</option>
-                    <option value="ease-in-out">缓入缓出</option>
-                </select>
+                <div v-if="customCurve">
+                    <CustomEaseRender v-model="points" @update:callback="handleCallback"></CustomEaseRender>
+                </div> -->
+
+                <div class="action-title">
+                    缓动曲线
+                    <Tooltip position="left">
+                        <div class="mode-description">
+                            指定参数随时间的变化率。
+                        </div>
+                    </Tooltip>
+                </div>
+
+                <Dropdown v-model="selectedEaseOption" @update:modelValue="onSelectEaseOption"
+                    :options="easingFunctionOptions" :disabled="false" />
+            </template>
+
+            <!-- 显示/隐藏模式的额外设置 -->
+            <template v-if="operationModeOptions[selectedOperationMode].value === 'show' || operationModeOptions[selectedOperationMode].value === 'hide'">
+                <div class="action-title">
+                    使用点阵剔除效果
+                    <ToggleSwitch v-model="useStippleEffect"></ToggleSwitch>
+                    <Tooltip position="left">
+                        <div class="mode-description">
+                            启用后，显示/隐藏角色时会使用点阵透明度效果，否则使用简单的淡入淡出效果
+                        </div>
+                    </Tooltip>
+                </div>
             </template>
         </div>
     </div>
@@ -78,7 +111,7 @@ import ActionItemHead from './ActionItemHead.vue';
 import { Modification, PropertyPath } from '../../../script/common/snapshot';
 import CanvasManager from '../../../script/render/canvas-manager';
 import Dropdown from '../../common/Dropdown.vue';
-import { ASIType, DropdownOption, GameMode, InputOption, sceneCharacter } from '../../../types/app';
+import { DropdownOption, GameMode, InputOption, sceneCharacter } from '../../../types/app';
 import Tooltip from '../../common/Tooltip.vue';
 import ToggleSwitch from '../../common/ToggleSwitch.vue';
 import { setModification } from '../../../script/util/common';
@@ -86,9 +119,13 @@ import { useI18n } from 'vue-i18n';
 import DynamicInputs from '../../common/DynamicInputs.vue';
 import ActionBottomLine from '../../common/ActionBottomLine.vue';
 import { useActionStore } from '../../../stores/action-store';
-import { OutlineFilter } from 'pixi-filters';
 import { Spine } from 'pixi-spine';
 import { TransformGizmo } from '../../../script/render/transform-gizmo';
+import { Action, Timing } from 'pixijs-actions';
+import { ControlPoint } from '../../../types/app';
+
+import { createStippleTransparencyFilter, createAlphaFilter } from '../../../script/common/effect';
+
 
 const canvas = CanvasManager.getInstance();
 
@@ -102,6 +139,13 @@ const { t } = useI18n();
 const { action, actionItem } = useCommonState(props.title, props.id);
 const actionStore = useActionStore();
 let modification: Map<PropertyPath, Modification>;
+
+const isSelected = ref(false)
+let transformGizmo: TransformGizmo;
+
+transformGizmo = TransformGizmo.getInstance();
+transformGizmo.zIndex = 1000; // 确保在Spine对象之上
+transformGizmo.visible = false; // 默认隐藏
 
 
 
@@ -118,48 +162,55 @@ const characterOptions = computed(() => {
 const selectedOperationMode = ref(0);
 const operationModeOptions = ref<DropdownOption[]>([
     { label: "固定 (Fixed)", value: "fixed" },
-    { label: "补间 (Tween)", value: "tween" }
+    { label: "补间 (Tween)", value: "tween" },
+    { label: "显示 (Show)", value: "show" },
+    { label: "隐藏 (Hide)", value: "hide" }
 ]);
 
-// 缓动相关 (暂时保留，可能在后续版本中使用)
-// const customCurve = ref(false);
-// const selectedEaseOption = ref(0);
-// const easingFunctionOptions = ref(getEasingFunctionOptions());
-// const points = ref<ControlPoint[]>([]);
+// 缓动相关
+const customCurve = ref(false);
+const selectedEaseOption = ref(0);
+// 将 Timing 对象转换为下拉框选项格式
+const createTimingOptions = () => {
+    const timingKeys = [
+        'linear',
+        'easeInQuad', 'easeOutQuad', 'easeInOutQuad',
+        'easeInCubic', 'easeOutCubic', 'easeInOutCubic',
+        'easeInQuart', 'easeOutQuart', 'easeInOutQuart',
+        'easeInQuint', 'easeOutQuint', 'easeInOutQuint',
+        'easeInSine', 'easeOutSine', 'easeInOutSine',
+        'easeInExpo', 'easeOutExpo', 'easeInOutExpo',
+        'easeInCirc', 'easeOutCirc', 'easeInOutCirc',
+        'easeInBack', 'easeOutBack', 'easeInOutBack',
+        'easeInElastic', 'easeOutElastic', 'easeInOutElastic',
+        'easeInBounce', 'easeOutBounce', 'easeInOutBounce'
+    ] as const;
 
-// 时间设置 (暂时保留，可能在后续版本中使用)
-// const timeDuration = ref<InputOption[]>([
-//     {
-//         label: '持续时间(ms)',
-//         value: 400,
-//         type: 'number',
-//         disabled: false
-//     },
-// ]);
+    return timingKeys.map((key) => ({
+        label: key,
+        value: key // 使用实际的缓动函数
+    }));
+};
 
-// 位置设置相关 (暂时保留，可能在后续版本中使用)
-// const isCustomStartPosition = ref(false);
+const easingFunctionOptions = ref(createTimingOptions());
+const points = ref<ControlPoint[]>([]);
 
-// const targetFixedPositionValues = ref<InputOption[]>([
-//     {
-//         label: 'x',
-//         value: 0,
-//         type: 'number',
-//         disabled: true
-//     },
-//     {
-//         label: 'y',
-//         value: 0,
-//         type: 'number',
-//         disabled: true
-//     },
-//     {
-//         label: "scale",
-//         value: 1,
-//         type: 'text',
-//         disabled: true
-//     }
-// ]);
+// 时间设置
+const timeDuration = ref<InputOption[]>([
+    {
+        label: '持续时间(ms)',
+        value: 1000,
+        type: 'number',
+        disabled: false
+    },
+]);
+
+
+// 自定义缓动曲线回调函数
+const customEaseCallback = ref<((t: number) => number) | null>(null);
+
+// 点阵剔除效果开关
+const useStippleEffect = ref(true);
 
 // 目标状态设置
 const targetStateOptions = ref<InputOption[]>([
@@ -183,53 +234,8 @@ const targetStateOptions = ref<InputOption[]>([
     }
 ]);
 
-// 自定义起始位置设置 (暂时保留，可能在后续版本中使用)
-// const customStartPositionValues = ref<InputOption[]>([
-//     {
-//         label: 'x',
-//         value: 0,
-//         type: 'number',
-//         disabled: false
-//     },
-//     {
-//         label: 'y',
-//         value: 0,
-//         type: 'number',
-//         disabled: false
-//     },
-//     {
-//         label: "scale",
-//         value: 1,
-//         type: 'text',
-//         disabled: false
-//     }
-// ]);
-
-// 补间目标位置设置 (暂时保留，可能在后续版本中使用)
-// const targetTweenPositionValues = ref<InputOption[]>([
-//     {
-//         label: 'x',
-//         value: 0,
-//         type: 'number',
-//         disabled: false
-//     },
-//     {
-//         label: 'y',
-//         value: 0,
-//         type: 'number',
-//         disabled: false
-//     },
-//     {
-//         label: "scale",
-//         value: 1,
-//         type: 'text',
-//         disabled: false
-//     }
-// ]);
-
-// 当前选中的角色
-
-
+// 是否选中角色
+const isCharacterSelected = ref(false);
 
 // 当前选中的角色信息
 const currentCharacter = computed(() => {
@@ -240,21 +246,28 @@ const currentCharacter = computed(() => {
         applyOutlineToSpine(action.maxCharacter[selectedCharacterIndex.value].spine, true);
         const newCharacter = action.maxCharacter[selectedCharacterIndex.value];
 
+        console.log("当前角色:", currentCharacter.value?.character.characterName);
+        console.log("新角色:", newCharacter.character.characterName);
+
         // 当角色发生变化时，更新 targetState 为当前角色的位置
         if (newCharacter && newCharacter.spine) {
-            targetState.value.x = newCharacter.spine.x;
-            targetState.value.y = newCharacter.spine.y;
-            targetState.value.scale = newCharacter.spine.scale.x;
+            if (isCharacterSelected.value) {
+                console.log("选择角色索引:", "AAA");
 
+                targetState.value.x = newCharacter.spine.x;
+                targetState.value.y = newCharacter.spine.y;
+                targetState.value.scale = newCharacter.spine.scale.x;
+            }
             // 同步更新到 targetStateOptions 显示
-            targetStateOptions.value[0].value = Math.round(newCharacter.spine.x);
-            targetStateOptions.value[1].value = Math.round(newCharacter.spine.y);
-            targetStateOptions.value[2].value = parseFloat(newCharacter.spine.scale.x.toFixed(2));
+            targetStateOptions.value[0].value = Math.round(targetState.value.x);
+            targetStateOptions.value[1].value = Math.round(targetState.value.y);
+            targetStateOptions.value[2].value = parseFloat(targetState.value.scale.toFixed(2));
         }
 
+        console.log("选择角色索引:", "cesF");
+        isCharacterSelected.value = false;
         return newCharacter;
     }
-
 
     return null;
 });
@@ -273,15 +286,6 @@ const targetState = ref({
     scale: 1
 });
 
-// 补间持续时间
-const tweenDuration = ref(1000);
-
-// 缓动类型选择
-const selectedEaseType = ref('linear');
-
-// 场景控制状态
-const isSceneControlEnabled = ref(false);
-
 // 角色选择变化处理
 const onSelectCharacter = (index: number) => {
     console.log("选择角色索引:", index);
@@ -299,14 +303,17 @@ const onSelectCharacter = (index: number) => {
 
     // 设置新的选中角色索引
     selectedCharacterIndex.value = index;
-    updateCharacterInfo();
+    isCharacterSelected.value = true;
+
+    // 获取新选择的角色
+    const newCharacter = action.maxCharacter[index];
 
     // 为新角色应用轮廓和 TransformGizmo
-    if (currentCharacter.value?.spine) {
-        applyOutlineToSpine(currentCharacter.value.spine, true);
+    if (newCharacter?.spine) {
+        applyOutlineToSpine(newCharacter.spine, true);
 
         // 重新附加并显示 TransformGizmo
-        transformGizmo.attachToSpine(currentCharacter.value.spine);
+        transformGizmo.attachToSpine(newCharacter.spine);
         transformGizmo.visible = true;
 
         // 设置位置更新回调
@@ -321,11 +328,18 @@ const onSelectCharacter = (index: number) => {
             targetStateOptions.value[2].value = parseFloat(scale.toFixed(2));
         });
     }
+
+    updateCharacterInfo();
 }
 
 // 操作模式选择处理
 const onSelectOperationMode = (index: number) => {
     selectedOperationMode.value = index;
+};
+
+// 缓动函数选择处理
+const onSelectEaseOption = (index: number) => {
+    selectedEaseOption.value = index;
 };
 
 // 更新角色信息
@@ -356,7 +370,7 @@ const updateCharacterInfo = () => {
 
 
 // 应用到场景
-const applyToScene = () => {
+const applyToScene = async () => {
     if (!currentCharacter.value) return;
 
     const spine = currentCharacter.value.spine;
@@ -379,86 +393,274 @@ const applyToScene = () => {
             saveModification();
         } else if (operationMode === 'tween') {
             // 补间模式：执行动画
-            runCharacterTween(spine);
+            await runCharacterTween(spine);
+        } else if (operationMode === 'show') {
+            // 显示模式：根据开关决定是否使用点阵透明度效果
+            spine.visible = true;
+            spine.alpha = 1;
+
+            if (useStippleEffect.value) {
+                // 使用点阵透明度效果
+                spine.run(Action.moveBy(0 ,-30, 1).easeInOut());
+
+                // 创建点阵透明度滤镜，初始透明度为0，调整点阵大小为3让效果更细腻
+                const stippleFilter = createStippleTransparencyFilter(0, 2.32);
+                
+                // 应用滤镜（保留现有滤镜）
+                const existingFilters = spine.filters || [];
+                spine.filters = [...existingFilters, stippleFilter];
+
+                // 使用动画逐渐增加透明度，实现填满效果
+                const startTime = Date.now();
+                const duration = 1432; // 调整为1200ms
+
+                const animateStipple = () => {
+                    const elapsed = Date.now() - startTime;
+                    const progress = Math.min(elapsed / duration, 1);
+
+                    // 使用easeInOut动画
+                    let easedProgress;
+                    if (progress < 0.5) {
+                        easedProgress = 2 * progress * progress;
+                    } else {
+                        easedProgress = 1 - 2 * Math.pow(1 - progress, 2);
+                    }
+                    stippleFilter.uniforms.uTransparency = easedProgress;
+
+                    if (progress < 1) {
+                        requestAnimationFrame(animateStipple);
+                    } else {
+                        // 动画完成后移除stippleFilter，保留其他滤镜
+                        const currentFilters = spine.filters || [];
+                        spine.filters = currentFilters.filter(filter => filter !== stippleFilter);
+                        spine.alpha = 1;
+                    }
+                };
+
+                requestAnimationFrame(animateStipple);
+            } else {
+                // 不使用点阵效果，使用透明度shader
+                spine.visible = true;
+                spine.alpha = 1;
+
+
+                // 创建透明度滤镜，初始透明度为0
+                const alphaFilter = createAlphaFilter(0);
+                
+                // 应用滤镜（保留现有滤镜）
+                const existingFilters = spine.filters || [];
+                spine.filters = [...existingFilters, alphaFilter];
+
+                // 使用动画逐渐增加透明度
+                const startTime = Date.now();
+                const duration = 1000;
+
+                const animateAlpha = () => {
+                    const elapsed = Date.now() - startTime;
+                    const progress = Math.min(elapsed / duration, 1);
+
+                    // 使用easeInOut动画
+                    let easedProgress;
+                    if (progress < 0.5) {
+                        easedProgress = 2 * progress * progress;
+                    } else {
+                        easedProgress = 1 - 2 * Math.pow(1 - progress, 2);
+                    }
+                    alphaFilter.uniforms.uAlpha = easedProgress;
+
+                    if (progress < 1) {
+                        requestAnimationFrame(animateAlpha);
+                    } else {
+                        // 动画完成后移除alphaFilter，保留其他滤镜
+                        const currentFilters = spine.filters || [];
+                        spine.filters = currentFilters.filter(filter => filter !== alphaFilter);
+                        spine.alpha = 1;
+                    }
+                };
+
+                requestAnimationFrame(animateAlpha);
+            }
+
+            // 保存修改
+            saveVisibilityModification(true, 1);
+        } else if (operationMode === 'hide') {
+            // 隐藏模式：根据开关决定是否使用反向点阵透明度效果
+            if (useStippleEffect.value) {
+                // 使用反向点阵透明度效果
+                spine.visible = true;
+                spine.alpha = 1; // 保持spine本身完全不透明
+
+
+                // 创建点阵透明度滤镜，初始透明度为1（完全显示），调整点阵大小
+                const stippleFilter = createStippleTransparencyFilter(1, 2.32);
+                
+                // 应用滤镜（保留现有滤镜）
+                const existingFilters = spine.filters || [];
+                spine.filters = [...existingFilters, stippleFilter];
+
+                // 使用动画逐渐减少透明度，实现消失效果
+                const startTime = Date.now();
+                const duration = 1000; // 与显示模式保持一致的时长
+
+                const animateStipple = () => {
+                    const elapsed = Date.now() - startTime;
+                    const progress = Math.min(elapsed / duration, 1);
+
+                    // 使用easeInOut动画
+                    let easedProgress;
+                    if (progress < 0.5) {
+                        easedProgress = 2 * progress * progress;
+                    } else {
+                        easedProgress = 1 - 2 * Math.pow(1 - progress, 2);
+                    }
+                    
+                    // 反向：从1逐渐减少到0
+                    stippleFilter.uniforms.uTransparency = 1 - easedProgress;
+
+                    if (progress < 1) {
+                        requestAnimationFrame(animateStipple);
+                    } else {
+                        // 动画完成后移除stippleFilter并隐藏角色
+                        const currentFilters = spine.filters || [];
+                        spine.filters = currentFilters.filter(filter => filter !== stippleFilter);
+                        spine.visible = false;
+                        spine.alpha = 0;
+                    }
+                };
+
+                requestAnimationFrame(animateStipple);
+            } else {
+                // 不使用点阵效果，使用透明度shader
+                spine.visible = true;
+                spine.alpha = 1;
+
+                spine.run(Action.moveBy(0, 30, 1).easeInOut());
+
+                // 创建透明度滤镜，初始透明度为1（完全显示）
+                const alphaFilter = createAlphaFilter(1);
+                
+                // 应用滤镜（保留现有滤镜）
+                const existingFilters = spine.filters || [];
+                spine.filters = [...existingFilters, alphaFilter];
+
+                // 使用动画逐渐减少透明度
+                const startTime = Date.now();
+                const duration = 1432;
+
+                const animateAlpha = () => {
+                    const elapsed = Date.now() - startTime;
+                    const progress = Math.min(elapsed / duration, 1);
+
+                    // 使用easeInOut动画
+                    let easedProgress;
+                    if (progress < 0.5) {
+                        easedProgress = 2 * progress * progress;
+                    } else {
+                        easedProgress = 1 - 2 * Math.pow(1 - progress, 2);
+                    }
+                    
+                    // 反向：从1逐渐减少到0
+                    alphaFilter.uniforms.uAlpha = 1 - easedProgress;
+
+                    if (progress < 1) {
+                        requestAnimationFrame(animateAlpha);
+                    } else {
+                        // 动画完成后移除alphaFilter并隐藏角色
+                        const currentFilters = spine.filters || [];
+                        spine.filters = currentFilters.filter(filter => filter !== alphaFilter);
+                        spine.visible = false;
+                        spine.alpha = 0;
+                    }
+                };
+
+                requestAnimationFrame(animateAlpha);
+            }
+
+            // 保存修改
+            saveVisibilityModification(false, 0);
         }
     }
 };
 
-// 重置到原始状态
-const resetToOriginal = () => {
-    if (lastCharacter.value) {
-        targetState.value = { ...lastCharacter.value };
-        applyToScene();
-    }
-};
 
-// 启用场景拖拽控制
-const enableSceneControl = () => {
-    isSceneControlEnabled.value = !isSceneControlEnabled.value;
-
-    if (isSceneControlEnabled.value) {
-        // 启用拖拽控制逻辑
-        console.log('启用场景拖拽控制');
-        // 这里可以添加鼠标事件监听器
-    } else {
-        // 禁用拖拽控制逻辑
-        console.log('禁用场景拖拽控制');
-        // 这里可以移除鼠标事件监听器
-    }
-};
 
 // 执行角色补间动画
-const runCharacterTween = (spine: any) => {
-    const startX = spine.x;
-    const startY = spine.y;
-    const startScale = spine.scale.x;
+const runCharacterTween = (spine: any): Promise<void> => {
+    return new Promise((resolve) => {
 
-    const targetX = targetState.value.x;
-    const targetY = targetState.value.y;
-    const targetScale = targetState.value.scale;
+        const targetX = targetState.value.x;
+        const targetY = targetState.value.y;
+        const targetScale = targetState.value.scale;
 
-    const duration = tweenDuration.value;
-    const startTime = Date.now();
+        const duration = timeDuration.value[0].value || 400;
 
-    const animate = () => {
-        const elapsed = Date.now() - startTime;
-        const progress = Math.min(elapsed / duration, 1);
+        // 获取缓动函数
+        let easingFunction: (t: number) => number;
 
-        // 简单的线性插值
-        spine.x = startX + (targetX - startX) * progress;
-        spine.y = startY + (targetY - startY) * progress;
-        spine.scale.set(startScale + (targetScale - startScale) * progress);
-
-        if (progress < 1) {
-            requestAnimationFrame(animate);
+        if (customCurve.value && customEaseCallback.value) {
+            // 使用自定义缓动曲线
+            easingFunction = customEaseCallback.value;
         } else {
-            // 动画完成，更新lastCharacter
+            // 使用预设的缓动函数
+            const selectedEasing = easingFunctionOptions.value[selectedEaseOption.value];
+            easingFunction = Timing[selectedEasing.value];
+        }
+
+
+        // 使用 pixijs-actions 创建补间动画
+        const moveAction = Action.group([
+            Action.moveTo(targetX, targetY, duration / 1000).setTiming(easingFunction),
+            Action.scaleTo(targetScale, duration / 1000).setTiming(easingFunction)
+        ]);
+
+        setTimeout(() => {
             lastCharacter.value = { ...targetState.value };
 
             // 保存修改
             saveModification();
-        }
-    };
 
-    requestAnimationFrame(animate);
+            resolve();
+        }, duration);
+
+        // 运行动画
+        spine.run(moveAction);
+    });
 };
 // 执行角色操作的主函数
 const targetAction = async () => {
     handleSceneState(canvas, props);
 
+    if (currentCharacter.value) {
+        const characterPreview = actionStore.previewSnapshot.characters.get(currentCharacter.value?.character.characterName);
+        console.log("characterPreview:", characterPreview);
+        currentCharacter.value.spine.x = characterPreview?.x || currentCharacter.value.spine.x;
+        currentCharacter.value.spine.y = characterPreview?.y || currentCharacter.value.spine.y;
+        currentCharacter.value.spine.scale.set(characterPreview?.scale || currentCharacter.value.spine.scale.x);
+    }
+
     if (action.maxCharacter.length > 0 && selectedCharacterIndex.value < action.maxCharacter.length) {
-        const currentCharacter = action.maxCharacter[selectedCharacterIndex.value];
+        // const currentCharacter = action.maxCharacter[selectedCharacterIndex.value];
 
         // 应用角色操作
-        if (operationModeOptions.value[selectedOperationMode.value].value === 'fixed') {
+        const operationMode = operationModeOptions.value[selectedOperationMode.value].value;
+        if (operationMode === 'fixed') {
             // 固定模式
             applyToScene();
-        } else if (operationModeOptions.value[selectedOperationMode.value].value === 'tween') {
+        } else if (operationMode === 'tween') {
             // 补间模式
+            await applyToScene();
+        } else if (operationMode === 'show' || operationMode === 'hide') {
+            // 显示/隐藏模式
             applyToScene();
         }
     }
 };
+
+
+watchEffect(() => {
+    // 监听 targetState 变化，同步更新到 targetStateOptions
+    console.log("targetStateOptions.value:", targetStateOptions.value);
+});
 
 // 当前角色位置模式 (暂时保留，可能在后续版本中使用)
 // const currentCharacterPositionMode = ref<CharacterPositionType>('none');
@@ -474,22 +676,36 @@ const saveModification = () => {
     setModification(modification, `characters.${currentCharacter.value.character.path?.name}.scale`, targetState.value.scale);
 };
 
+// 保存可见性修改
+const saveVisibilityModification = (visible: boolean, alpha: number) => {
+    if (!currentCharacter.value || !modification) return;
+};
+
 // 序列化方法
 const serialization = () => {
     return {
         character: {
             selectedCharacterIndex: selectedCharacterIndex.value,
             operationMode: operationModeOptions.value[selectedOperationMode.value].value,
+            useStippleEffect: useStippleEffect.value,
             targetState: {
                 x: targetState.value.x,
                 y: targetState.value.y,
                 scale: targetState.value.scale
             },
             tweenSettings: {
-                duration: tweenDuration.value,
-                easeType: selectedEaseType.value
+                duration: timeDuration.value[0].value || 400,
+                customCurve: customCurve.value,
+                selectedEaseOption: selectedEaseOption.value,
+                points: points.value
             },
             targetStateOptions: targetStateOptions.value.map(option => ({
+                label: option.label,
+                value: option.value,
+                type: option.type,
+                disabled: option.disabled
+            })),
+            timeDuration: timeDuration.value.map(option => ({
                 label: option.label,
                 value: option.value,
                 type: option.type,
@@ -521,6 +737,64 @@ const deserialization = (actionItem: any) => {
         }
     }
 
+    // 恢复点阵效果开关
+    if (characterData.useStippleEffect !== undefined) {
+        useStippleEffect.value = characterData.useStippleEffect;
+    }
+
+
+
+    // 恢复补间设置
+    if (characterData.tweenSettings) {
+        // 恢复持续时间
+        if (characterData.tweenSettings.duration !== undefined) {
+            timeDuration.value[0].value = characterData.tweenSettings.duration;
+        }
+
+        // 恢复自定义缓动曲线设置
+        if (characterData.tweenSettings.customCurve !== undefined) {
+            customCurve.value = characterData.tweenSettings.customCurve;
+        }
+
+        // 恢复选中的缓动选项
+        if (characterData.tweenSettings.selectedEaseOption !== undefined) {
+            selectedEaseOption.value = characterData.tweenSettings.selectedEaseOption;
+        }
+
+        // 恢复自定义缓动曲线点
+        if (characterData.tweenSettings.points) {
+            points.value = characterData.tweenSettings.points;
+        }
+    }
+
+    // // 恢复目标状态选项
+    // if (characterData.targetStateOptions && characterData.targetStateOptions.length === targetStateOptions.value.length) {
+    //     // 使用响应式方式更新数组
+    //     targetStateOptions.value = targetStateOptions.value.map((option, index) => {
+    //         const savedOption = characterData.targetStateOptions[index];
+    //         if (savedOption) {
+    //             return {
+    //                 ...option,
+    //                 value: savedOption.value,
+    //                 disabled: savedOption.disabled
+    //             };
+    //         }
+    //         return option;
+    //     });
+    // }
+
+    // 恢复时间持续时间选项
+    if (characterData.timeDuration && characterData.timeDuration.length === timeDuration.value.length) {
+        characterData.timeDuration.forEach((option: any, index: number) => {
+            if (timeDuration.value[index]) {
+                timeDuration.value[index].value = option.value;
+                timeDuration.value[index].disabled = option.disabled;
+            }
+        });
+    }
+
+
+
     // 恢复目标状态
     if (characterData.targetState) {
         targetState.value = {
@@ -528,34 +802,16 @@ const deserialization = (actionItem: any) => {
             y: characterData.targetState.y || 0,
             scale: characterData.targetState.scale || 1
         };
-    }
+        console.log("targetState.value:", targetState.value);
 
-    // 恢复补间设置
-    if (characterData.tweenSettings) {
-        tweenDuration.value = characterData.tweenSettings.duration || 1000;
-        selectedEaseType.value = characterData.tweenSettings.easeType || 'linear';
+        // 同步更新到 targetStateOptions 显示
+        targetStateOptions.value[0].value = Math.round(targetState.value.x);
+        targetStateOptions.value[1].value = Math.round(targetState.value.y);
+        targetStateOptions.value[2].value = parseFloat(targetState.value.scale.toFixed(2));
     }
-
-    // 恢复目标状态选项
-    if (characterData.targetStateOptions && characterData.targetStateOptions.length === targetStateOptions.value.length) {
-        characterData.targetStateOptions.forEach((option: any, index: number) => {
-            if (targetStateOptions.value[index]) {
-                targetStateOptions.value[index].value = option.value;
-                targetStateOptions.value[index].disabled = option.disabled;
-            }
-        });
-    }
-
-    // 更新角色信息
-    updateCharacterInfo();
 };
 
-const isSelected = ref(false)
-let transformGizmo: TransformGizmo;
 
-transformGizmo = TransformGizmo.getInstance();
-transformGizmo.zIndex = 1000; // 确保在Spine对象之上
-transformGizmo.visible = false; // 默认隐藏
 // 不再添加到UI层，而是在attachToSpine时添加到Spine对象
 // 应用或移除Spine描边效果
 const applyOutlineToSpine = (spine: Spine | undefined, apply: boolean) => {
@@ -565,6 +821,7 @@ const applyOutlineToSpine = (spine: Spine | undefined, apply: boolean) => {
 
 const onClickActionItem = () => {
     console.log("点击了当前选中的操作项");
+
 
     setTimeout(() => {
         CanvasManager.getInstance().setMode(GameMode.SCENE);
@@ -590,6 +847,7 @@ const onClickActionItem = () => {
 
         // 设置位置更新回调，实时同步到 targetState
         transformGizmo.setOnPositionUpdateCallback((x: number, y: number, scale: number) => {
+            console.log("TransformGizmo 位置更新:", x, y, scale);
             targetState.value.x = x;
             targetState.value.y = y;
             targetState.value.scale = scale;
@@ -606,6 +864,7 @@ const onClickActionItem = () => {
     }
 
     isSelected.value = true;
+
 }
 
 watchEffect(() => {
@@ -634,10 +893,12 @@ onMounted(() => {
     // 反序列化数据
     const actionIndex = action.getAction(props.title).as.findIndex((item) => item.id === props.id);
     const currentActionItem = action.getAction(props.title).as[actionIndex];
-    deserialization(currentActionItem);
 
     // 初始化角色信息
     updateCharacterInfo();
+
+    deserialization(currentActionItem);
+
 
     // 设置 Spine 点击回调，当点击场景中的 Spine 对象时切换选择
     canvas.setSpineClickCallback(props.id, (spine: Spine, characterInfo: sceneCharacter) => {
@@ -645,7 +906,7 @@ onMounted(() => {
         if (isSelected.value) {
             // 查找被点击的 Spine 对应的角色索引
             const clickedCharacterIndex = action.maxCharacter.findIndex(
-                (char) => char.spine === spine
+                (char) => char.character.characterName === characterInfo.character.characterName
             );
 
             if (clickedCharacterIndex !== -1 && clickedCharacterIndex !== selectedCharacterIndex.value) {

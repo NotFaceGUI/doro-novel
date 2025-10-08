@@ -112,7 +112,7 @@ import CanvasManager from '../../../script/render/canvas-manager';
 import { setModification } from '../../../script/util/common';
 import { Modification, PropertyPath } from '../../../script/common/snapshot';
 import ToggleSwitch from '../../common/ToggleSwitch.vue';
-import { ASSET_CHARACTER, ResType } from '../../../script/var';
+import { ASSET_CHARACTER, DEFAULT_SPINE_SCALE, ResType } from '../../../script/var';
 import { selectCharacterType, selectImageType } from '../../../script/common/search-action';
 import { handleSceneState, useCommonState } from '../../../script/common/common-action-item';
 import { ActionItems, GameMode, InputOption, LoadRes } from '../../../types/app';
@@ -224,7 +224,7 @@ const addCharacter = () => {
             character: res,
             x: viewport.worldWidth / 2,
             y: viewport.worldHeight + 200,
-            scale: 1,
+            scale: DEFAULT_SPINE_SCALE,
             isInitShow: true,
         }
 
@@ -275,6 +275,7 @@ const updateCharacterPosition = (index: number) => {
     // 修改值
     setModification(modification, `characters.${character.character.path?.name}.x`, character.x);
     setModification(modification, `characters.${character.character.path?.name}.y`, character.y);
+    setModification(modification, `characters.${character.character.path?.name}.scale`, character.scale);
 }
 
 // 拖拽相关变量
@@ -526,6 +527,7 @@ const targetAction = async () => {
        character.spine.visible = character.isInitShow;
        character.spine.scale.set(character.scale)
        character.spine.position.set(character.x, character.y);
+       character.spine.alpha = 1;
     })
 
 

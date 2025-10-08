@@ -149,7 +149,7 @@ export const useActionStore = defineStore('action', () => {
     CanvasManager.getInstance().setMode(GameMode.PLAY);
 
     let nextActionKey = null;  // 跟踪下一个 action 的 key
-    let nextActionItemId : string | null = null;  // 跟踪下一个 actionItem 的 id
+    let nextActionItemId: string | null = null;  // 跟踪下一个 actionItem 的 id
 
     // 遍历 actionMap 中所有 Actions
     for (const key in actionMap.value) {
@@ -364,7 +364,8 @@ export const useActionStore = defineStore('action', () => {
     useBranchStore().clearAllTags();
 
     currentSelectActionItemId.value = -1;
-    
+    CanvasManager.getInstance().setMode(GameMode.PLAY)
+
   }
 
 
