@@ -89,7 +89,6 @@ const { t } = useI18n()
 
 const search = ref<HTMLInputElement | null>(null);
 const actionStore = useActionStore();
-const loadRes = actionStore.loadResMap;
 
 const props = defineProps<{
     mode: "res" | "character" | "Image" | "sceneCharacter",
@@ -125,6 +124,7 @@ const options = [
 ];
 
 const slelectOptions = computed(() => {
+    const loadRes = actionStore.loadResMap;
     return Object.values(loadRes).filter(option => option.type === props.type);
 });
 

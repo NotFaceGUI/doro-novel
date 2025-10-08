@@ -599,12 +599,13 @@ export class UIRender {
         if (isEndVisible) {
             if (hideDelay > 0) {
                 // 延迟隐藏UI
-                setTimeout(() => {
+                await new Promise<void>(resolve => setTimeout(() => {
                     this.voiceoverTextAera.visible = false;
                     this.normalDialog.visible = false;
                     this.normalTextAera.visible = false;
                     this.isStart = false; // 结束
-                }, hideDelay); // 转换为毫秒
+                    resolve();
+                }, hideDelay)); // 转换为毫秒
             } else {
                 // 立即隐藏UI
                 this.voiceoverTextAera.visible = false;
