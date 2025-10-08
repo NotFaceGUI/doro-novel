@@ -123,6 +123,7 @@ import ResourceManager from '../../../script/resource-manager';
 import Tooltip from '../../common/Tooltip.vue';
 import Dropdown from '../../common/Dropdown.vue';
 import { useI18n } from 'vue-i18n';
+import { useViewportStore } from '../../../stores/viewport-store';
 
 const canvasManager = CanvasManager.getInstance();
 let viewport = canvasManager.viewport;
@@ -177,6 +178,8 @@ const cameraValues = ref<InputOption[]>([
         disabled: true
     }
 ]);
+
+useViewportStore()
 
 const backgroundParallaxFactorValues = ref<InputOption[]>([
     {

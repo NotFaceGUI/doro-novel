@@ -1,5 +1,5 @@
 <template>
-    <div class="action-item-main">
+    <div class="action-item-main" @click="onClickActionItem">
         <ActionItemHead content="👤 操作角色" :title="title" :id="id"></ActionItemHead>
         <div class="action-item-content">
             <div class="action-title">
@@ -19,7 +19,7 @@
                 </Tooltip>
             </div>
 
-            <Dropdown v-model="selectedCharacterIndex" @update:modelValue="onSelectCharacter"
+            <Dropdown style="width: 100%;" v-model="selectedCharacterIndex" @update:modelValue="onSelectCharacter"
                 :options="characterOptions" :disabled="false" />
 
             <!-- 角色操作区域 -->
@@ -44,7 +44,7 @@
             <div class="action-title">
                 目标状态
             </div>
-            <DynamicInputs v-model="targetStateOptions" :columns="targetStateOptions.length"  />
+            <DynamicInputs v-model="targetStateOptions" :columns="targetStateOptions.length" />
 
             <!-- 补间模式的额外设置 -->
             <template v-if="operationModeOptions[selectedOperationMode].value === 'tween'">
@@ -67,38 +67,28 @@
                     <option value="ease-in-out">缓入缓出</option>
                 </select>
             </template>
-
-            <!-- 场景控制按钮 -->
-            <div class="scene-control-buttons">
-                <button class="control-btn primary" @click="applyToScene">
-                    应用到场景
-                </button>
-                <button class="control-btn secondary" @click="resetToOriginal">
-                    重置
-                </button>
-                <button class="control-btn interactive" @click="enableSceneControl">
-                    场景拖拽控制
-                </button>
-            </div>
-
         </div>
     </div>
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue';
+import { computed, onMounted, onUnmounted, ref, watchEffect } from 'vue';
 import { handleSceneState, useCommonState } from '../../../script/common/common-action-item';
 import ActionItemHead from './ActionItemHead.vue';
 import { Modification, PropertyPath } from '../../../script/common/snapshot';
 import CanvasManager from '../../../script/render/canvas-manager';
 import Dropdown from '../../common/Dropdown.vue';
-import { DropdownOption, InputOption } from '../../../types/app';
+import { ASIType, DropdownOption, GameMode, InputOption, sceneCharacter } from '../../../types/app';
 import Tooltip from '../../common/Tooltip.vue';
 import ToggleSwitch from '../../common/ToggleSwitch.vue';
 import { setModification } from '../../../script/util/common';
 import { useI18n } from 'vue-i18n';
 import DynamicInputs from '../../common/DynamicInputs.vue';
 import ActionBottomLine from '../../common/ActionBottomLine.vue';
+import { useActionStore } from '../../../stores/action-store';
+import { OutlineFilter } from 'pixi-filters';
+import { Spine } from 'pixi-spine';
+import { TransformGizmo } from '../../../script/render/transform-gizmo';
 
 const canvas = CanvasManager.getInstance();
 
@@ -110,7 +100,10 @@ const props = defineProps<{
 const { t } = useI18n();
 
 const { action, actionItem } = useCommonState(props.title, props.id);
+const actionStore = useActionStore();
 let modification: Map<PropertyPath, Modification>;
+
+
 
 // 角色选择相关
 const selectedCharacterIndex = ref(0);
@@ -174,19 +167,19 @@ const targetStateOptions = ref<InputOption[]>([
         label: 'x',
         value: 0,
         type: 'number',
-        disabled: false
+        disabled: true
     },
     {
         label: 'y',
         value: 0,
         type: 'number',
-        disabled: false
+        disabled: true
     },
     {
         label: "scale",
         value: 1,
         type: 'text',
-        disabled: false
+        disabled: true
     }
 ]);
 
@@ -241,8 +234,28 @@ const targetStateOptions = ref<InputOption[]>([
 // 当前选中的角色信息
 const currentCharacter = computed(() => {
     if (action.maxCharacter.length > 0 && selectedCharacterIndex.value < action.maxCharacter.length) {
-        return action.maxCharacter[selectedCharacterIndex.value];
+        // 发生变化时更新当前角色 先去除轮廓
+        applyOutlineToSpine(currentCharacter.value?.spine, false);
+        // 应用轮廓到新角色
+        applyOutlineToSpine(action.maxCharacter[selectedCharacterIndex.value].spine, true);
+        const newCharacter = action.maxCharacter[selectedCharacterIndex.value];
+
+        // 当角色发生变化时，更新 targetState 为当前角色的位置
+        if (newCharacter && newCharacter.spine) {
+            targetState.value.x = newCharacter.spine.x;
+            targetState.value.y = newCharacter.spine.y;
+            targetState.value.scale = newCharacter.spine.scale.x;
+
+            // 同步更新到 targetStateOptions 显示
+            targetStateOptions.value[0].value = Math.round(newCharacter.spine.x);
+            targetStateOptions.value[1].value = Math.round(newCharacter.spine.y);
+            targetStateOptions.value[2].value = parseFloat(newCharacter.spine.scale.x.toFixed(2));
+        }
+
+        return newCharacter;
     }
+
+
     return null;
 });
 
@@ -271,9 +284,44 @@ const isSceneControlEnabled = ref(false);
 
 // 角色选择变化处理
 const onSelectCharacter = (index: number) => {
+    console.log("选择角色索引:", index);
+
+    // 先清理之前的选择状态
+    if (currentCharacter.value?.spine) {
+        // 移除之前角色的轮廓
+        applyOutlineToSpine(currentCharacter.value.spine, false);
+
+        // 隐藏并清理 TransformGizmo
+        const transformGizmo = TransformGizmo.getInstance();
+        transformGizmo.visible = false;
+        transformGizmo.removeOnPositionUpdateCallback();
+    }
+
+    // 设置新的选中角色索引
     selectedCharacterIndex.value = index;
     updateCharacterInfo();
-};
+
+    // 为新角色应用轮廓和 TransformGizmo
+    if (currentCharacter.value?.spine) {
+        applyOutlineToSpine(currentCharacter.value.spine, true);
+
+        // 重新附加并显示 TransformGizmo
+        transformGizmo.attachToSpine(currentCharacter.value.spine);
+        transformGizmo.visible = true;
+
+        // 设置位置更新回调
+        transformGizmo.setOnPositionUpdateCallback((x: number, y: number, scale: number) => {
+            targetState.value.x = x;
+            targetState.value.y = y;
+            targetState.value.scale = scale;
+
+            // 同步更新到 targetStateOptions 显示
+            targetStateOptions.value[0].value = Math.round(x);
+            targetStateOptions.value[1].value = Math.round(y);
+            targetStateOptions.value[2].value = parseFloat(scale.toFixed(2));
+        });
+    }
+}
 
 // 操作模式选择处理
 const onSelectOperationMode = (index: number) => {
@@ -306,19 +354,14 @@ const updateCharacterInfo = () => {
     }
 };
 
-// 更新目标状态
-const updateTargetState = () => {
-    // 这里可以添加实时预览逻辑
-    console.log('目标状态更新:', targetState.value);
-};
 
 // 应用到场景
 const applyToScene = () => {
     if (!currentCharacter.value) return;
 
-    const spine = canvas.viewport.children.find(child =>
-        child.name === currentCharacter.value?.character.path?.name
-    );
+    const spine = currentCharacter.value.spine;
+    console.log("引用角色:", spine);
+
 
     if (spine) {
         const operationMode = operationModeOptions.value[selectedOperationMode.value].value;
@@ -507,6 +550,79 @@ const deserialization = (actionItem: any) => {
     updateCharacterInfo();
 };
 
+const isSelected = ref(false)
+let transformGizmo: TransformGizmo;
+
+transformGizmo = TransformGizmo.getInstance();
+transformGizmo.zIndex = 1000; // 确保在Spine对象之上
+transformGizmo.visible = false; // 默认隐藏
+// 不再添加到UI层，而是在attachToSpine时添加到Spine对象
+// 应用或移除Spine描边效果
+const applyOutlineToSpine = (spine: Spine | undefined, apply: boolean) => {
+    // 使用 CanvasManager 的全局描边管理
+    canvas.applyOutlineToSpine(spine, apply);
+};
+
+const onClickActionItem = () => {
+    console.log("点击了当前选中的操作项");
+
+    setTimeout(() => {
+        CanvasManager.getInstance().setMode(GameMode.SCENE);
+    }, 10);
+
+
+    if (isSelected.value) {
+        return;
+    }
+
+    console.log("开始添加轮廓")
+    applyOutlineToSpine(currentCharacter.value?.spine, true);
+
+    // 显示变换控制工具
+    if (currentCharacter.value?.spine) {
+        console.log("显示TransformGizmo，附加到Spine:", currentCharacter.value.spine);
+        setTimeout(() => {
+            applyOutlineToSpine(currentCharacter.value?.spine, true);
+            transformGizmo.attachToSpine(currentCharacter.value!.spine);
+            transformGizmo.visible = true;
+        }, 10);
+
+
+        // 设置位置更新回调，实时同步到 targetState
+        transformGizmo.setOnPositionUpdateCallback((x: number, y: number, scale: number) => {
+            targetState.value.x = x;
+            targetState.value.y = y;
+            targetState.value.scale = scale;
+
+            // 同步更新到 targetStateOptions 显示
+            targetStateOptions.value[0].value = Math.round(x);
+            targetStateOptions.value[1].value = Math.round(y);
+            targetStateOptions.value[2].value = parseFloat(scale.toFixed(2));
+        });
+
+        console.log("TransformGizmo visible:", transformGizmo.visible);
+        console.log("TransformGizmo parent:", transformGizmo.parent);
+        console.log("TransformGizmo position:", transformGizmo.position);
+    }
+
+    isSelected.value = true;
+}
+
+watchEffect(() => {
+    if (actionStore.currentSelectActionTitle === props.title && actionStore.currentSelectActionItemId !== props.id) {
+
+        console.log("点击了其他操作项");
+
+        applyOutlineToSpine(currentCharacter.value?.spine, false);
+
+        // 隐藏变换控制工具
+        transformGizmo.visible = false;
+        transformGizmo.detachFromSpine();
+
+        isSelected.value = false;
+    }
+});
+
 onMounted(() => {
     // 注册action回调
     actionItem.action = targetAction;
@@ -522,7 +638,32 @@ onMounted(() => {
 
     // 初始化角色信息
     updateCharacterInfo();
+
+    // 设置 Spine 点击回调，当点击场景中的 Spine 对象时切换选择
+    canvas.setSpineClickCallback(props.id, (spine: Spine, characterInfo: sceneCharacter) => {
+        // 只有在当前 ActionCharacter 组件被选中时才响应 Spine 点击
+        if (isSelected.value) {
+            // 查找被点击的 Spine 对应的角色索引
+            const clickedCharacterIndex = action.maxCharacter.findIndex(
+                (char) => char.spine === spine
+            );
+
+            if (clickedCharacterIndex !== -1 && clickedCharacterIndex !== selectedCharacterIndex.value) {
+                console.log('通过点击 Spine 切换角色:', characterInfo.character.characterName);
+
+                // 切换到被点击的角色
+                onSelectCharacter(clickedCharacterIndex);
+            }
+        }
+    });
 });
+
+onUnmounted(() => {
+    // 移除 Spine 点击回调
+    canvas.removeSpineClickCallback(props.id);
+});
+
+
 </script>
 
 <style scoped>

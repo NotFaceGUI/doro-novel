@@ -95,7 +95,7 @@ const selectActionItem = () => {
             const actionIndex = action.getAction(props.title).as.findIndex((item) => item.id === props.id);
             const type = action.getAction(props.title).as[actionIndex].type;
             // 如果当前的模式是场景就修改
-            if (type === ASIType.SCENE ) {
+            if (type === ASIType.SCENE || type === ASIType.CHARACTER) {
                 canvas.setMode(GameMode.SCENE);
             }else {
                 canvas.setMode(GameMode.PREVIEW);

@@ -10,10 +10,12 @@ import { loadShader } from './tmep-loader';
 import { GameMode, CharacterType, sceneCharacter } from '../../types/app';
 import { Action, registerPixiJSActionsMixin } from 'pixijs-actions';
 import { useActionStore } from '../../stores/action-store';
-import { AdvancedBloomFilter, BloomFilter } from 'pixi-filters';
+import { AdvancedBloomFilter, BloomFilter, OutlineFilter } from 'pixi-filters';
 import ResourceManager from '../resource-manager';
 import { DEFAULT_RESOLUTION, DEFAULT_SPINE_SCALE, ResType } from '../var';
 import { markRaw } from 'vue';
+import { useViewportStore } from '../../stores/viewport-store';
+import { set } from 'lodash';
 
 interface Layer {
     container: PIXI.Container,
@@ -25,6 +27,8 @@ interface Layer {
 interface SpriteWithUpdate extends PIXI.Sprite {
     updatePosition: () => void;
 }
+
+let lastViewportState: { zoom: any; x: any; y: any; };
 
 class CanvasManager {
     public viewport: Viewport;
@@ -38,17 +42,36 @@ class CanvasManager {
 
     public inSceneCharacterMap: Spine[] = [];
 
+    // Spine 选择回调函数集合
+    private spineClickCallbacks: Map<number, (spine: Spine, characterInfo: sceneCharacter) => void> = new Map();
+    
+    // 当前应用描边效果的 Spine 对象
+    private currentOutlinedSpine: Spine | null = null;
+
     public setMode(mode: GameMode = GameMode.PLAY) {
         const action = useActionStore();
+        if (action.gameMode == mode) {
+            return
+        }
         action.gameMode = mode;
         // 如果切换的模式为这些就需要移除viewport的的插件
         if (mode === GameMode.PREVIEW || mode === GameMode.PLAY) {
             this.viewport.plugins.remove('drag');
             this.viewport.plugins.remove('wheel');
             this.viewport.plugins.remove('clampZoom');
+            if (lastViewportState) {
+                this.viewport.setZoom(lastViewportState.zoom);
+                this.viewport.moveCenter(lastViewportState.x, lastViewportState.y);
+                this.viewport.emit('moved')
+            }
 
             action.isEditMode = false;
         } else {
+            lastViewportState = {
+                x: this.viewport.center.x,
+                y: this.viewport.center.y,
+                zoom: this.viewport.scale.x,
+            }
             this.viewport.drag({
                 wheel: false,
             }).wheel({
@@ -57,6 +80,11 @@ class CanvasManager {
                 minScale: 1,
                 maxScale: 3,
             })
+
+            const viewportState = useViewportStore().getViewportState();
+            this.viewport.setZoom(1);
+            this.viewport.moveCenter(viewportState.x, viewportState.y);
+            this.viewport.emit('moved')
 
             action.isEditMode = true;
         }
@@ -308,6 +336,31 @@ class CanvasManager {
         spine.zIndex = 10;
         spine.x = characterInfo.x
         spine.y = characterInfo.y;
+
+        // 设置 Spine 对象的交互属性，使其可以被点击
+        spine.eventMode = 'static';
+
+        // 为 Spine 对象添加点击事件监听器
+        spine.on('pointerdown', (event: PIXI.FederatedPointerEvent) => {
+            if (this.mode == GameMode.SCENE) {
+                // 检查点击的目标是否是 TransformGizmo 的子元素
+                const target = event.target as PIXI.DisplayObject;
+                
+                // 如果点击的是 TransformGizmo 相关的元素，不处理 Spine 点击
+                if (target && (
+                    target.name === 'x-axis' || 
+                    target.name === 'y-axis' || 
+                    target.name === 'center' || 
+                    target.name?.startsWith('scale-') ||
+                    target.parent?.name === 'TransformGizmo'
+                )) {
+                    return; // 不处理 Spine 点击事件
+                }
+                
+                // 触发 Spine 选择事件
+                this.onSpineClick(spine, info);
+            }
+        });
 
         if (info.animationOption.length == 0) {
             // 添加动画
@@ -979,6 +1032,78 @@ class CanvasManager {
 
         console.log('CanvasManager 重新初始化完成');
     }
+
+    /**
+     * 设置 Spine 点击回调函数
+     */
+    public setSpineClickCallback(id: number, callback: (spine: Spine, characterInfo: sceneCharacter) => void) {
+        this.spineClickCallbacks.set(id, callback);
+    }
+
+    /**
+     * 移除 Spine 点击回调函数
+     */
+    public removeSpineClickCallback(id: number) {
+        this.spineClickCallbacks.delete(id);
+    }
+
+    /**
+     * 全局管理 Spine 描边效果
+     */
+    public applyOutlineToSpine(spine: Spine | undefined, apply: boolean) {
+        if (!spine) return;
+
+        // 如果要应用描边，先移除当前的描边
+        if (apply && this.currentOutlinedSpine && this.currentOutlinedSpine !== spine) {
+            this.removeOutlineFromSpine(this.currentOutlinedSpine);
+        }
+
+        if (apply) {
+            // 应用描边效果
+            const outline = new OutlineFilter(5, 0xffd700, 1); // 5px，金黄色，强度1
+
+            // 保存原始滤镜（如果有的话）
+            if (!(spine as any)._originalFilters) {
+                (spine as any)._originalFilters = spine.filters ? [...spine.filters] : [];
+            }
+
+            // 应用新的滤镜数组，包含原始滤镜和描边滤镜
+            spine.filters = [...(spine as any)._originalFilters, outline];
+            this.currentOutlinedSpine = spine;
+        } else {
+            this.removeOutlineFromSpine(spine);
+        }
+    }
+
+    /**
+     * 移除 Spine 的描边效果
+     */
+    private removeOutlineFromSpine(spine: Spine) {
+        if ((spine as any)._originalFilters) {
+            spine.filters = (spine as any)._originalFilters;
+            delete (spine as any)._originalFilters;
+        } else {
+            spine.filters = [];
+        }
+        
+        if (this.currentOutlinedSpine === spine) {
+            this.currentOutlinedSpine = null;
+        }
+    }
+
+    /**
+     * 处理 Spine 对象点击事件
+     */
+    private onSpineClick(spine: Spine, characterInfo: sceneCharacter) {
+        console.log('Spine 被点击:', characterInfo.character.characterName);
+
+        // 调用所有注册的回调函数
+        this.spineClickCallbacks.forEach((callback) => {
+            callback(spine, characterInfo);
+        });
+    }
 }
 
 export default CanvasManager;
+
+

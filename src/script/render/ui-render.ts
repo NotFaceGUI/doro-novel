@@ -887,7 +887,8 @@ export class UIRender {
         this.titleCharacterColorLeftBar.drawRect(45 * scaleFactor, this.app.screen.height - (500 * scaleFactor) + 5, 10, 40 * scaleFactor);
         this.titleCharacterColorLeftBar.endFill();
 
-        tempText.title.text = t(message.speaker);
+        // 解析出说话人名称 不带异格
+        tempText.title.text = t(message.speaker).split('：')[0];
         tempText.content.text = '';
 
         let fullText = message.texts[0].text;

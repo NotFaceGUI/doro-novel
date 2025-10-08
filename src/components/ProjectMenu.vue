@@ -32,15 +32,21 @@
                     <li>查看帮助</li>
                     <li>在线文档</li>
                     <li>常见问题</li>
-                    <li>关于我们</li>
+                    <li @click="showAboutDialog">关于我们</li>
                 </ul>
             </li>
         </ul>
+        
+        <!-- 关于我们弹窗 -->
+        <AboutDialog 
+            :showDialog="isAboutDialogVisible" 
+            @close="closeAboutDialog" 
+        />
     </div>
 </template>
 
 <script setup lang="ts">
-import { onBeforeUnmount, onMounted, reactive } from 'vue';
+import { onBeforeUnmount, onMounted, reactive, ref } from 'vue';
 import { useActionStore } from '../stores/action-store';
 import { useCharacterConfigStore } from '../stores/character-config-store';
 import { useBranchStore } from '../stores/branch-store';
@@ -54,8 +60,12 @@ import { open } from '@tauri-apps/plugin-dialog';
 import { Spine } from 'pixi-spine';
 import ResourceManager from '../script/resource-manager';
 import CanvasManager from '../script/render/canvas-manager';
+import AboutDialog from './AboutDialog.vue';
 
 const dropdowns = reactive([false, false, false]);
+
+// 关于我们弹窗状态
+const isAboutDialogVisible = ref(false);
 
 // 初始化stores
 const actionStore = useActionStore();
@@ -415,6 +425,18 @@ const handleClickOutside = (event: MouseEvent) => {
             dropdowns[index] = false;
         });
     }
+};
+
+// 显示关于我们弹窗
+const showAboutDialog = () => {
+    isAboutDialogVisible.value = true;
+    // 关闭下拉菜单
+    dropdowns[2] = false;
+};
+
+// 关闭关于我们弹窗
+const closeAboutDialog = () => {
+    isAboutDialogVisible.value = false;
 };
 
 onMounted(() => {

@@ -11,6 +11,7 @@ import { useSearchDialogStore } from './stores/search-dialog-store';
 import { useProjectStore } from './stores/project-store';
 import { useUpdater } from './composables/useUpdater';
 import { openProject } from './script/common/common-action-item';
+import { APP_VERSION } from './script/var';
 
 const searchStore = useSearchDialogStore();
 const projectStore = useProjectStore();
@@ -20,7 +21,7 @@ const updater = useUpdater();
 
 const app = ref<DoroApp>({
   name: 'Doro Novel',
-  version: 'ver 0.4.2',
+  version: 'ver ' + APP_VERSION,
 });
 
 onMounted(async() => {

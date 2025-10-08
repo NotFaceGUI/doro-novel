@@ -362,6 +362,9 @@ export const useActionStore = defineStore('action', () => {
 
     // 重置分支标签
     useBranchStore().clearAllTags();
+
+    currentSelectActionItemId.value = -1;
+    
   }
 
 

@@ -24,3 +24,6 @@ export enum ResType {
 
 export const DEFAULT_SPINE_SCALE = 1 * window.devicePixelRatio;
 export const DEFAULT_RESOLUTION = 2 * window.devicePixelRatio; // 默认分辨率为2倍
+
+
+export const APP_VERSION = '0.4.2';
