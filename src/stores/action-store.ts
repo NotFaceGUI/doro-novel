@@ -347,6 +347,7 @@ export const useActionStore = defineStore('action', () => {
     cm.initMask.zIndex = 9999;
 
     cm.transitionMask.alpha = 0;
+    cm.uiRender.commanderTextAera.visible = false;
 
     cm.uiRender.voiceoverTextAera.visible = false;
     cm.uiRender.normalDialog.visible = false;

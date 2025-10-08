@@ -31,6 +31,7 @@ export class UIRender {
 
     public normalTextAera: Container = new Container(); // 聊天对话的文本区域
     public voiceoverTextAera: Container = new Container(); // 旁白或心离活动的文本区域
+    public commanderTextAera: Container = new Container(); // 指挥官对话的文本区域
 
     public currentDisplayText: { title: Text, content: Text }
     public currentSideText: { title: Text, content: Text }
@@ -140,10 +141,12 @@ export class UIRender {
         // 设置成不可见
         this.normalTextAera.visible = false;
         this.voiceoverTextAera.visible = false;
+        this.commanderTextAera.visible = false;
 
         // 添加进ui图层
         this.stage.addChild(this.voiceoverTextAera);
         this.stage.addChild(this.normalTextAera);
+        this.stage.addChild(this.commanderTextAera);
 
         // 初始化旁边对话框
 
@@ -174,6 +177,7 @@ export class UIRender {
             this.normalDialog.zIndex = 1;
             this.normalTextAera.zIndex = 10;
             this.voiceoverTextAera.zIndex = 10;
+            this.commanderTextAera.zIndex = 11;
 
             this.stage.sortChildren();
 
@@ -314,7 +318,7 @@ export class UIRender {
             button.scale.set(button.scale.x * options?.scaleFactor!);
 
             // 添加到舞台
-            this.stage.addChild(button);
+            this.commanderTextAera.addChild(button);
             buttons.push(button);
         });
 
@@ -416,7 +420,7 @@ export class UIRender {
         const uiMap: Record<DialogueType, (Sprite | Container)[]> = {
             [DialogueType.NORMAL]: [this.normalDialog, this.normalTextAera],
             [DialogueType.VOICEOVER]: [this.voiceoverTextAera],
-            [DialogueType.COMMANDER]: []
+            [DialogueType.COMMANDER]: [this.commanderTextAera]
         };
 
         // 获取所有UI元素
@@ -506,6 +510,7 @@ export class UIRender {
             }
         });
 
+
         // 显示元素的渐变效果
         showUIs.forEach(ui => {
             // 检查元素是否已经完全可见，如果已经完全可见则跳过动画
@@ -584,11 +589,13 @@ export class UIRender {
         this.hideWaitIcon();
 
         if (messages.length > 0) {
-            if (messages[0].mode === DialogueType.NORMAL || messages[0].mode === DialogueType.COMMANDER) {
+            if (messages[0].mode === DialogueType.NORMAL) {
                 this.normalDialog.visible = true;
                 this.normalTextAera.visible = true;
             } else if (messages[0].mode === DialogueType.VOICEOVER) {
                 this.voiceoverTextAera.visible = true;
+            } else if (messages[0].mode === DialogueType.COMMANDER) {
+                this.commanderTextAera.visible = true;
             }
         }
 
@@ -599,18 +606,19 @@ export class UIRender {
         if (isEndVisible) {
             if (hideDelay > 0) {
                 // 延迟隐藏UI
-                await new Promise<void>(resolve => setTimeout(() => {
+                setTimeout(() => {
                     this.voiceoverTextAera.visible = false;
                     this.normalDialog.visible = false;
                     this.normalTextAera.visible = false;
+                    this.commanderTextAera.visible = false;
                     this.isStart = false; // 结束
-                    resolve();
-                }, hideDelay)); // 转换为毫秒
+                }, hideDelay)
             } else {
                 // 立即隐藏UI
                 this.voiceoverTextAera.visible = false;
                 this.normalDialog.visible = false;
                 this.normalTextAera.visible = false;
+                this.commanderTextAera.visible = false;
                 this.isStart = false; // 结束
             }
         }
@@ -625,13 +633,13 @@ export class UIRender {
         console.log("对话开始:", messages);
         for (const message of messages) {
             console.log("当前对话:", message);
-            
+
             // 检查分支条件，如果不满足则跳过此对话
             if (message.requiredBranchTag && !useBranchStore().canShowDialogue(message.requiredBranchTag)) {
                 console.log(`跳过对话，不满足分支条件: ${message.requiredBranchTag}`);
                 continue;
             }
-            
+
             const currentMode = message.mode;
             if (currentMode === DialogueType.COMMANDER) {
                 this.hideWaitIcon();
@@ -1288,11 +1296,11 @@ export class UIRender {
                         // 支持多标签设置：A,B 代表同时设置 A 和 B 两个标签
                         const tags = selectedText.branchTag.split(',').map(tag => tag.trim()).filter(tag => tag);
                         const branchStore = useBranchStore();
-                        
+
                         tags.forEach(tag => {
                             branchStore.addTag(tag);
                         });
-                        
+
                         console.log(`添加分支标签到用户标签集合: ${selectedText.branchTag} -> [${tags.join(', ')}]`);
                         console.log(`用户当前拥有的标签:`, branchStore.getUserTags());
                     }
