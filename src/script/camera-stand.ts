@@ -7,7 +7,6 @@ import { Raw } from 'vue';
 import { DEFAULT_RESOLUTION } from "./var";
 import { setModification } from "./util/common";
 import { Modification, PropertyPath } from "./common/snapshot";
-import { Timing } from 'pixijs-actions';
 
 // 存储 spine 实例的初始高度
 const spineHeightCache = new Map<string, number>();

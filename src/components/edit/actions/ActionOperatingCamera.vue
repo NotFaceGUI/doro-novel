@@ -115,7 +115,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, ref, watchEffect } from 'vue';
+import { computed, onMounted, ref, watchEffect, onUnmounted } from 'vue';
 import { handleSceneState, updateCameraView, useCommonState, updateCameraViewOnlyPos } from '../../../script/common/common-action-item';
 import ActionItemHead from './ActionItemHead.vue';
 import { Modification, PropertyPath } from '../../../script/common/snapshot';
@@ -132,6 +132,7 @@ import { setModification } from '../../../script/util/common';
 import ActionBottomLine from '../../common/ActionBottomLine.vue';
 import { EasingFunction, getEasingFunctionOptions } from '../../../script/camera-stand';
 import { delay } from 'lodash';
+import { useActionStore } from '../../../stores/action-store';
 type modelCameraType = 'fixed' | 'tween-end' | 'tween-start' | 'none';
 
 let canvas = CanvasManager.getInstance();
@@ -435,6 +436,14 @@ const targetAction = async () => {
     canvas.initMask.alpha = 0;
     handleSceneState(canvas, props);
 
+    viewport.setZoom(action.previewSnapshot.camera.zoom);
+    viewport.moveCenter(
+        action.previewSnapshot.camera.x,
+        action.previewSnapshot.camera.y
+    );
+    viewport.emit('moved');
+    viewport.emit('zoomed');
+
     if (CameraOperaMode.value[selectedOption.value].value === 'fixed') {
         // 固定类型，直接设置值
         viewport.setZoom(targetFixedCameraValues.value[2].value);
@@ -443,6 +452,8 @@ const targetAction = async () => {
             targetFixedCameraValues.value[1].value
         );
         viewport.emit('moved');
+        viewport.emit('zoomed');
+
 
         setModification(modification, 'camera.x', targetFixedCameraValues.value[0].value);
         setModification(modification, 'camera.y', targetFixedCameraValues.value[1].value);
@@ -455,9 +466,15 @@ const targetAction = async () => {
     console.log("✅ targetAction 执行完毕，可以继续下一步逻辑");
 };
 
+const actionStore = useActionStore()
+const isSelectedCurrentActionItem = ref(false);
+
+
+
 const currentCameraModel = ref<modelCameraType>('none');
 
 const setCamera = (type: modelCameraType) => {
+    console.log('setCamera', type);
     // 将摄像机的值设置到当前的值上
     if (type == 'fixed') {
         viewport.setZoom(targetFixedCameraValues.value[2].value);
@@ -472,13 +489,13 @@ const setCamera = (type: modelCameraType) => {
         viewport.moveCenter(customSourceTweenCameraValues.value[0].value, customSourceTweenCameraValues.value[1].value);
         viewport.emit('moved')
     } else {
-        canvas.setMode(GameMode.PREVIEW);
+        canvas.setMode(GameMode.PREVIEW, false);
         return;
     }
 
     if (currentCameraModel.value !== type) {
         currentCameraModel.value = type;
-        canvas.setMode(GameMode.SCENE);
+        canvas.setMode(GameMode.SCENE, false);
         massage(`场景模式-${type}`, 'info', 3000);
         return;
     }
@@ -486,12 +503,12 @@ const setCamera = (type: modelCameraType) => {
     currentCameraModel.value = type;
 
     if (canvas.getMode() == GameMode.SCENE) {
-        canvas.setMode(GameMode.PREVIEW);
+        canvas.setMode(GameMode.PREVIEW, false);
         massage(`预览模式-${type}`, 'info', 3000);
         console.log("设置预览模式");
     } else if (canvas.getMode() == GameMode.PREVIEW) {
         massage(`场景模式-${type}`, 'info', 3000);
-        canvas.setMode(GameMode.SCENE);
+        canvas.setMode(GameMode.SCENE, false);
         console.log("设置场景模式");
     }
 
@@ -560,19 +577,19 @@ const deserialization = (data: ActionItems) => {
         if (typeof actionData.selectedOption === 'number') {
             selectedOption.value = actionData.selectedOption;
         }
-        
+
         if (typeof actionData.selectedEaseOption === 'number') {
             selectedEaseOption.value = actionData.selectedEaseOption;
         }
-        
+
         if (typeof actionData.customCurve === 'boolean') {
             customCurve.value = actionData.customCurve;
         }
-        
+
         if (typeof actionData.isCustomOpen === 'boolean') {
             isCustomOpen.value = actionData.isCustomOpen;
         }
-        
+
         if (Array.isArray(actionData.targetFixedCameraValues)) {
             // 更新现有数组的属性，而不是重新创建数组
             actionData.targetFixedCameraValues.forEach((setting: any, index: number) => {
@@ -584,7 +601,7 @@ const deserialization = (data: ActionItems) => {
                 }
             });
         }
-        
+
         if (Array.isArray(actionData.timeDuration)) {
             // 更新现有数组的属性，而不是重新创建数组
             actionData.timeDuration.forEach((setting: any, index: number) => {
@@ -596,7 +613,7 @@ const deserialization = (data: ActionItems) => {
                 }
             });
         }
-        
+
         if (Array.isArray(actionData.customSourceTweenCameraValues)) {
             // 更新现有数组的属性，而不是重新创建数组
             actionData.customSourceTweenCameraValues.forEach((setting: any, index: number) => {
@@ -608,7 +625,7 @@ const deserialization = (data: ActionItems) => {
                 }
             });
         }
-        
+
         if (Array.isArray(actionData.targetTweenCameraValues)) {
             // 更新现有数组的属性，而不是重新创建数组
             actionData.targetTweenCameraValues.forEach((setting: any, index: number) => {
@@ -620,7 +637,7 @@ const deserialization = (data: ActionItems) => {
                 }
             });
         }
-        
+
         if (Array.isArray(actionData.points)) {
             // 更新现有数组的属性，而不是重新创建数组
             actionData.points.forEach((point: any, index: number) => {
@@ -642,12 +659,14 @@ onMounted(() => {
     // 反序列化数据
     deserialization(actionItem);
 
+
+
     viewport.on('drag-end', () => {
         if (canvas.getMode() != GameMode.SCENE) return;
 
         // 这个事件只会在这里触发
         if (action.eqSelectActionItem(props.title, props.id)) {
-            console.log("触发");
+            console.log("拖拽事件触发", Date.now());
             if (currentCameraModel.value === 'fixed') {
                 updateCameraViewOnlyPos(viewport, targetFixedCameraValues, modification)
             } else if (currentCameraModel.value === 'tween-end') {
@@ -676,6 +695,39 @@ onMounted(() => {
         }
     })
 })
+
+// 清理事件监听器
+onUnmounted(() => {
+    // 移除所有相关的事件监听器
+    viewport.off('drag-end');
+    viewport.off('zoomed-end');
+})
+
+// 是否选中了 当前操作项
+watchEffect(() => {
+    isSelectedCurrentActionItem.value = actionStore.currentSelectActionTitle == props.title && actionStore.currentSelectActionItemId == props.id;
+
+    if (isSelectedCurrentActionItem.value) {
+        // handleSceneState(canvas, props);
+        // 如果选中了当前项, 则设置摄像机为目标
+        if (CameraOperaMode.value[selectedOption.value].value === 'fixed') {
+            viewport.setZoom(targetFixedCameraValues.value[2].value);
+            viewport.moveCenter(targetFixedCameraValues.value[0].value, targetFixedCameraValues.value[1].value);
+            viewport.emit('moved')
+            viewport.emit('zoomed');
+
+        } else {
+            viewport.setZoom(targetTweenCameraValues.value[2].value);
+            viewport.moveCenter(targetTweenCameraValues.value[0].value, targetTweenCameraValues.value[1].value);
+            viewport.emit('moved')
+            viewport.emit('zoomed');
+        }
+
+        // updateCameraIndicators();
+        // currentCameraModel.value = "none"
+    }
+});
+
 </script>
 
 <style lang="css" scoped>

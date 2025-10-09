@@ -682,7 +682,7 @@ const saveModification = () => {
 };
 
 // 保存可见性修改
-const saveVisibilityModification = (visible: boolean, alpha: number) => {
+const saveVisibilityModification = (_visible: boolean, _alpha: number) => {
     if (!currentCharacter.value || !modification) return;
 };
 
@@ -906,7 +906,7 @@ onMounted(() => {
 
 
     // 设置 Spine 点击回调，当点击场景中的 Spine 对象时切换选择
-    canvas.setSpineClickCallback(props.id, (spine: Spine, characterInfo: sceneCharacter) => {
+    canvas.setSpineClickCallback(props.id, (_spine: Spine, characterInfo: sceneCharacter) => {
         // 只有在当前 ActionCharacter 组件被选中时才响应 Spine 点击
         if (isSelected.value) {
             // 查找被点击的 Spine 对应的角色索引

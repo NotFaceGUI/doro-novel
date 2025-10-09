@@ -18,6 +18,7 @@ import { Spine } from 'pixi-spine';
 import { ButtonComponent } from '../ui/button-component';
 import { Action } from 'pixijs-actions';
 import { useBranchStore } from '../../stores/branch-store';
+import { setModification } from '../util/common';
 
 const t = i18n.global.t
 
@@ -724,6 +725,16 @@ export class UIRender {
                     }, message.parms?.duration || 0);
                 }
 
+            } else {
+                // 没有摄像机代理就直接设置
+                const currentZoom = canvas.viewport.scale.x;
+
+                setModification(modification!, 'camera.x', canvas.viewport.center.x);
+                setModification(modification!, 'camera.y', canvas.viewport.center.y);
+                setModification(modification!, 'camera.zoom', currentZoom);
+
+                canvas.viewport.emit('moved');  
+                canvas.viewport.emit('zoomed');
             }
 
             this.isUpdateVisibility = false;

@@ -20,6 +20,7 @@ import ActionInitScene from "./actions/ActionInitScene.vue";
 import ActionOperatingCamera from "./actions/ActionOperatingCamera.vue";
 import ActionTransition from "./actions/ActionTransition.vue";
 import ActionCharacter from "./actions/ActionCharacter.vue";
+import ActionCG from "./actions/ActionCG.vue";
 import { useActionStore } from "../../stores/action-store";
 import { makeSnapshot } from "../../script/common/snapshot";
 import CanvasManager from "../../script/render/canvas-manager";
@@ -50,6 +51,7 @@ const currentComponent = computed(() => {
     if (props.asiType === ASIType.TRANSITION) return ActionTransition;
     if (props.asiType === ASIType.WAIT) return ActionBlock;
     if (props.asiType === ASIType.CHARACTER) return ActionCharacter;
+    if (props.asiType === ASIType.CG) return ActionCG;
 
     // 默认无组件
     return null;

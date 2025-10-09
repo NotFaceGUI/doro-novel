@@ -86,7 +86,8 @@ export enum ASIType {
     AUDIO = "Audio", // 音频播放
     TRANSITION = "Transition", // 过渡效果
     WAIT = "Wait", // 等待
-    CHARACTER = "Character" // 操作角色
+    CHARACTER = "Character", // 操作角色
+    CG = "CG" // CG画面
 }
 
 export interface LoadRes {

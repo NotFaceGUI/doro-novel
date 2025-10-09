@@ -98,7 +98,8 @@ const getTypeDisplayName = (type: ASIType): string => {
         [ASIType.WAIT]: '等待/阻塞',
         [ASIType.CHECKDIALOGUE]: '分支对话',
         [ASIType.EFFECT]: '特效',
-        [ASIType.CHARACTER]: '操作角色'
+        [ASIType.CHARACTER]: '操作角色',
+        [ASIType.CG]: 'CG画面'
     };
     return typeMap[type] || '未知类型';
 };

@@ -105,7 +105,7 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref } from 'vue';
+import { onMounted, ref, onUnmounted } from 'vue';
 import DynamicInputs from '../../common/DynamicInputs.vue';
 import ActionItemHead from './ActionItemHead.vue';
 import CanvasManager from '../../../script/render/canvas-manager';
@@ -753,6 +753,12 @@ onMounted(() => {
         }
         // actionItem.action?.();
     })
+})
+
+// 清理事件监听器
+onUnmounted(() => {
+    // 移除所有相关的事件监听器
+    viewport.off('drag-end');
 })
 
 
