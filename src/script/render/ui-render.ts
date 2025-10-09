@@ -113,8 +113,8 @@ export class UIRender {
         // 创建文本样式
         const contentSideStyle = new TextStyle({
             fill: '#DDDDDD',
-            fontSize: 25 * DEFAULT_RESOLUTION,
-            lineHeight: 55 * scaleFactor,
+            fontSize: Math.max(16, 45 * scaleFactor),
+            lineHeight: 60 * scaleFactor,
             fontFamily: 'Noto Sans SC', // 使用 Noto Sans SC 字体
             fontWeight: '600', // 确保字体加粗
             breakWords: true,
@@ -364,9 +364,9 @@ export class UIRender {
     * 初始化 Nikke UI 侧边模板：黑色半透明背景 + 黑色描边 + 阴影
     */
     public initSideDialogTemplate(scaleFactor: number): Graphics {
-        const width = this.app.view.width - 600 / scaleFactor;   // 可以根据需要设置宽度
+        const width = this.app.view.width - 600 * scaleFactor;   // 可以根据需要设置宽度
         const height = 175 * DEFAULT_RESOLUTION;
-        const x = 600 / scaleFactor / 2;
+        const x = 600 * scaleFactor / 2;
         const y = this.app.view.height - height - 65 * DEFAULT_RESOLUTION;
 
         // 创建一个 Graphics 对象
