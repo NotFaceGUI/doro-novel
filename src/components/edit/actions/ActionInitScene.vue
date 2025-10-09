@@ -494,6 +494,7 @@ const handleParallaxFactorBlur = () => {
 
     setModification(modification, 'background.parallax', backgroundParallaxFactorValues.value[0].value);
     canvasManager.setBackground(currentBackground.value.path, backgroundParallaxFactorValues.value[0].value)
+
 }
 
 
@@ -521,15 +522,14 @@ const valueChange = (updateIndex: number) => {
 const targetAction = async () => {
     // 先初始化角色的一些属性
     action.maxCharacter.forEach(character => {
-
-        
-
-       character.spine.visible = character.isInitShow;
-       character.spine.scale.set(character.scale)
-       character.spine.position.set(character.x, character.y);
-       character.spine.alpha = 1;
+        character.spine.visible = character.isInitShow;
+        character.spine.scale.set(character.scale)
+        character.spine.position.set(character.x, character.y);
+        character.spine.alpha = 1;
     })
 
+    // 如果当前修改的背景和
+    canvasManager.setBackground(currentBackground.value.path, backgroundParallaxFactorValues.value[0].value)
 
     await new Promise((resolve) => {
         setTimeout(() => {
@@ -539,8 +539,7 @@ const targetAction = async () => {
     // 为了是拿到上一个的状态 永远是上一个的状态
     handleSceneState(canvasManager, props);
 
-    // 如果当前修改的背景和
-    canvasManager.setBackground(currentBackground.value.path)
+
     // 设置初始化的背景
 
     // 设置摄像机到上一个的状态初始状态
@@ -631,19 +630,20 @@ const deserialization = (data: ActionItems) => {
         if (typeof actionData.fade === 'boolean') {
             fade.value = actionData.fade;
         }
-        
+
         if (actionData.currentBackground) {
             currentBackground.value = {
                 name: actionData.currentBackground.name || "CommanderRoom.png",
                 path: actionData.currentBackground.path || "resources\\image\\Background\\CommanderRoom.png",
                 type: actionData.currentBackground.type || ResType.Image
             };
+
         }
-        
+
         if (typeof actionData.backgroundUrl === 'string') {
             backgroundUrl.value = actionData.backgroundUrl;
         }
-        
+
         if (Array.isArray(actionData.cameraValues)) {
             // 不要重新创建数组，而是更新现有数组中的值以保持响应式绑定
             actionData.cameraValues.forEach((setting: any, index: number) => {
@@ -655,7 +655,7 @@ const deserialization = (data: ActionItems) => {
                 }
             });
         }
-        
+
         if (Array.isArray(actionData.backgroundParallaxFactorValues)) {
             // 不要重新创建数组，而是更新现有数组中的值以保持响应式绑定
             actionData.backgroundParallaxFactorValues.forEach((setting: any, index: number) => {
@@ -667,7 +667,7 @@ const deserialization = (data: ActionItems) => {
                 }
             });
         }
-        
+
         if (Array.isArray(actionData.maxCharacter)) {
             // 恢复角色数据到action.maxCharacter
             actionData.maxCharacter.forEach((charData: any, index: number) => {
@@ -686,6 +686,9 @@ const deserialization = (data: ActionItems) => {
                 }
             });
         }
+
+        // 需要重新设置背景 parallax 因子
+        canvasManager.setBackground(currentBackground.value.path, backgroundParallaxFactorValues.value[0].value)
     }
 };
 
@@ -696,10 +699,6 @@ onMounted(() => {
     action.getAction(props.title).as[actionIndex].serialize = serialization;
 
     modification = action.getCurrentModification(props.title, props.id);
-
-    // 反序列化数据
-    deserialization(action.getAction(props.title).as[actionIndex]);
-
     setModification(modification, 'camera.x', cameraValues.value[0].value);
     setModification(modification, 'camera.y', cameraValues.value[1].value);
     setModification(modification, 'camera.zoom', cameraValues.value[2].value);
@@ -753,6 +752,9 @@ onMounted(() => {
         }
         // actionItem.action?.();
     })
+
+    // 反序列化数据
+    deserialization(action.getAction(props.title).as[actionIndex]);
 })
 
 // 清理事件监听器
