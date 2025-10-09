@@ -18,9 +18,9 @@
                         <div style="line-height: 1.6; font-size: 10px;">
                             <p>
                                 <span style="color: red; font-weight: bold;">⚠ 注意：</span>
-                            <p></p>
-                            <span>切换角色将会</span>
-                            <span style="color: #d9534f; font-weight: bold;">失去当前角色的目标状态</span>。
+                                <br>
+                                <span>切换角色将会</span>
+                                <span style="color: #d9534f; font-weight: bold;">失去当前角色的目标状态</span>。
                             </p>
                             <p>
                                 切换角色后，当前角色的 <span style="color: #d9534f; font-weight: bold;">目标状态将被清空</span>。
@@ -89,13 +89,18 @@
             </template>
 
             <!-- 显示/隐藏模式的额外设置 -->
-            <template v-if="operationModeOptions[selectedOperationMode].value === 'show' || operationModeOptions[selectedOperationMode].value === 'hide'">
+            <template
+                v-if="operationModeOptions[selectedOperationMode].value === 'show' || operationModeOptions[selectedOperationMode].value === 'hide'">
                 <div class="action-title">
-                    使用点阵剔除效果
-                    <ToggleSwitch v-model="useStippleEffect"></ToggleSwitch>
+                    <div style="display: flex; align-items: center;gap: 5px;">
+                        使用点阵剔除效果
+                        <ToggleSwitch v-model="useStippleEffect"></ToggleSwitch>
+                    </div>
+
                     <Tooltip position="left">
                         <div class="mode-description">
-                            启用后，显示/隐藏角色时会使用点阵透明度效果，否则使用简单的淡入淡出效果
+                            启用后，显示/隐藏角色时会使用点阵透明度效果
+                            <p>否则使用简单的淡入淡出效果</p>
                         </div>
                     </Tooltip>
                 </div>
@@ -401,11 +406,11 @@ const applyToScene = async () => {
 
             if (useStippleEffect.value) {
                 // 使用点阵透明度效果
-                spine.run(Action.moveBy(0 ,-30, 1).easeInOut());
+                spine.run(Action.moveBy(0, -30, 1).easeInOut());
 
                 // 创建点阵透明度滤镜，初始透明度为0，调整点阵大小为3让效果更细腻
                 const stippleFilter = createStippleTransparencyFilter(0, 2.32);
-                
+
                 // 应用滤镜（保留现有滤镜）
                 const existingFilters = spine.filters || [];
                 spine.filters = [...existingFilters, stippleFilter];
@@ -446,7 +451,7 @@ const applyToScene = async () => {
 
                 // 创建透明度滤镜，初始透明度为0
                 const alphaFilter = createAlphaFilter(0);
-                
+
                 // 应用滤镜（保留现有滤镜）
                 const existingFilters = spine.filters || [];
                 spine.filters = [...existingFilters, alphaFilter];
@@ -493,7 +498,7 @@ const applyToScene = async () => {
 
                 // 创建点阵透明度滤镜，初始透明度为1（完全显示），调整点阵大小
                 const stippleFilter = createStippleTransparencyFilter(1, 2.32);
-                
+
                 // 应用滤镜（保留现有滤镜）
                 const existingFilters = spine.filters || [];
                 spine.filters = [...existingFilters, stippleFilter];
@@ -513,7 +518,7 @@ const applyToScene = async () => {
                     } else {
                         easedProgress = 1 - 2 * Math.pow(1 - progress, 2);
                     }
-                    
+
                     // 反向：从1逐渐减少到0
                     stippleFilter.uniforms.uTransparency = 1 - easedProgress;
 
@@ -538,7 +543,7 @@ const applyToScene = async () => {
 
                 // 创建透明度滤镜，初始透明度为1（完全显示）
                 const alphaFilter = createAlphaFilter(1);
-                
+
                 // 应用滤镜（保留现有滤镜）
                 const existingFilters = spine.filters || [];
                 spine.filters = [...existingFilters, alphaFilter];
@@ -558,7 +563,7 @@ const applyToScene = async () => {
                     } else {
                         easedProgress = 1 - 2 * Math.pow(1 - progress, 2);
                     }
-                    
+
                     // 反向：从1逐渐减少到0
                     alphaFilter.uniforms.uAlpha = 1 - easedProgress;
 

@@ -148,7 +148,7 @@ export const EasingFunctionLabels: Record<EasingFunction, string> = {
 export function getEasingFunctionOptions() {
     return Object.values(EasingFunction).map(value => ({
         label: EasingFunctionLabels[value],
-        value: Timing[value as keyof typeof Timing] // 使用 Timing 对象中的实际函数
+         value: value
     }));
 }
 
