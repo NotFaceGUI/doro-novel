@@ -1129,9 +1129,9 @@ export class UIRender {
 
             // 根据旁白框的位置设置等待图标位置
             // 旁白框参数：width = this.app.view.width - 800, x = 400, y = this.app.view.height - height - 65 * DEFAULT_RESOLUTION
-            const sideBoxWidth = this.app.view.width - 600 / scaleFactor;
+            const sideBoxWidth = this.app.view.width - 600 * scaleFactor;
             const sideBoxHeight = 175 * DEFAULT_RESOLUTION;
-            const sideBoxX = 600 / scaleFactor / 2;
+            const sideBoxX = 600 * scaleFactor / 2;
             const sideBoxY = this.app.view.height - sideBoxHeight - 65 * DEFAULT_RESOLUTION;
 
             // 将等待图标放在旁白框的右下角，边距15

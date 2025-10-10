@@ -59,7 +59,7 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref } from "vue";
+import { onMounted, onUnmounted, ref } from "vue";
 import { ActionItems, ActionItemtype, ASIType, DragType } from "../../types/app";
 import ActionItem from "./ActionItem.vue";
 import SortDialog from "./SortDialog.vue";
@@ -230,11 +230,29 @@ const handleDragStart = (event: DragEvent) => {
     event.dataTransfer?.setData("type", DragType.ACTION);
 };
 
+// 处理快捷键
+const handleKeyDown = (event: KeyboardEvent) => {
+    // Ctrl + Shift + A 快速选择ActionItem
+    if (event.ctrlKey && event.shiftKey && event.key.toLowerCase() === 'a') {
+        event.preventDefault();
+        event.stopPropagation();
+        openSelect();
+    }
+};
+
 onMounted(() => {
     if (props.title === "Init Load Action") {
         isExpanded.value = false;
     }
-})
+    
+    // 添加键盘事件监听器
+    document.addEventListener('keydown', handleKeyDown);
+});
+
+onUnmounted(() => {
+    // 移除键盘事件监听器
+    document.removeEventListener('keydown', handleKeyDown);
+});
 </script>
 
 <style lang="css" scoped>

@@ -2,6 +2,9 @@
     <div class="action-item-tool">
         <button class="play-btn" @click.stop="play">▶</button>
         <button @click="onDelete">🗑</button>
+        <button class="collapse-btn" @click.stop="toggleCollapse" :title="actionItem.isToggle ? '展开' : '折叠'">
+            {{ actionItem.isToggle ? '▼' : '▲' }}
+        </button>
     </div>
 </template>
 
@@ -9,13 +12,30 @@
 import CanvasManager from '../../../script/render/canvas-manager';
 import { useActionStore } from '../../../stores/action-store';
 import { GameMode } from '../../../types/app';
+import { useCommonState } from '../../../script/common/common-action-item';
 
 const actions = useActionStore();
+
 
 const props = defineProps<{
     title: string,
     id: number,
 }>();
+
+const { actionItem } = useCommonState(props.title, props.id);
+
+
+
+// 定义事件发射
+const emit = defineEmits<{
+    toggleCollapse: [collapsed: boolean]
+}>();
+
+// 切换折叠状态
+const toggleCollapse = () => {
+    actionItem.isToggle = !actionItem.isToggle;
+    emit('toggleCollapse', actionItem.isToggle);
+};
 
 const onDelete = () => {
     const actionIndex = actions.getAction(props.title).as.findIndex((item) => item.id === props.id);
@@ -33,7 +53,7 @@ const play = () => {
 
     actions.gameMode = GameMode.PREVIEW;
     CanvasManager.getInstance().setMode(GameMode.PREVIEW);
-    
+
     // 播放前需要选中这个actionItem
     if (actions.currentSelectActionItemId !== props.id) {
         actions.currentSelectActionTitle = props.title;
@@ -74,5 +94,14 @@ button:hover {
 button.play-btn:hover {
     background-color: transparent;
     color: green;
+}
+
+button.collapse-btn {
+    font-size: 16px;
+}
+
+button.collapse-btn:hover {
+    background-color: var(--error-color);
+    color: white;
 }
 </style>

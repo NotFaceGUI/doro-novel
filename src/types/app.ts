@@ -133,6 +133,7 @@ export interface ActionItems {
     snapshot?: Snapshot, // 存储快照
     modification?: Map<PropertyPath, Modification>, // 当前ActionItem对快照的修改
     wait?: boolean
+    isToggle?: boolean,
     action?: ActionCallback,
     serialize?: () => any,
     deserialize?: () => any,

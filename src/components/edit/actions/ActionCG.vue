@@ -1,7 +1,7 @@
 <template>
     <div class="action-item-main">
-        <ActionItemHead content="🖼️ CG图像" :title="title" :id="id"></ActionItemHead>
-        <div class="action-item-content">
+        <ActionItemHead content="🖼️ CG图像" :title="title" :id="id" :is-collapsed="actionItem.isToggle"></ActionItemHead>
+        <div class="action-item-content" v-show="!actionItem.isToggle">
             <div class="action-title">
                 阻塞执行
                 <ToggleSwitch v-model="actionItem.wait!"></ToggleSwitch>
@@ -14,7 +14,7 @@
             <Dropdown v-model="selectedOption" @update:modelValue="onSelectModel" :options="CGOperaMode"
                 :disabled="false" />
 
-            <ActionBottomLine></ActionBottomLine>
+           <ActionBottomLine></ActionBottomLine>
 
             <template v-if="CGOperaMode[selectedOption].value === 'show'">
                 <div class="action-title">
@@ -36,36 +36,62 @@
                     层级设置
                 </div> -->
                 <div>
-                    <FilterSlider 
-                        label="Z-Index" 
-                        :min="0" 
-                        :max="200" 
-                        :step="1" 
-                        :modelValue="zIndexValue" 
-                        @update:modelValue="handleZIndexChange"
-                    />
+                    <FilterSlider label="Z-Index" :min="0" :max="200" :step="1" :modelValue="zIndexValue"
+                        @update:modelValue="handleZIndexChange" />
                 </div>
 
                 <!-- <div class="action-title">
                     透明度设置
                 </div> -->
                 <div>
-                    <FilterSlider 
-                        label="透明度" 
-                        :min="0" 
-                        :max="1" 
-                        :step="0.01" 
-                        :modelValue="alphaValue" 
-                        @update:modelValue="handleAlphaChange"
-                    />
+                    <FilterSlider label="透明度" :min="0" :max="1" :step="0.01" :modelValue="alphaValue"
+                        @update:modelValue="handleAlphaChange" />
                 </div>
 
-                <!-- 滤镜效果设置 -->
+                <!-- 位置和大小设置 -->
+                <div class="action-title">
+                    位置设置
+                </div>
+                <div class="position-controls">
+                    <div class="position-row">
+                        <FilterSlider label="X坐标" :min="-3000" :max="3000" :step="1" :modelValue="positionX"
+                            @update:modelValue="handlePositionXChange" />
+                    </div>
+                    <div class="position-row">
+                        <FilterSlider label="Y坐标" :min="-3000" :max="3000" :step="1" :modelValue="positionY"
+                            @update:modelValue="handlePositionYChange" />
+                    </div>
+                </div>
+
+                <div class="action-title">
+                    大小设置
+                </div>
+                <div class="size-controls">
+                    <div class="size-row">
+                        <FilterSlider label="宽度缩放" :min="0.1" :max="5" :step="0.01" :modelValue="scaleX"
+                            @update:modelValue="handleScaleXChange" />
+                    </div>
+                    <div class="size-row">
+                        <FilterSlider label="高度缩放" :min="0.1" :max="5" :step="0.01" :modelValue="scaleY"
+                            @update:modelValue="handleScaleYChange" />
+                    </div>
+                    <div class="size-row">
+                        <button @click="lockAspectRatio = !lockAspectRatio"
+                            :class="['aspect-lock-btn', { active: lockAspectRatio }]">
+                            <span class="lock-icon">{{ lockAspectRatio ? '🔒' : '🔓' }}</span>
+                            <span class="lock-text">锁定比例</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- <div class="action-title">
+                    滤镜效果设置
+                </div> -->
                 <div class="action-title">
                     滤镜效果
                     <ToggleSwitch v-model="enableFilters"></ToggleSwitch>
                 </div>
-                
+
                 <template v-if="enableFilters">
                     <!-- 当前应用的滤镜 -->
                     <div v-if="activeFilters.length > 0" class="filters-section">
@@ -77,14 +103,10 @@
                                 <span>{{ filterConfigs[filter.type].label }}</span>
                                 <button @click="removeFilter(index)" class="remove-filter-btn">×</button>
                             </div>
-                            <FilterSlider 
-                                :label="filterConfigs[filter.type].label"
-                                :min="filterConfigs[filter.type].min"
-                                :max="filterConfigs[filter.type].max"
-                                :step="filterConfigs[filter.type].step"
-                                :modelValue="filter.value"
-                                @update:modelValue="(value) => handleFilterChange(index, value)"
-                            />
+                            <FilterSlider :label="filterConfigs[filter.type].label"
+                                :min="filterConfigs[filter.type].min" :max="filterConfigs[filter.type].max"
+                                :step="filterConfigs[filter.type].step" :modelValue="filter.value"
+                                @update:modelValue="(value) => handleFilterChange(index, value)" />
                         </div>
                     </div>
 
@@ -102,15 +124,28 @@
                             <button @click="showFilterSelector = false" class="close-selector-btn">×</button>
                         </div>
                         <div class="filter-options">
-                            <button 
-                                v-for="filterType in availableFilters" 
-                                :key="filterType"
-                                @click="selectFilter(filterType)"
-                                class="filter-option-btn"
-                            >
+                            <button v-for="filterType in availableFilters" :key="filterType"
+                                @click="selectFilter(filterType)" class="filter-option-btn">
                                 {{ filterConfigs[filterType].label }}
                             </button>
                         </div>
+                    </div>
+
+                </template>
+                <!-- 显示时的淡入设置 -->
+                <div class="action-title">
+                    淡入效果
+                    <ToggleSwitch v-model="enableShowFadeIn"></ToggleSwitch>
+
+                </div>
+                <template v-if="enableShowFadeIn">
+                    <div>
+                        <FilterSlider label="淡入时长 (秒)" :min="0.1" :max="10" :step="0.1" :modelValue="showFadeInDuration"
+                            @update:modelValue="(value) => showFadeInDuration = value" />
+                    </div>
+                    <div>
+                        <FilterSlider label="淡入延迟 (秒)" :min="0" :max="5" :step="0.1" :modelValue="showFadeInDelay"
+                            @update:modelValue="(value) => showFadeInDelay = value" />
                     </div>
                 </template>
             </template>
@@ -119,23 +154,18 @@
                 <div class="operation-info">
                     隐藏当前显示的CG图像
                 </div>
-                
+
                 <!-- 隐藏时的淡出设置 -->
                 <div class="action-title">
                     淡出效果
                     <ToggleSwitch v-model="enableHideFadeOut"></ToggleSwitch>
                 </div>
-                
+
                 <template v-if="enableHideFadeOut">
                     <div>
-                        <FilterSlider 
-                            label="淡出时长 (秒)" 
-                            :min="0.1" 
-                            :max="10" 
-                            :step="0.1" 
-                            :modelValue="hideFadeOutDuration" 
-                            @update:modelValue="(value) => hideFadeOutDuration = value"
-                        />
+                        <FilterSlider label="淡出时长 (秒)" :min="0.1" :max="10" :step="0.1"
+                            :modelValue="hideFadeOutDuration"
+                            @update:modelValue="(value) => hideFadeOutDuration = value" />
                     </div>
                 </template>
             </template>
@@ -183,6 +213,7 @@ import CanvasManager from '../../../script/render/canvas-manager';
 import { selectImageType } from '../../../script/common/search-action';
 import { ResType } from '../../../script/var';
 import { Texture } from 'pixi.js';
+import { Action } from 'pixijs-actions';
 
 // CG操作模式
 const selectedOption = ref(0);
@@ -199,6 +230,11 @@ const isCGActive = ref(false);
 // CG属性设置
 const zIndexValue = ref(100);
 const alphaValue = ref(1.0);
+
+// 淡入效果设置
+const enableShowFadeIn = ref(false);
+const showFadeInDuration = ref(1.0);
+const showFadeInDelay = ref(0.0);
 
 // 淡出效果设置
 const enableHideFadeOut = ref(false);
@@ -233,6 +269,16 @@ const filterConfigs: Record<FilterType, {
 
 // 当前应用的滤镜
 const activeFilters = ref<FilterItem[]>([]);
+
+// 位置和大小设置
+const positionX = ref(0);
+const positionY = ref(0);
+const scaleX = ref(1);
+const scaleY = ref(1);
+const lockAspectRatio = ref(true);
+
+
+
 
 // 可用的滤镜类型（排除已添加的）
 const availableFilters = computed(() => {
@@ -269,7 +315,7 @@ const availableCGs = computed(() => {
 
 // 更新CG列表
 const updateCGList = () => {
-    cgList.value = {...ResourceManager.allResUrl};
+    cgList.value = { ...ResourceManager.allResUrl };
 };
 
 const canPreview = computed(() => {
@@ -334,6 +380,39 @@ const handleAlphaChange = (value: number) => {
     updateCG();
 };
 
+
+// 防抖更新CG函数
+const debouncedUpdateCG = () => {
+    updateCG();
+};
+
+// 位置和大小处理函数
+const handlePositionXChange = (value: number) => {
+    positionX.value = value;
+    debouncedUpdateCG();
+};
+
+const handlePositionYChange = (value: number) => {
+    positionY.value = value;
+    debouncedUpdateCG();
+};
+
+const handleScaleXChange = (value: number) => {
+    scaleX.value = value;
+    if (lockAspectRatio.value) {
+        scaleY.value = value;
+    }
+    debouncedUpdateCG();
+};
+
+const handleScaleYChange = (value: number) => {
+    scaleY.value = value;
+    if (lockAspectRatio.value) {
+        scaleX.value = value;
+    }
+    debouncedUpdateCG();
+};
+
 // 更新CG显示
 const updateCG = () => {
     if (!isCGActive.value || !selectedCGKey.value) return;
@@ -344,34 +423,167 @@ const updateCG = () => {
         value: filter.value
     }));
 
-    canvasManager.setCG(selectedCGKey.value, zIndexValue.value, alphaValue.value, filtersArray);
+    // 传递位置、大小和其他属性
+    canvasManager.setCG(
+        selectedCGKey.value,
+        zIndexValue.value,
+        alphaValue.value,
+        filtersArray,
+        {
+            x: positionX.value,
+            y: positionY.value,
+            scaleX: scaleX.value,
+            scaleY: scaleY.value
+        }
+    );
+
+    // // 如果启用了淡入效果，应用淡入动画
+    // if (enableShowFadeIn.value) {
+    //     applyCGFadeInAnimation();
+    // }
+};
+
+// 应用CG淡入动画
+const applyCGFadeInAnimation = () => {
+    const canvasManager = CanvasManager.getInstance();
+    const cgContainer = canvasManager.getCGContainer();
+
+    if (cgContainer) {
+        // 设置初始透明度为0
+        cgContainer.alpha = 0;
+
+        // 创建淡入动画
+        const fadeInAction = Action.fadeIn(showFadeInDuration.value).easeInOut();
+
+        // 如果有延迟，先等待
+        if (showFadeInDelay.value > 0) {
+            const delayAction = Action.waitForDuration(showFadeInDelay.value);
+            const combinedAction = Action.sequence([delayAction, fadeInAction]);
+            cgContainer.run(combinedAction);
+        } else {
+            cgContainer.run(fadeInAction);
+        }
+    }
+};
+
+// 等待淡入动画完成
+const waitForFadeInAnimation = (): Promise<void> => {
+    return new Promise((resolve) => {
+        const canvasManager = CanvasManager.getInstance();
+        const cgContainer = canvasManager.getCGContainer();
+
+        if (cgContainer) {
+            // 设置初始透明度为0
+            cgContainer.alpha = 0;
+
+            // 创建淡入动画
+            const fadeInAction = Action.fadeIn(showFadeInDuration.value).easeInOut();
+
+            // 如果有延迟，先等待
+            if (showFadeInDelay.value > 0) {
+                const delayAction = Action.waitForDuration(showFadeInDelay.value);
+                const combinedAction = Action.sequence([delayAction, fadeInAction]);
+                cgContainer.run(combinedAction);
+                // 等待延迟 + 淡入时间
+                setTimeout(resolve, (showFadeInDelay.value + showFadeInDuration.value) * 1000);
+            } else {
+                cgContainer.run(fadeInAction);
+                // 等待淡入时间
+                setTimeout(resolve, showFadeInDuration.value * 1000);
+            }
+        } else {
+            resolve();
+        }
+    });
+};
+
+// 等待淡出动画完成
+const waitForFadeOutAnimation = (): Promise<void> => {
+    return new Promise((resolve) => {
+        const canvasManager = CanvasManager.getInstance();
+        const cgContainer = canvasManager.getCGContainer();
+
+        if (cgContainer && cgContainer.children.length > 0) {
+            // 创建淡出动画
+            const fadeOutAction = Action.fadeOut(hideFadeOutDuration.value).easeInOut();
+            cgContainer.run(fadeOutAction);
+
+            // 等待淡出时间，然后在回调中移除CG
+            setTimeout(() => {
+                canvasManager.removeCG();
+                resolve();
+            }, hideFadeOutDuration.value * 1000);
+        } else {
+            resolve();
+        }
+    });
 };
 
 // 主要的action执行函数
-const targetAction = () => {
+const targetAction = async () => {
     const mode = CGOperaMode.value[selectedOption.value].value;
     const canvasManager = CanvasManager.getInstance();
-    
+
     if (mode === 'show') {
         if (selectedCGKey.value) {
             isCGActive.value = true;
             updateCG();
+
+            // 如果启用了淡入效果，等待淡入动画完成
+            if (enableShowFadeIn.value) {
+                await waitForFadeInAnimation();
+            }
         }
     } else if (mode === 'hide') {
-        isCGActive.value = false;
-        canvasManager.removeCG();
+        // 如果启用了淡出效果，等待淡出动画完成
+        if (enableHideFadeOut.value) {
+            await waitForFadeOutAnimation();
+            isCGActive.value = false;
+        } else {
+            isCGActive.value = false;
+            canvasManager.removeCG();
+        }
+    }
+};
+
+// 应用CG淡出动画
+const applyCGFadeOutAnimation = (onComplete?: () => void) => {
+    const canvasManager = CanvasManager.getInstance();
+    const cgContainer = canvasManager.getCGContainer();
+
+    if (cgContainer && cgContainer.children.length > 0) {
+        // 创建淡出动画
+        const fadeOutAction = Action.fadeOut(hideFadeOutDuration.value).easeInOut();
+
+
+
+        cgContainer.run(fadeOutAction);
+        setTimeout(() => {
+            onComplete?.()
+        }, hideFadeOutDuration.value)
+    } else if (onComplete) {
+        // 如果没有CG容器或内容，直接执行回调
+        onComplete();
     }
 };
 
 // 预览功能
 const previewCG = () => {
     if (!canPreview.value) return;
-    
+
     if (isCGActive.value) {
-        // 隐藏预览
-        const canvasManager = CanvasManager.getInstance();
-        canvasManager.removeCG();
-        isCGActive.value = false;
+        // 隐藏预览 - 应用淡出动画
+        if (enableHideFadeOut.value) {
+            applyCGFadeOutAnimation(() => {
+                const canvasManager = CanvasManager.getInstance();
+                canvasManager.removeCG();
+                isCGActive.value = false;
+            });
+        } else {
+            const canvasManager = CanvasManager.getInstance();
+            canvasManager.removeCG();
+            isCGActive.value = false;
+        }
     } else {
         // 显示预览
         isCGActive.value = true;
@@ -380,9 +592,18 @@ const previewCG = () => {
 };
 
 const previewHide = () => {
-    const canvasManager = CanvasManager.getInstance();
-    canvasManager.removeCG();
-    isCGActive.value = false;
+    // 应用淡出动画
+    if (enableHideFadeOut.value) {
+        applyCGFadeOutAnimation(() => {
+            const canvasManager = CanvasManager.getInstance();
+            canvasManager.removeCG();
+            isCGActive.value = false;
+        });
+    } else {
+        const canvasManager = CanvasManager.getInstance();
+        canvasManager.removeCG();
+        isCGActive.value = false;
+    }
 };
 
 const clearAllFilters = () => {
@@ -398,6 +619,20 @@ const serialization = () => {
             selectedCG: selectedCGKey.value,
             zIndex: zIndexValue.value,
             alpha: alphaValue.value,
+            position: {
+                x: positionX.value,
+                y: positionY.value
+            },
+            scale: {
+                x: scaleX.value,
+                y: scaleY.value,
+                lockAspectRatio: lockAspectRatio.value
+            },
+            showFadeIn: {
+                enabled: enableShowFadeIn.value,
+                duration: showFadeInDuration.value,
+                delay: showFadeInDelay.value
+            },
             hideFadeOut: {
                 enabled: enableHideFadeOut.value,
                 duration: hideFadeOutDuration.value
@@ -425,11 +660,19 @@ const deserialization = (actionItem: ActionItems) => {
         selectedOption.value = modeIndex;
     }
 
-    // 恢复选中的CG
+    // 恢复选中的CG - 需要等待CG列表更新后再设置
     if (cgData.selectedCG) {
-        const cgIndex = availableCGs.value.findIndex(cg => cg.value === cgData.selectedCG);
-        if (cgIndex !== -1) {
-            selectedCGOption.value = cgIndex;
+        // 直接设置选中的CG键值，不依赖于下拉选项索引
+        const cgExists = Object.keys(cgList.value).includes(cgData.selectedCG);
+        if (cgExists) {
+            // 找到对应的选项索引
+            const cgIndex = availableCGs.value.findIndex(cg => cg.value === cgData.selectedCG);
+            if (cgIndex !== -1) {
+                selectedCGOption.value = cgIndex;
+            }
+        } else {
+            // 如果CG不存在于当前列表中，可能需要等待资源加载
+            console.warn(`CG资源未找到: ${cgData.selectedCG}`);
         }
     }
 
@@ -439,6 +682,24 @@ const deserialization = (actionItem: ActionItems) => {
     }
     if (cgData.alpha !== undefined) {
         alphaValue.value = cgData.alpha;
+    }
+
+    // 恢复位置和缩放设置
+    if (cgData.position) {
+        positionX.value = cgData.position.x || 0;
+        positionY.value = cgData.position.y || 0;
+    }
+    if (cgData.scale) {
+        scaleX.value = cgData.scale.x || 1;
+        scaleY.value = cgData.scale.y || 1;
+        lockAspectRatio.value = cgData.scale.lockAspectRatio !== undefined ? cgData.scale.lockAspectRatio : true;
+    }
+
+    // 恢复淡入设置
+    if (cgData.showFadeIn) {
+        enableShowFadeIn.value = cgData.showFadeIn.enabled;
+        showFadeInDuration.value = cgData.showFadeIn.duration;
+        showFadeInDelay.value = cgData.showFadeIn.delay;
     }
 
     // 恢复淡出设置
@@ -451,7 +712,7 @@ const deserialization = (actionItem: ActionItems) => {
     if (cgData.filters) {
         enableFilters.value = cgData.filters.enabled;
         if (cgData.filters.activeFilters) {
-            activeFilters.value = cgData.filters.activeFilters;
+            activeFilters.value = [...cgData.filters.activeFilters];
         }
     }
 
@@ -489,6 +750,8 @@ const selectCG = () => {
             }
         }
 
+
+
         // 如果当前是显示模式，更新CG显示
         if (CGOperaMode.value[selectedOption.value].value === 'show') {
             updateCG();
@@ -499,6 +762,7 @@ const selectCG = () => {
 const onSelectModel = () => {
     // 切换模式时隐藏预览
     previewHide();
+    
 };
 
 const onSelectCG = () => {
@@ -510,26 +774,31 @@ const onSelectCG = () => {
 let cgListTimer: number | null = null;
 
 onMounted(() => {
+    const actionIndex = action.getAction(props.title).as.findIndex((item) => item.id === props.id);
+    const currentActionItem = action.getAction(props.title).as[actionIndex];
+    
     // 注册action回调
-    actionItem.action = targetAction;
-
-    // 设置序列化和反序列化方法
-    actionItem.serialize = serialization;
+    currentActionItem.action = targetAction;
+    currentActionItem.serialize = serialization;
 
     // 初始化CG列表
     updateCGList();
 
     // 定时更新CG列表
-    cgListTimer = window.setInterval(updateCGList, 1000);
+    // cgListTimer = window.setInterval(updateCGList, 1000);
+
+    // 获取修改对象
+    modification = action.getCurrentModification(props.title, props.id);
 
     // 反序列化现有数据
-    if (actionItem.actionData) {
-        deserialization(actionItem.actionData);
-    }
+    deserialization(currentActionItem);
 
     // 如果是显示模式且CG处于激活状态，则更新显示
-    if (isCGActive.value) {
-        updateCG();
+    if (isCGActive.value && selectedCGKey.value) {
+        // 延迟一下确保资源已加载
+        setTimeout(() => {
+            updateCG();
+        }, 100);
     }
 });
 
@@ -539,17 +808,13 @@ onUnmounted(() => {
         clearInterval(cgListTimer);
         cgListTimer = null;
     }
-    
+
     // 清理CG显示
     previewHide();
 });
 </script>
 
 <style scoped>
-
-
-
-
 .operation-info {
     display: flex;
     justify-content: center;
@@ -745,5 +1010,50 @@ onUnmounted(() => {
 
     backdrop-filter: blur(5px);
     transition: all .1s ease-in-out;
+}
+
+/* 锁定比例按钮样式 */
+.aspect-lock-btn {
+    margin-top: 10px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--secondary-bg);
+    color: var(--text-color);
+    border: 2px solid var(--main-border-color);
+    border-radius: var(--border-radius);
+    padding: 4px 6px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    min-width: 80px;
+    justify-content: center;
+}
+
+.aspect-lock-btn:hover {
+    background: var(--high-hover-bg);
+    border-color: var(--accent-color);
+}
+
+.aspect-lock-btn.active {
+    background: var(--accent-color);
+    color: white;
+    border-color: var(--accent-color);
+}
+
+.aspect-lock-btn.active:hover {
+    background: var(--accent-hover-color);
+    border-color: var(--accent-hover-color);
+}
+
+.lock-icon {
+    font-size: 16px;
+    line-height: 1;
+}
+
+.lock-text {
+    font-size: 14px;
+    font-weight: 500;
 }
 </style>

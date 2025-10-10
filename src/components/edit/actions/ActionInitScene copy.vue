@@ -1,6 +1,6 @@
 <template>
     <div class="action-item-main">
-        <ActionItemHead content="🎬 场景初始化" :is-hover="true" :title="title" :id="id"></ActionItemHead>
+        <ActionItemHead content="🎬 场景初始化" :is-hover="true" :title="title" :id="id" :is-collapsed="actionItem.isToggle"></ActionItemHead>
         <div class="action-item-content">
             <div class="action-title">
                 阻塞执行

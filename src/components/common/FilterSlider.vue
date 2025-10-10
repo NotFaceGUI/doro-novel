@@ -59,7 +59,7 @@ const handleChange = (event: Event) => {
 
 <style scoped>
 .filter-slider {
-    margin-bottom: 15px;
+    margin-bottom: 5px;
 }
 
 .slider-header {

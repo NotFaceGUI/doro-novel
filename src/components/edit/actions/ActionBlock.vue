@@ -1,7 +1,7 @@
 <template>
     <div class="action-item-main">
-        <ActionItemHead content="⏱️ 阻塞执行" :title="title" :id="id"></ActionItemHead>
-        <div class="action-item-content">
+        <ActionItemHead content="⏱️ 阻塞执行" :title="title" :id="id" :is-collapsed="actionItem.isToggle"></ActionItemHead>
+        <div class="action-item-content" v-show="!actionItem.isToggle">
             <div>
                 <DynamicInputs v-model="blockSettings" :columns="blockSettings.length">
                 </DynamicInputs>

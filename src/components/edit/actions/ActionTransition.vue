@@ -1,7 +1,7 @@
 <template>
     <div class="action-item-main">
-        <ActionItemHead content="🎭 过渡效果" :is-hover="true" :title="title" :id="id"></ActionItemHead>
-        <div class="action-item-content">
+        <ActionItemHead content="🎭 过渡效果" :is-hover="true" :title="title" :id="id" :is-collapsed="actionItem.isToggle"></ActionItemHead>
+        <div class="action-item-content" v-show="!actionItem.isToggle">
             <div class="action-title">
                 过渡类型
             </div>

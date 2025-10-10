@@ -1,7 +1,7 @@
 <template>
     <div class="action-item-main">
-        <ActionItemHead content="🎬 场景初始化" :is-hover="true" :title="title" :id="id"></ActionItemHead>
-        <div class="action-item-content">
+        <ActionItemHead content="🎬 场景初始化" :is-hover="true" :title="title" :id="id" :is-collapsed="actionItem.isToggle"></ActionItemHead>
+        <div class="action-item-content" v-show="!actionItem.isToggle">
             <!-- <div class="action-title">
                 阻塞执行
                 <ToggleSwitch v-model="actionItem.wait!"></ToggleSwitch>
@@ -137,7 +137,10 @@ const props = defineProps<{
 }>();
 
 // 拿到一些共同的属性
-const { action } = useCommonState(props.title, props.id);
+const { action, actionItem } = useCommonState(props.title, props.id);
+
+
+
 
 
 // 用于控制初始化场景的黑幕显影

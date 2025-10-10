@@ -364,8 +364,10 @@ export const useActionStore = defineStore('action', () => {
     useBranchStore().clearAllTags();
 
     currentSelectActionItemId.value = -1;
-    CanvasManager.getInstance().setMode(GameMode.PLAY)
+    cm.setMode(GameMode.PLAY)
 
+    // 移除 CG
+    cm.removeCG()
   }
 
 

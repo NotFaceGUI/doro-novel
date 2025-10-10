@@ -21,6 +21,7 @@ export function useCommonState(actionTitle: string, actionId: number) {
         actionItem.wait = true;
     }
 
+
     return { action, actionItem };
 }
 

@@ -1,7 +1,7 @@
 <template>
     <div class="action-item-main" :data-component-id="id">
-        <ActionItemHead content="💬 设置对话" :title="title" :id="id"></ActionItemHead>
-        <div class="action-item-content">
+        <ActionItemHead content="💬 设置对话" :title="title" :id="id" :is-collapsed="actionItem.isToggle"></ActionItemHead>
+        <div class="action-item-content" v-show="!actionItem.isToggle">
             <div class="action-title">
                 阻塞执行
                 <ToggleSwitch v-model="actionItem.wait!"></ToggleSwitch>
@@ -24,7 +24,8 @@
             </div>
         </div>
         <VueDraggable v-model="messages" :animation="200" ghostClass="ghost-item" chosenClass="chosen-item"
-            dragClass="drag-item" handle=".drag-handle" @start="onDragStart" @end="onDragEnd">
+            dragClass="drag-item" handle=".drag-handle" @start="onDragStart" @end="onDragEnd"
+            v-show="!actionItem.isToggle">
             <div class="action-item-content dialogue-item" v-for="(message, messageIndex) in messages"
                 :key="message.id || messageIndex">
                 <!-- 拖拽手柄 -->
@@ -202,7 +203,7 @@
                 </div>
             </div>
         </VueDraggable>
-        <div>
+        <div v-show="!actionItem.isToggle">
             <div class="pre-bind-section">
                 <button v-if="!preSelectedCharacter" @click.stop="preBindCharacter" class="pre-bind-btn">
                     👤 预选角色
@@ -217,7 +218,7 @@
                 </div>
             </div>
         </div>
-        <div class="action-dialogue-tool">
+        <div class="action-dialogue-tool" v-show="!actionItem.isToggle">
             <div style="display: flex;flex-direction: column;align-items: center;justify-content: center;flex: 1;">
                 <button class="action-dialogue-tool-button " style="width: 100%;"
                     @click.stop="showDialogueTypeSelector">✨&emsp;新增</button>
@@ -535,7 +536,7 @@ const bindCharacter = (index: number) => {
             animation: 'idle',
             ease: EasingFunction.EaseInOutSine,
             duration: 300,
-            spine: (markRaw(ResourceManager.getResource(ASSET_CHARACTER + res.path?.name + "/" + res.path?.skel , ResType.Spine) ?? {}) as Raw<Spine>) ?? undefined,
+            spine: (markRaw(ResourceManager.getResource(ASSET_CHARACTER + res.path?.name + "/" + res.path?.skel, ResType.Spine) ?? {}) as Raw<Spine>) ?? undefined,
         }
 
         messages.value[index].parms.amintionOption = messages.value[index].parms?.spine?.state.data.skeletonData.animations.map((item, _index) => {

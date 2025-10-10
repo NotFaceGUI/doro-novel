@@ -175,7 +175,7 @@ class CanvasManager {
         // 在连线中点添加一个小圆点作为标记
         const midX = (startPos.x + endPos.x) / 2;
         const midY = (startPos.y + endPos.y) / 2;
-        
+
         this.cameraConnectionLine.beginFill(0xff6600, 1); // 橙色填充
         this.cameraConnectionLine.drawCircle(midX, midY, 3);
         this.cameraConnectionLine.endFill();
@@ -356,7 +356,7 @@ class CanvasManager {
         this.layers['cg'] = {
             container: new PIXI.Container(),
             viewport: true,
-            sortLayer: 50,
+            sortLayer: 101,
             parallaxFactor: 1
         }
 
@@ -1215,14 +1215,36 @@ class CanvasManager {
     public async setCG(key: string, zIndex: number = 100, alpha: number = 1.0, filters?: Array<{
         type: string;
         value: number;
-    }>) {
+    }>, config?: { x: number; y: number; scaleX: number; scaleY: number; }) {
         // 如果设置的CG是相同的就不进行重复设置
         if (this.lastCGPath === key && this.currentCG) {
-            // 只更新属性
+            // 只更新属性，避免重复计算
             this.currentCG.zIndex = zIndex;
             this.currentCG.alpha = alpha;
             this.applyCGFilters(this.currentCG, filters);
-            return;
+            
+            if (config) {
+                // 获取基础中心位置
+                const baseCenterX = this.app.renderer.width / 2;
+                const baseCenterY = this.app.renderer.height / 2;
+                
+                // 计算适当的缩放比例使图像填充屏幕
+                const scaleFactor = Math.max(
+                    this.app.renderer.width / this.currentCG.texture.width,
+                    this.app.renderer.height / this.currentCG.texture.height
+                );
+                
+                // 直接设置位置和缩放，避免重复计算
+                this.currentCG.position.set(
+                    baseCenterX + config.x,
+                    baseCenterY + config.y
+                );
+                this.currentCG.scale.set(
+                    config.scaleX * scaleFactor,
+                    config.scaleY * scaleFactor
+                );
+            }
+            return this.currentCG;
         }
 
         this.lastCGPath = key;
@@ -1233,9 +1255,12 @@ class CanvasManager {
             this.currentCG = null;
         }
 
-        // 确保资源已加载
-        let texture = ResourceManager.getResource<PIXI.Texture>(key, ResType.Image)
-            ?? (await PIXI.Assets.load(key), PIXI.Texture.from(key));
+        // 确保资源已加载 - 优化资源加载逻辑
+        let texture = ResourceManager.getResource<PIXI.Texture>(key, ResType.Image);
+        if (!texture) {
+            texture = await PIXI.Assets.load(key);
+            texture = PIXI.Texture.from(key);
+        }
 
         // 创建新CG精灵
         const cg = new PIXI.Sprite(texture);
@@ -1246,13 +1271,25 @@ class CanvasManager {
             this.app.renderer.width / cg.texture.width,
             this.app.renderer.height / cg.texture.height
         );
-        cg.scale.set(scaleFactor);
 
-        // 设置位置为视口世界中心
-        cg.position.set(
-            this.viewport.worldWidth / 2,
-            this.viewport.worldHeight / 2
-        );
+        // 设置基础位置为app.stage的中心（UI层中心）
+        const baseCenterX = this.viewport.center.x;
+        const baseCenterY = this.viewport.center.y;
+        
+        // 应用位置偏移和缩放
+        if (config) {
+            // 基于中心位置应用偏移
+            cg.position.set(
+                baseCenterX + config.x,
+                baseCenterY + config.y
+            );
+            // 应用自定义缩放
+            cg.scale.set(config.scaleX * scaleFactor, config.scaleY * scaleFactor);
+        } else {
+            // 默认位置为中心
+            cg.position.set(baseCenterX, baseCenterY);
+            cg.scale.set(scaleFactor);
+        }
 
         // 设置层级和透明度
         cg.zIndex = zIndex;
@@ -1324,6 +1361,13 @@ class CanvasManager {
         });
 
         cg.filters = filterArray;
+    }
+
+    /**
+     * 获取CG容器，用于动画操作
+     */
+    public getCGContainer(): PIXI.Container {
+        return this.layers['cg'].container;
     }
 
     /**
