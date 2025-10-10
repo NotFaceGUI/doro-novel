@@ -25,7 +25,7 @@
         </div>
         <VueDraggable v-model="messages" :animation="200" ghostClass="ghost-item" chosenClass="chosen-item"
             dragClass="drag-item" handle=".drag-handle" @start="onDragStart" @end="onDragEnd">
-            <div  class="action-item-content dialogue-item" v-for="(message, messageIndex) in messages"
+            <div class="action-item-content dialogue-item" v-for="(message, messageIndex) in messages"
                 :key="message.id || messageIndex">
                 <!-- 拖拽手柄 -->
                 <div class="drag-handle" title="拖拽排序">⋮⋮</div>
@@ -167,7 +167,8 @@
                                     <span class="unit-label">ms</span>
                                 </div>
 
-                                <div class="camera-control-row">
+                                <div class="camera-control-row"
+                                    v-if="message.parms?.amintionOption && message.parms.amintionOption.length > 0">
                                     <label class="control-label">选择名称：</label>
                                     <Dropdown v-model="message.parms.animationIndex!" @update:modelValue="(value) => {
                                         if (messages[messageIndex].parms) {
@@ -260,7 +261,7 @@
 
 <script setup lang="ts">
 // 在 script setup 部分添加
-import { markRaw, onMounted, onUnmounted, ref, watch } from 'vue';
+import { markRaw, onMounted, onUnmounted, Raw, ref, watch } from 'vue';
 import { ActionItems, DialogTextData, DialogueType } from '../../../types/app';
 import ActionItemHead from './ActionItemHead.vue';
 import massage from '../../../script/common/massage';
@@ -510,6 +511,7 @@ const bindCharacter = (index: number) => {
     selectCharacterType().then((res) => {
         const characterName = res.characterName;
 
+
         // 从store中获取已保存的角色配置
         const savedConfig = characterConfigStore.getCharacterConfig(characterName);
 
@@ -532,8 +534,17 @@ const bindCharacter = (index: number) => {
             animationIndex: 0,
             animation: 'idle',
             ease: EasingFunction.EaseInOutSine,
-            duration: 300
+            duration: 300,
+            spine: (markRaw(ResourceManager.getResource(ASSET_CHARACTER + res.path?.name + "/" + res.path?.skel , ResType.Spine) ?? {}) as Raw<Spine>) ?? undefined,
         }
+
+        messages.value[index].parms.amintionOption = messages.value[index].parms?.spine?.state.data.skeletonData.animations.map((item, _index) => {
+            return {
+                value: item.name,
+                label: item.name,
+            };
+        })
+
 
         // 如果没有保存的配置，保存当前配置到store
         if (!savedConfig) {
@@ -732,10 +743,10 @@ const serialization = () => {
             parms: message.parms ? {
                 ...message.parms,
                 // 不直接序列化spine对象，而是保存spine的资源key
-                spineResourceKey: message.parms.spine ? 
-                    (message.parms.CharacterName ? 
-                        ASSET_CHARACTER + message.parms.character.path?.name + "/" + message.parms.character.path?.skel : 
-                        undefined) : 
+                spineResourceKey: message.parms.spine ?
+                    (message.parms.CharacterName ?
+                        ASSET_CHARACTER + message.parms.character.path?.name + "/" + message.parms.character.path?.skel :
+                        undefined) :
                     undefined,
                 // 移除spine对象本身
                 spine: undefined
@@ -749,10 +760,10 @@ const serialization = () => {
             parms: preSelectedCharacter.value.parms ? {
                 ...preSelectedCharacter.value.parms,
                 // 同样处理预选角色的spine
-                spineResourceKey: preSelectedCharacter.value.parms.spine ? 
-                    (preSelectedCharacter.value.parms.CharacterName ? 
-                        ASSET_CHARACTER + preSelectedCharacter.value.parms.character.path?.name + "/" + preSelectedCharacter.value.parms.character.path?.skel : 
-                        undefined) : 
+                spineResourceKey: preSelectedCharacter.value.parms.spine ?
+                    (preSelectedCharacter.value.parms.CharacterName ?
+                        ASSET_CHARACTER + preSelectedCharacter.value.parms.character.path?.name + "/" + preSelectedCharacter.value.parms.character.path?.skel :
+                        undefined) :
                     undefined,
                 spine: undefined
             } : undefined
@@ -775,7 +786,7 @@ const deserialization = (data: ActionItems) => {
             parms: message.parms ? {
                 ...message.parms,
                 // 根据spineResourceKey重新获取spine实例
-                spine:  message.parms.spineResourceKey ? 
+                spine: message.parms.spineResourceKey ?
                     markRaw(ResourceManager.getResource<Spine>(message.parms.spineResourceKey, ResType.Spine) ?? {}) :
                     undefined
             } : undefined
@@ -799,8 +810,8 @@ const deserialization = (data: ActionItems) => {
             parms: actionData.preSelectedCharacter.parms ? {
                 ...actionData.preSelectedCharacter.parms,
                 // 同样根据spineResourceKey重新获取spine实例
-                spine: actionData.preSelectedCharacter.parms.spineResourceKey ? 
-                    markRaw(ResourceManager.getResource<Spine>(actionData.preSelectedCharacter.parms.spineResourceKey, ResType.Spine) ?? {}) : 
+                spine: actionData.preSelectedCharacter.parms.spineResourceKey ?
+                    markRaw(ResourceManager.getResource<Spine>(actionData.preSelectedCharacter.parms.spineResourceKey, ResType.Spine) ?? {}) :
                     undefined
             } : undefined
         };
@@ -813,7 +824,7 @@ onMounted(() => {
     const actionIndex = action.getAction(props.title).as.findIndex((item) => item.id === props.id);
     action.getAction(props.title).as[actionIndex].action = targetAction;
     action.getAction(props.title).as[actionIndex].serialize = serialization;
-    
+
     modification = action.getCurrentModification(props.title, props.id);
 
     // 反序列化数据
@@ -827,14 +838,14 @@ onMounted(() => {
     // 初始化当前组件实例的可编辑div内容
     setTimeout(() => {
         // 获取当前组件的根元素
-        const currentComponent = document.querySelector(`[data-component-id="${props.id}"]`) || 
-                                document.querySelector('.action-item-main');
-        
+        const currentComponent = document.querySelector(`[data-component-id="${props.id}"]`) ||
+            document.querySelector('.action-item-main');
+
         if (currentComponent) {
             // 只查询当前组件内的可编辑div
             const editableDivs = currentComponent.querySelectorAll('.text-input .editable-div');
             let globalIndex = 0;
-            
+
             messages.value.forEach((message) => {
                 message.texts.forEach((textData) => {
                     if (globalIndex < editableDivs.length) {
