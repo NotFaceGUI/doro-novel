@@ -89,6 +89,7 @@ const componentProps = computed(() => {
 
 // 选择ActionItem
 const selectActionItem = () => {
+    console.log("选择ActionItem：", props.title, props.id);
     // 如果是激活的Action下的Item才可以被选中
     if (props.id != undefined) {
         if (props.title === action.currentSelectActionTitle && action.currentSelectActionItemId != props.id) {

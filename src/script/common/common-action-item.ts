@@ -15,7 +15,11 @@ export function useCommonState(actionTitle: string, actionId: number) {
     const action = useActionStore();
     const actionIndex = action.getAction(actionTitle).as.findIndex((item) => item.id === actionId);
     const actionItem = action.getAction(actionTitle).as[actionIndex]!;
-    actionItem.wait = true;
+    
+    // 只在wait属性未定义时才设置默认值，避免覆盖反序列化的值
+    if (actionItem.wait === undefined) {
+        actionItem.wait = true;
+    }
 
     return { action, actionItem };
 }

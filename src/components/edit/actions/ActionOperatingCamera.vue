@@ -433,7 +433,8 @@ const runCameraTween = (): Promise<void> => {
 
 const targetAction = async () => {
     setCamera('none');
-    canvas.initMask.alpha = 0;
+    // 这句话会导致如果第二个是操作摄像机会导致initMask出问题 
+    // canvas.initMask.alpha = 0;
     handleSceneState(canvas, props);
 
     viewport.setZoom(action.previewSnapshot.camera.zoom);
@@ -489,7 +490,9 @@ const setCamera = (type: modelCameraType) => {
         viewport.moveCenter(customSourceTweenCameraValues.value[0].value, customSourceTweenCameraValues.value[1].value);
         viewport.emit('moved')
     } else {
-        canvas.setMode(GameMode.PREVIEW, false);
+        if (canvas.getMode() !== GameMode.PLAY) {
+            canvas.setMode(GameMode.PREVIEW, false);
+        }
         return;
     }
 

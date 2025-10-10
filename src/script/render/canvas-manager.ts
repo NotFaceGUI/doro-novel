@@ -53,6 +53,7 @@ class CanvasManager {
     private lastCGPath: string = '';
 
     public setMode(mode: GameMode = GameMode.PLAY, record: boolean = true) {
+        console.log("切换模式为：", mode);
         const action = useActionStore();
         if (action.gameMode == mode) {
             return

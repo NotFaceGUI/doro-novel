@@ -68,7 +68,7 @@ const handleTitle = (title: string) => {
 const handlePlay = async () => {
     // showMessage("开始播放", "success", 1500);
     console.log("开始播放");
-    
+
     // 取消一些内容的显示如切换 
     await actionStore.runAllActions();
     // showMessage("播放借宿", "success", 1500);
@@ -175,16 +175,21 @@ const createAction = () => {
 // 处理键盘快捷键
 const handleKeyDown = (event: KeyboardEvent) => {
     // Ctrl + 空格作为播放快捷键
+
     if (event.code === 'Space' && event.ctrlKey && !event.altKey && !event.shiftKey) {
+        console.log("Ctrl + Space 被按下");
         event.preventDefault(); // 防止滚动或其他默认行为
         handlePlay();
     }
 };
 
+
+
 onMounted(() => {
     createAction();
     // 添加键盘事件监听器
     window.addEventListener('keydown', handleKeyDown);
+
 });
 
 onUnmounted(() => {
