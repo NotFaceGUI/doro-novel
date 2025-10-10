@@ -32,6 +32,7 @@
                     <li>查看帮助</li>
                     <li>在线文档</li>
                     <li>常见问题</li>
+                    <li @click="executeUpdateSpine">更新资源<span class="keyword">Ctrl + U</span></li>
                     <li @click="showAboutDialog">关于我们</li>
                 </ul>
             </li>
@@ -61,6 +62,7 @@ import { Spine } from 'pixi-spine';
 import ResourceManager from '../script/resource-manager';
 import CanvasManager from '../script/render/canvas-manager';
 import AboutDialog from './AboutDialog.vue';
+import { PowerShellService } from '../script/powershell-service';
 
 const dropdowns = reactive([false, false, false]);
 
@@ -440,6 +442,28 @@ const closeAboutDialog = () => {
     isAboutDialogVisible.value = false;
 };
 
+// 执行 update_spine.ps1 脚本
+const executeUpdateSpine = async () => {
+    try {
+        console.log('开始执行 update_spine.ps1 脚本...');
+        const result = await PowerShellService.executeUpdateSpineWithDetails();
+        
+        if (result.exitCode === 0) {
+            console.log('update_spine.ps1 执行成功:', result.stdout);
+            alert('资源更新成功！');
+        } else {
+            console.error('update_spine.ps1 执行失败:', result.stderr);
+            alert('资源更新失败: ' + result.stderr);
+        }
+    } catch (error) {
+        console.error('执行 update_spine.ps1 时发生错误:', error);
+        alert('执行资源更新时发生错误: ' + error);
+    }
+    
+    // 关闭下拉菜单
+    dropdowns[2] = false;
+};
+
 onMounted(() => {
     document.addEventListener('click', handleClickOutside);
     document.addEventListener('keydown', handleKeyDown);
@@ -471,6 +495,11 @@ const handleKeyDown = (event: KeyboardEvent) => {
     if (event.ctrlKey && event.key === 'o') {
         event.preventDefault();
         openProject();
+    }
+    // Ctrl + U 更新资源
+    if (event.ctrlKey && event.key === 'u') {
+        event.preventDefault();
+        executeUpdateSpine();
     }
 };
 
