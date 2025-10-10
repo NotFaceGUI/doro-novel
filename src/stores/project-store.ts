@@ -8,8 +8,6 @@ export const useProjectStore = defineStore('project', () => {
   // 项目是否打开的状态
   const isOpenProject = ref<boolean>(false);
   
-
-  
   // 当前项目名称
   const currentProjectName = ref<string>('');
   

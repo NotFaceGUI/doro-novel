@@ -90,9 +90,11 @@ export async function openProject(filePath: string) {
         if (!selected) {
             return;
         }
-        
+        console.log("selected:", selected);
         const projectData = await readTextFile(selected as string);
         const project: Project = JSON.parse(projectData);
+        console.log("project:", project);
+        project.savePath = selected;
 
         const projectStore = useProjectStore();
         const actionStore = useActionStore();

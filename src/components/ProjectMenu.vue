@@ -284,6 +284,7 @@ const openProject = async (filePath?: string) => {
         }
         const projectData = await readTextFile(selected as string);
         const project: Project = JSON.parse(projectData);
+        project.savePath = selected;
 
 
         // 使用项目store打开项目
