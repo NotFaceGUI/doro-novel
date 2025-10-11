@@ -1,6 +1,5 @@
 import { Spine } from 'pixi-spine';
 import * as PIXI from 'pixi.js';
-import massage from '../common/massage';
 import { resolveResource } from '@tauri-apps/api/path';
 import { convertFileSrc } from '@tauri-apps/api/core';
 import { Viewport } from "pixi-viewport";
@@ -15,7 +14,8 @@ import ResourceManager from '../resource-manager';
 import { DEFAULT_RESOLUTION, DEFAULT_SPINE_SCALE, ResType } from '../var';
 import { markRaw } from 'vue';
 import { useViewportStore } from '../../stores/viewport-store';
-import { set } from 'lodash';
+import '@pixi/gif';
+import { AnimatedGIF } from '@pixi/gif';
 
 interface Layer {
     container: PIXI.Container,
@@ -49,7 +49,7 @@ class CanvasManager {
     private currentOutlinedSpine: Spine | null = null;
 
     // CG管理相关属性
-    private currentCG: PIXI.Sprite | null = null;
+    private currentCG: PIXI.Sprite | AnimatedGIF | null = null;
     private lastCGPath: string = '';
 
     public setMode(mode: GameMode = GameMode.PLAY, record: boolean = true) {
@@ -1221,12 +1221,13 @@ class CanvasManager {
             // 只更新属性，避免重复计算
             this.currentCG.zIndex = zIndex;
             this.currentCG.alpha = alpha;
+            this.currentCG.anchor.set(0.5);
             this.applyCGFilters(this.currentCG, filters);
             
             if (config) {
                 // 获取基础中心位置
-                const baseCenterX = this.app.renderer.width / 2;
-                const baseCenterY = this.app.renderer.height / 2;
+                const baseCenterX = this.viewport.center.x;
+                const baseCenterY = this.viewport.center.y;
                 
                 // 计算适当的缩放比例使图像填充屏幕
                 const scaleFactor = Math.max(
@@ -1251,19 +1252,26 @@ class CanvasManager {
 
         // 如果存在旧CG就销毁
         if (this.currentCG) {
-            this.currentCG.destroy();
+            if (this.currentCG instanceof AnimatedGIF) {
+                this.currentCG.visible = false;
+            } else {
+                this.currentCG.destroy();
+            }
             this.currentCG = null;
         }
 
         // 确保资源已加载 - 优化资源加载逻辑
-        let texture = ResourceManager.getResource<PIXI.Texture>(key, ResType.Image);
+        let texture = ResourceManager.getResource<PIXI.Texture | AnimatedGIF>(key, ResType.Image);
         if (!texture) {
             texture = await PIXI.Assets.load(key);
             texture = PIXI.Texture.from(key);
         }
 
-        // 创建新CG精灵
-        const cg = new PIXI.Sprite(texture);
+        const cg: PIXI.Sprite | AnimatedGIF = texture instanceof AnimatedGIF ? texture : new PIXI.Sprite(texture);
+        if (cg instanceof AnimatedGIF) {
+            cg.visible = true;
+        }
+
         cg.anchor.set(0.5);
 
         // 计算适当的缩放比例使图像填充屏幕
@@ -1374,6 +1382,11 @@ class CanvasManager {
      * 移除当前CG
      */
     public removeCG() {
+        if (this.currentCG instanceof AnimatedGIF) {
+            this.currentCG.visible = false;
+            this.currentCG = null;
+            return
+        }
         if (this.currentCG) {
             this.currentCG.destroy();
             this.currentCG = null;

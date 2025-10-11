@@ -212,7 +212,7 @@ import { setModification } from '../../../script/util/common';
 import CanvasManager from '../../../script/render/canvas-manager';
 import { selectImageType } from '../../../script/common/search-action';
 import { ResType } from '../../../script/var';
-import { Texture } from 'pixi.js';
+import {  Texture } from 'pixi.js';
 import { Action } from 'pixijs-actions';
 
 // CG操作模式
@@ -298,7 +298,7 @@ let modification: Map<PropertyPath, Modification>;
 const availableCGs = computed(() => {
     const cgKeys = Object.keys(cgList.value).filter(key => {
         const url = cgList.value[key];
-        return url && (url.endsWith('.jpg') || url.endsWith('.jpeg') || url.endsWith('.png') || url.endsWith('.webp'));
+        return url && (url.endsWith('.jpg') || url.endsWith('.jpeg') || url.endsWith('.png') || url.endsWith('.webp') || url.endsWith('.gif'));
     });
 
     const cgOptions = cgKeys.map((key) => ({

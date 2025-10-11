@@ -2,10 +2,13 @@ import { Assets, Texture } from "pixi.js";
 import { Spine } from "pixi-spine";  // 用于加载 spine 资源
 import { ResType } from "./var";
 import { Sound } from "@pixi/sound";
+import '@pixi/gif';
+import { AnimatedGIF } from "@pixi/gif";
 
 
 class ResourceManager {
     private static textures: Record<string, Texture> = {}; // 存储加载的纹理
+    private static gifObject: Record<string, AnimatedGIF> = {}; // 存储加载的gif纹理
     private static sounds: Record<string, Sound> = {}; // 存储加载的音频
     private static spineData: Record<string, Spine> = {}; // 存储加载的 spine 数据
 
@@ -27,6 +30,11 @@ class ResourceManager {
             switch (type) {
                 case ResType.Image:
                     const texture = await Assets.load(url);
+                    if (url.includes(".gif")) {
+                        this.gifObject[key] = texture;
+                        console.log(`gif图像资源加载成功: ${key}`);
+                        break;
+                    }
                     this.textures[key] = texture as Texture;
                     console.log(`图像资源加载成功: ${key}`);
                     break;
@@ -63,7 +71,7 @@ class ResourceManager {
     private static isResourceLoaded(key: string, type: ResType): boolean {
         switch (type) {
             case ResType.Image:
-                return !!this.textures[key];
+                return !!this.textures[key] || !!this.gifObject[key];
             case ResType.Audio:
                 return !!this.sounds[key];
             case ResType.Spine:
@@ -79,10 +87,11 @@ class ResourceManager {
      * @param type 资源类型
      * @returns 对应资源或 undefined
      */
-    static getResource<T extends Texture | Sound | Spine>(key: string, type: ResType): T | undefined {
+    static getResource<T extends Texture | Sound | Spine | AnimatedGIF>(key: string, type: ResType): T | undefined {
         switch (type) {
             case ResType.Image:
-                return this.textures[key] as T;
+                // 优先返回 GIF 对象，如果不存在则返回普通纹理
+                return (this.gifObject[key] || this.textures[key]) as T;
             case ResType.Audio:
                 return this.sounds[key] as T;
             case ResType.Spine:
@@ -100,6 +109,13 @@ class ResourceManager {
     static removeResource(key: string, type: ResType) {
         switch (type) {
             case ResType.Image:
+                // 删除 GIF 对象
+                if (this.gifObject[key]) {
+                    this.gifObject[key].destroy();
+                    delete this.gifObject[key];
+                    console.log(`GIF图像资源已移除: ${key}`);
+                }
+                // 删除普通纹理
                 if (this.textures[key]) {
                     this.textures[key].destroy(true);
                     delete this.textures[key];

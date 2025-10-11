@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "@esotericsoftware/spine-pixi": "~4.1.*",
+    "@pixi/gif": "^2.1.1",
     "@pixi/sound": "5.2.3",
     "@pixi/unsafe-eval": "^7.4.2",
     "@tauri-apps/api": "^2",
