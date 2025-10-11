@@ -20,21 +20,50 @@
                 :files="file.childrenDirs || []" />
         </li>
     </ul>
-    <ul v-else>
-        <li v-for="char in characters" :key="char.characterName">
-            <div @click="toggleSpine(char)" class="el no-wrap" draggable="true"
-                @dragstart="handleDragStart($event, char)">
-                {{ formatI18nKey(t(char.characterName), char.characterName) }} <span
-                    style="font-size: 10px;color: #888;" v-if="char.characterName.startsWith('c')">{{
-                        t(char.characterName) }}</span>
+    <ul v-else >
+        <!-- 有角色分类（不可点击，仅用于展开/收缩） -->
+        <li>
+            <div class="el no-wrap section-header" @click="toggleSection('characters')">
+                <span>📁</span>
+                角色
+                <span class="count">({{ gameCharacters.length }})</span>
+                <span class="caret">{{ sections.characters ? '▼' : '▶' }}</span>
             </div>
+            <ul v-show="sections.characters" class="asset-tree-spine">
+                <li v-for="char in gameCharacters" :key="char.characterName">
+                    <div @click="toggleSpine(char)" class="el no-wrap" draggable="true"
+                        @dragstart="handleDragStart($event, char)">
+                        {{ formatI18nKey(t(char.characterName), char.characterName) }} <span
+                            style="font-size: 10px;color: #888;" v-if="char.characterName.startsWith('c')">{{
+                                t(char.characterName) }}</span>
+                    </div>
+                </li>
+            </ul>
+        </li>
+
+        <!-- 其他分类（不可点击，仅用于展开/收缩） -->
+        <li>
+            <div class="el no-wrap section-header" @click="toggleSection('others')">
+                <span>📁</span>
+                其他
+                <span class="count">({{ otherCharacters.length }})</span>
+                <span class="caret">{{ sections.others ? '▼' : '▶' }}</span>
+            </div>
+            <ul v-show="sections.others" class="asset-tree-spine">
+                <li v-for="char in otherCharacters" :key="char.characterName">
+                    <div @click="toggleSpine(char)" class="el no-wrap" draggable="true"
+                        @dragstart="handleDragStart($event, char)">
+                        {{ formatI18nKey(t(char.characterName), char.characterName) }}
+                    </div>
+                </li>
+            </ul>
         </li>
     </ul>
 
 </template>
 
 <script setup lang="ts">
-import { ref, watch, onMounted } from 'vue';
+import { ref, watch, onMounted, computed } from 'vue';
 import { CharacterType, CharacterUrls, dirs, DragType } from '../../types/app';
 import { ASSET_CHARACTER, ResType } from '../../script/var';
 import { resolveResource } from '@tauri-apps/api/path';
@@ -53,6 +82,20 @@ const props = defineProps<{
 }>();
 
 const characters = ref<CharacterType[]>([]);
+// 分类折叠状态（分类标题不可点击打开，仅用于展开/收缩）
+const sections = ref<{ characters: boolean; others: boolean }>({ characters: true, others: true });
+
+// 计算分类：以 c+数字 开头视为“有角色”，其余归为“其他”
+const gameCharacters = computed(() =>
+    characters.value.filter((c) => /^c\d+/.test(c.characterName))
+);
+const otherCharacters = computed(() =>
+    characters.value.filter((c) => !/^c\d+/.test(c.characterName))
+);
+
+const toggleSection = (key: 'characters' | 'others') => {
+    sections.value[key] = !sections.value[key];
+};
 
 onMounted(async () => {
     if (props.type == ResType.Spine) {
@@ -241,4 +284,24 @@ li:hover {
     padding-left: 5px;
 
 }
-</style>
+
+/* 分类标题样式（不可点击打开，仅用于展开/收缩） */
+.section-header {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+.section-header .count {
+    color: #888;
+    font-size: 12px;
+}
+.section-header .caret {
+    margin-left: auto;
+    color: #888;
+    font-size: 12px;
+}
+
+.asset-tree-spine > li {
+    padding-left: 10px ;
+}
+</style> 
