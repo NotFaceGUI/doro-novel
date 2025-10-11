@@ -368,6 +368,11 @@ export const useActionStore = defineStore('action', () => {
 
     // 移除 CG
     cm.removeCG()
+
+    // 重置角色的滤镜,避免操作角色而参数的描边等效果
+    maxCharacter.value.forEach(item => {
+      item.spine.filters = []
+    })
   }
 
 

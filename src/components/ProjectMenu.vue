@@ -24,6 +24,7 @@
                     <li>查找<span class="keyword">Ctrl + F</span></li>
                     <li>替换<span class="keyword">Ctrl + H</span></li>
                     <hr />
+                    <li @click="openResourceFolder">打开资源文件夹</li>
                     <li>导入资源<span class="keyword">Shift + Space</span></li>
                 </ul>
             </li>
@@ -32,6 +33,7 @@
                     <li>查看帮助</li>
                     <li>在线文档</li>
                     <li>常见问题</li>
+                    <li @click="showWatermarkDialog">水印设置</li>
                     <li @click="executeUpdateSpine">更新资源<span class="keyword">Ctrl + U</span></li>
                     <li @click="showAboutDialog">关于我们</li>
                 </ul>
@@ -42,6 +44,10 @@
         <AboutDialog 
             :showDialog="isAboutDialogVisible" 
             @close="closeAboutDialog" 
+        />
+        <WatermarkDialog 
+            :showDialog="isWatermarkDialogVisible" 
+            @close="closeWatermarkDialog" 
         />
     </div>
 </template>
@@ -57,17 +63,20 @@ import { LOCAL_OPEN_KEY, ResType, ASSET_CHARACTER } from '../script/var';
 import { resolveResource } from '@tauri-apps/api/path';
 import { writeTextFile, readTextFile } from '@tauri-apps/plugin-fs';
 import { invoke } from '@tauri-apps/api/core';
-import { open } from '@tauri-apps/plugin-dialog';
+import { message, open } from '@tauri-apps/plugin-dialog';
 import { Spine } from 'pixi-spine';
 import ResourceManager from '../script/resource-manager';
 import CanvasManager from '../script/render/canvas-manager';
 import AboutDialog from './AboutDialog.vue';
+import WatermarkDialog from './WatermarkDialog.vue';
 import { PowerShellService } from '../script/powershell-service';
+import massage from '../script/common/massage';
 
 const dropdowns = reactive([false, false, false]);
 
 // 关于我们弹窗状态
 const isAboutDialogVisible = ref(false);
+const isWatermarkDialogVisible = ref(false);
 
 // 初始化stores
 const actionStore = useActionStore();
@@ -161,7 +170,7 @@ const saveProject = async () => {
         // 获取当前项目名称
         const projectName = localStorage.getItem(LOCAL_OPEN_KEY);
         if (!projectName) {
-            alert('未找到当前项目信息');
+            massage('未找到当前项目信息', 'error', 2000);
             return;
         }
 
@@ -175,7 +184,7 @@ const saveProject = async () => {
             existingProject = JSON.parse(existingContent);
         } catch (error) {
             console.error('读取项目文件失败:', error);
-            alert('读取项目文件失败');
+            massage('读取项目文件失败', 'error', 2000);
             return;
         }
 
@@ -193,14 +202,14 @@ const saveProject = async () => {
         await writeTextFile(projectPath, JSON.stringify(updatedProject, null, 2));
 
         console.log('项目保存成功');
-        alert('项目保存成功！');
+        massage('项目保存成功！', 'success', 2000);
 
         // 关闭下拉菜单
         dropdowns[0] = false;
 
     } catch (error) {
         console.error('保存项目失败:', error);
-        alert('保存项目失败，请重试');
+        massage('保存项目失败，请重试', 'error', 2000);
     }
 };
 
@@ -253,10 +262,11 @@ const closeProject = () => {
         }, 100);
 
         console.log('项目已关闭，所有数据已清空');
+        massage('项目已关闭', 'success', 2000);
 
     } catch (error) {
         console.error('关闭项目失败:', error);
-        alert('关闭项目失败，请重试');
+       massage('关闭项目失败，请重试', 'error', 2000);
     }
 };
 
@@ -398,7 +408,7 @@ const openProject = async (filePath?: string) => {
 
     } catch (error) {
         console.error('打开项目失败:', error);
-        alert('打开项目失败，请检查文件格式是否正确');
+        massage('打开项目失败，请检查文件格式是否正确', 'error', 2000);
     }
 };
 
@@ -417,7 +427,22 @@ const openProjectFolder = async () => {
 
     } catch (error) {
         console.error('打开项目文件夹失败:', error);
-        alert('打开项目文件夹失败，请检查项目是否存在');
+        massage('打开项目文件夹失败，请检查项目是否存在', 'error', 2000);
+    }
+};
+
+// 打开资源文件夹
+const openResourceFolder = async () => {
+    try {
+        // 获取资源根目录路径（src-tauri/resources/）
+        const resourcePath = await resolveResource('resources/');
+        // 直接调用自定义 Rust 命令打开文件夹
+        await invoke('open_folder', { path: resourcePath });
+        // 关闭下拉菜单（编辑菜单）
+        dropdowns[1] = false;
+    } catch (error) {
+        console.error('打开资源文件夹失败:', error);
+        massage('打开资源文件夹失败，请检查资源目录是否存在', 'error', 2000);
     }
 };
 
@@ -442,22 +467,27 @@ const closeAboutDialog = () => {
     isAboutDialogVisible.value = false;
 };
 
+// 显示水印设置弹窗
+const showWatermarkDialog = () => {
+    isWatermarkDialogVisible.value = true;
+    // 关闭下拉菜单
+    dropdowns[2] = false;
+};
+
+// 关闭水印设置弹窗
+const closeWatermarkDialog = () => {
+    isWatermarkDialogVisible.value = false;
+};
+
 // 执行 update_spine.ps1 脚本
 const executeUpdateSpine = async () => {
     try {
-        console.log('开始执行 update_spine.ps1 脚本...');
-        const result = await PowerShellService.executeUpdateSpineWithDetails();
-        
-        if (result.exitCode === 0) {
-            console.log('update_spine.ps1 执行成功:', result.stdout);
-            alert('资源更新成功！');
-        } else {
-            console.error('update_spine.ps1 执行失败:', result.stderr);
-            alert('资源更新失败: ' + result.stderr);
-        }
+        console.log('以分离(detached)方式执行 update_spine.ps1 脚本...');
+        await PowerShellService.executeUpdateSpineDetached();
+        massage(`已启动资源更新，详细日志请在弹出的控制台窗口查看。`, 'success', 2000);
     } catch (error) {
         console.error('执行 update_spine.ps1 时发生错误:', error);
-        alert('执行资源更新时发生错误: ' + error);
+        massage(`执行资源更新时发生错误: ${error}`, 'error', 2000);
     }
     
     // 关闭下拉菜单

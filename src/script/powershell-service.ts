@@ -47,6 +47,21 @@ export class PowerShellService {
   }
 
   /**
+   * 以分离(detached)方式执行 PowerShell 脚本（控制台不自动关闭）
+   */
+  static async executeScriptDetached(scriptPath: string, args: string[] = []): Promise<void> {
+    try {
+      await invoke<void>('execute_powershell_script_detached', {
+        scriptPath: scriptPath,
+        args: args
+      });
+    } catch (error) {
+      console.error('PowerShell 脚本(detached)执行失败:', error);
+      throw new Error(`PowerShell 脚本(detached)执行失败: ${error}`);
+    }
+  }
+
+  /**
    * 执行 update_spine.ps1 脚本
    * @returns Promise<string> 脚本执行输出
    */
@@ -68,5 +83,14 @@ export class PowerShellService {
     // 使用 resolveResource 获取应用资源目录下的 update_spine.ps1 脚本路径
     const scriptPath = await resolveResource('update_spine.ps1');
     return await this.executeScriptWithDetails(scriptPath);
+  }
+
+  /**
+   * 以分离(detached)方式执行 update_spine.ps1（控制台窗口保持，需手动关闭）
+   */
+  static async executeUpdateSpineDetached(): Promise<void> {
+    const scriptPath = await resolveResource('update_spine.ps1');
+    // 传入 -KeepOpen 让脚本末尾等待按键
+    await this.executeScriptDetached(scriptPath, ['-KeepOpen']);
   }
 }

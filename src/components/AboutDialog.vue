@@ -27,7 +27,8 @@
         <!-- 作者信息 -->
         <div class="author-info">
           <div class="author-avatar">
-            <img src="../assets/ghost.jpg" alt="" srcset="" style="width: 48px; height: 48px; border-radius: 50%;">
+            <!-- <img src="../assets/ghost.jpg" alt="" srcset="" style="width: 48px; height: 48px; border-radius: 50%;"> -->
+             👻
           </div>
           <div class="author-details">
             <h3>Ghost</h3>
@@ -222,7 +223,7 @@ const closeDialog = () => {
 /* 项目信息样式 */
 .project-info {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   gap: 16px;
   margin-bottom: 24px;
   padding-bottom: 20px;
@@ -232,6 +233,7 @@ const closeDialog = () => {
 .project-icon {
   flex-shrink: 0;
 }
+
 
 .project-details h2 {
   margin: 0 0 8px 0;
@@ -269,6 +271,7 @@ const closeDialog = () => {
 
 .author-avatar {
   flex-shrink: 0;
+  font-size: 48px;
 }
 
 .author-details h3 {

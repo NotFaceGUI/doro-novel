@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted, onUnmounted, ref, watchEffect } from 'vue';
+import { onMounted, onUnmounted, ref } from 'vue';
 import { DoroApp, type Project } from './types/app';
 import WelcomeGuide from './components/WelcomeGuide.vue';
 import AppHeader from './components/AppHeader.vue';
@@ -198,6 +198,11 @@ onUnmounted(() => {
   overflow: hidden;
   display: flex;
   flex-direction: column;
+}
+
+/* 全屏时取消 #app 边框 */
+#app.is-full-screen {
+  border: none;
 }
 
 .loading-screen {

@@ -136,6 +136,26 @@ fn execute_powershell_script_with_details(script_path: String) -> Result<(String
         .map_err(|e| e.to_string())
 }
 
+// 以分离(detached)方式执行脚本，保持控制台窗口不关闭
+#[tauri::command]
+fn execute_powershell_script_detached(script_path: String, args: Option<Vec<String>>) -> Result<(), String> {
+    if !Path::new(&script_path).exists() {
+        return Err(format!("PowerShell 脚本文件未找到: {}", script_path));
+    }
+
+    if !script_path.to_lowercase().ends_with(".ps1") {
+        return Err(format!("文件不是 PowerShell 脚本 (.ps1): {}", script_path));
+    }
+
+    let mut cmd = Command::new("powershell");
+    cmd.args(["-NoExit", "-ExecutionPolicy", "Bypass", "-File", &script_path]);
+    if let Some(extra) = args {
+        cmd.args(extra);
+    }
+    cmd.spawn().map_err(|e| e.to_string())?;
+    Ok(())
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
@@ -149,7 +169,8 @@ pub fn run() {
             check_path_is_file, 
             open_folder,
             execute_powershell_script,
-            execute_powershell_script_with_details
+            execute_powershell_script_with_details,
+            execute_powershell_script_detached
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

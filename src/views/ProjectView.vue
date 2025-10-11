@@ -7,6 +7,17 @@
                 <img src="/img/sprite/nv_tab.png" v-if="activeTab === 'canvas'" width="100%" alt="">
 
             </div>
+            <!-- 水印覆盖层：平铺模式 -->
+            <div v-if="wm.settings.enabled && wm.settings.placement === 'tiled' && isFullScreen"
+                 :style="{ position: 'absolute', inset: '0', pointerEvents: 'none', zIndex: 100, backgroundRepeat: 'repeat', backgroundImage: wm.svgDataUrl }">
+            </div>
+
+            <!-- 水印覆盖层：四角模式 -->
+            <div v-if="wm.settings.enabled && wm.settings.placement !== 'tiled' && isFullScreen"
+                 class="watermark-corner"
+                 :style="cornerStyle">
+                {{ wm.settings.text }}
+            </div>
 
             <div class="project-tab" v-if="!isFullScreen">
                 <div class="tab-card" :class="{ 'tab-active': activeTab === 'canvas' }" @click="activeTab = 'canvas'">
@@ -171,7 +182,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted, nextTick, watch } from 'vue';
+import { ref, onMounted, onUnmounted, nextTick, watch, computed } from 'vue';
 import LeftBar from '../components/LeftBar.vue';
 import ScriptEditor from '../components/edit/ScriptEditor.vue';
 import Dropdown from '../components/common/Dropdown.vue';
@@ -187,11 +198,47 @@ import { useActionStore } from '../stores/action-store';
 import type { CharacterUrls, DropdownOption } from '../types/app';
 import { applyUIAnimationConfig, type UIAnimationConfig } from '../script/render/animation-config';
 import { OutlineFilter } from 'pixi-filters';
+import { useWatermarkStore } from '../stores/watermark-store';
 
 
 const imgRef = ref<HTMLImageElement | null>(null);
 const videoRef = ref<HTMLVideoElement | null>(null);
 const projectView = ref<HTMLDivElement | null>(null)
+
+// 水印设置
+const wm = useWatermarkStore();
+wm.initialize();
+
+// 计算四角水印的样式
+const cornerStyle = computed(() => {
+    const s = wm.settings;
+    const base: Record<string, string> = {
+        position: 'absolute',
+        pointerEvents: 'none',
+        zIndex: '100',
+        color: s.color,
+        opacity: String(s.opacity),
+        fontSize: s.fontSize + 'px',
+        transform: `rotate(${s.angle}deg)`,
+    };
+    // 位置与偏移
+    if (s.placement === 'top-left') {
+        base.top = s.offsetY + 'px';
+        base.left = s.offsetX + 'px';
+    } else if (s.placement === 'top-right') {
+        base.top = s.offsetY + 'px';
+        base.right = s.offsetX + 'px';
+        base.textAlign = 'right';
+    } else if (s.placement === 'bottom-left') {
+        base.bottom = s.offsetY + 'px';
+        base.left = s.offsetX + 'px';
+    } else if (s.placement === 'bottom-right') {
+        base.bottom = s.offsetY + 'px';
+        base.right = s.offsetX + 'px';
+        base.textAlign = 'right';
+    }
+    return base;
+});
 
 const showImage = ref<boolean>(false);
 const showVideo = ref<boolean>(false);
@@ -407,6 +454,14 @@ onMounted(() => {
 watch(() => actionStore.isEditMode, () => {
     handelResizeCanvasToPreview();
 })
+
+// 监听全屏状态，切换 #app 边框（通过添加类）
+watch(isFullScreen, (val) => {
+    const appEl = document.getElementById('app');
+    if (appEl) {
+        appEl.classList.toggle('is-full-screen', val);
+    }
+});
 
 const handelResizeCanvasToPreview = () => {
     if (projectView.value) {

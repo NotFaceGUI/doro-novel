@@ -3,6 +3,7 @@ import { defineStore } from 'pinia';
 import { ref } from 'vue';
 import { LOCAL_OPEN_KEY, LOCAL_OPEN_PROJECT_SAVEPATH_KEY } from '../script/var';
 import { Project } from '../types/app';
+import massage from '../script/common/massage';
 
 export const useProjectStore = defineStore('project', () => {
   // 项目是否打开的状态
@@ -34,6 +35,7 @@ export const useProjectStore = defineStore('project', () => {
     localStorage.setItem(LOCAL_OPEN_PROJECT_SAVEPATH_KEY, project.savePath);
     currentProjectName.value = project.projectName;
     isOpenProject.value = true;
+    massage(`[${project.projectName}]项目已打开`, 'success', 2000);
   };
 
   // 关闭项目

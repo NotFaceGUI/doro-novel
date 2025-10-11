@@ -1,6 +1,10 @@
 # -----------------------------
 # Configuration
 # -----------------------------
+param(
+    [switch]$KeepOpen = $false
+)
+
 $PortableGit = ".\MinGit-2.51.0-64-bit\cmd\git.exe"
 $PortableGitZip = ".\MinGit-2.51.0-64-bit.zip"
 $PortableGitDir = ".\MinGit-2.51.0-64-bit"
@@ -186,3 +190,12 @@ Write-Output "🎉 All resource synchronization completed successfully!"
 Write-Output "📁 Character files: $CharacterDir"
 Write-Output "🖼️ Image files: $ImageDir"
 Write-Output "🔊 Audio files: $AudioDir"
+
+# -----------------------------
+# Keep console window open optionally
+# -----------------------------
+if ($KeepOpen) {
+    Write-Output ""
+    Write-Output "Press the Enter key to exit the window."
+    Read-Host | Out-Null
+}

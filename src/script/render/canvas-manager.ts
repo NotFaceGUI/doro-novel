@@ -192,9 +192,9 @@ class CanvasManager {
         const container = document.getElementById("canvas") as HTMLDivElement;
         const info = document.getElementById("canvas-info") as HTMLDivElement;
         this.defaultBackground = new PIXI.Sprite(PIXI.Texture.WHITE);
-        if (!container) {
-            massage("找不到Canvas", "error", 2000);
-        }
+        // if (!container) {
+        //     massage("找不到Canvas", "error", 2000);
+        // }
 
         this.action = useActionStore()
         this.app = new PIXI.Application({

@@ -6,6 +6,7 @@ import { BaseDirectory, copyFile, exists, mkdir, writeTextFile } from '@tauri-ap
 import { path } from "@tauri-apps/api";
 import { resolveResource } from "@tauri-apps/api/path";
 import { convertFileSrc } from "@tauri-apps/api/core";
+import massage from "../script/common/massage";
 
 const showCreateWindow = ref(false);
 const step = ref(1)
@@ -34,7 +35,7 @@ const createProject = () => {
 const createOneProject = () => {
     // 检测数据是否完整
     if (!projectData.value.projectName || !projectData.value.savePath) {
-        alert("请填写完整的项目信息");
+        massage("请填写完整的项目信息", 'error', 2000);
         return;
     }
     showCreateWindow.value = false;
@@ -45,7 +46,7 @@ const createOneProject = () => {
         wEmit('create', projectData.value);
     }).catch((error) => {
         console.error("项目保存失败", error);
-        alert("项目保存失败，请重试");
+        massage("项目保存失败，请重试", 'error', 2000);
     });
 };
 

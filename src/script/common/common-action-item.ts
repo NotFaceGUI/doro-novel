@@ -197,6 +197,6 @@ export async function openProject(filePath: string) {
 
     } catch (error) {
         console.error('打开项目失败:', error);
-        alert('打开项目失败，请检查文件格式是否正确');
+        // alert('打开项目失败，请检查文件格式是否正确');
     }
 };
