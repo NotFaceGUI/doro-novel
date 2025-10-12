@@ -1,8 +1,13 @@
 use std::fs;
 use std::path::Path;
 use std::process::Command;
+use std::sync::{Arc, Mutex};
 use tauri::command;
 use tauri_plugin_opener::OpenerExt;
+use std::sync::LazyLock;
+
+// 全局状态，用于跟踪启动参数是否已被处理
+static STARTUP_FILE_CONSUMED: LazyLock<Arc<Mutex<bool>>> = LazyLock::new(|| Arc::new(Mutex::new(false)));
 
 // PowerShell 执行器相关的错误类型
 #[derive(Debug)]
@@ -156,9 +161,64 @@ fn execute_powershell_script_detached(script_path: String, args: Option<Vec<Stri
     Ok(())
 }
 
+// 打开项目文件的command
+#[tauri::command]
+fn get_startup_file_path() -> Result<Option<String>, String> {
+    // 检查启动参数是否已被消费
+    {
+        let consumed = STARTUP_FILE_CONSUMED.lock().unwrap();
+        if *consumed {
+            return Ok(None);
+        }
+    }
+    
+    let args: Vec<String> = std::env::args().collect();
+    if args.len() > 1 {
+        let file_path = &args[1];
+        // 检查是否是.doro项目文件
+        if (file_path.to_lowercase().ends_with(".doro") || file_path.to_lowercase().ends_with(".DORO") || file_path.to_lowercase().ends_with(".Doro")) && Path::new(file_path).exists() {
+            // 标记启动参数已被消费
+            {
+                let mut consumed = STARTUP_FILE_CONSUMED.lock().unwrap();
+                *consumed = true;
+            }
+            return Ok(Some(file_path.clone()));
+        }
+    }
+    Ok(None)
+}
+
+#[tauri::command]
+fn validate_project_file(file_path: String) -> Result<bool, String> {
+    // 验证文件是否存在
+    if !Path::new(&file_path).exists() {
+        return Err(format!("项目文件不存在: {}", file_path));
+    }
+
+    // 验证文件扩展名
+    let file_path_lower = file_path.to_lowercase();
+    if !file_path_lower.ends_with(".doro") {
+        return Err(format!("不是有效的项目文件 (.doro): {}", file_path));
+    }
+
+    // 读取项目文件内容
+    let project_content = fs::read_to_string(&file_path)
+        .map_err(|e| format!("读取项目文件失败: {}", e))?;
+
+    // 验证JSON格式
+    let _: serde_json::Value = serde_json::from_str(&project_content)
+        .map_err(|e| format!("项目文件格式错误: {}", e))?;
+
+    Ok(true)
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
+        .setup(|app| {
+            // 移除之前的启动参数处理逻辑，改为通过command调用
+            Ok(())
+        })
         .plugin(tauri_plugin_process::init())
         .plugin(tauri_plugin_updater::Builder::new().build())
         .plugin(tauri_plugin_fs::init())
@@ -170,7 +230,9 @@ pub fn run() {
             open_folder,
             execute_powershell_script,
             execute_powershell_script_with_details,
-            execute_powershell_script_detached
+            execute_powershell_script_detached,
+            get_startup_file_path,
+            validate_project_file
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

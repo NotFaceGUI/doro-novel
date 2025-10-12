@@ -12,6 +12,7 @@ import { useProjectStore } from './stores/project-store';
 import { useUpdater } from './composables/useUpdater';
 import { openProject } from './script/common/common-action-item';
 import { APP_VERSION } from './script/var';
+import { invoke } from '@tauri-apps/api/core';
 
 const searchStore = useSearchDialogStore();
 const projectStore = useProjectStore();
@@ -24,12 +25,25 @@ const app = ref<DoroApp>({
   version: 'ver ' + APP_VERSION,
 });
 
-onMounted(async() => {
+onMounted(async () => {
   // 初始化项目状态
   projectStore.initializeProjectState();
   window.addEventListener('keydown', handleSpacePress);
 
+  // 检查启动参数中是否有项目文件
+  try {
+    const startupFilePath = await invoke<string | null>('get_startup_file_path');
+    if (startupFilePath) {
+      console.log('检测到启动参数中的项目文件:', startupFilePath);
+      await openProject(startupFilePath);
+      return;
+    }
+  } catch (error) {
+    console.error('检查启动参数失败:', error);
+  }
+
   if (projectStore.isOpenProject && projectStore.currentProjectSavePath) {
+    console.log('default 检测到当前打开项目:', projectStore.currentProjectSavePath);
     await openProject(projectStore.currentProjectSavePath);
   }
 });

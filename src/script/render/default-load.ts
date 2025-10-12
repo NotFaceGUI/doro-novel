@@ -4,11 +4,11 @@ import textwriterUrl from '../../assets/audio/nv_textwriter.wav';
 import buttonEntryUrl from '../../assets/audio/nv_buttonentry.wav';
 import buttonHoverUrl from '../../assets/audio/nv_needselect.wav';
 import buttonSelectUrl from '../../assets/audio/nv_select.wav';
-import checkWaitUrl from '../../../public/img/sprite/check_wait.png';
-import nvButtonUrl from '../../../public/img/sprite/nv_9slice_button.png';
-import leftDecorUrl from '../../../public/img/sprite/left.png';
-import leftButtonUrl from '../../../public/img/sprite/left_button.png';
-import daArrowUrl from '../../../public/img/sprite/da_arrow.png';
+import checkWaitUrl from '/img/sprite/check_wait.png';
+import nvButtonUrl from '/img/sprite/nv_9slice_button.png';
+import leftDecorUrl from '/img/sprite/left.png';
+import leftButtonUrl from '/img/sprite/left_button.png';
+import daArrowUrl from '/img/sprite/da_arrow.png';
 
 export const textWriterSound = async (): Promise<Sound> => {
     return new Promise<Sound>((resolve, _reject) => {

@@ -191,6 +191,7 @@ class CanvasManager {
     private constructor() {
         const container = document.getElementById("canvas") as HTMLDivElement;
         const info = document.getElementById("canvas-info") as HTMLDivElement;
+        
         this.defaultBackground = new PIXI.Sprite(PIXI.Texture.WHITE);
         // if (!container) {
         //     massage("找不到Canvas", "error", 2000);
@@ -1223,18 +1224,18 @@ class CanvasManager {
             this.currentCG.alpha = alpha;
             this.currentCG.anchor.set(0.5);
             this.applyCGFilters(this.currentCG, filters);
-            
+
             if (config) {
                 // 获取基础中心位置
                 const baseCenterX = this.viewport.center.x;
                 const baseCenterY = this.viewport.center.y;
-                
+
                 // 计算适当的缩放比例使图像填充屏幕
                 const scaleFactor = Math.max(
                     this.app.renderer.width / this.currentCG.texture.width,
                     this.app.renderer.height / this.currentCG.texture.height
                 );
-                
+
                 // 直接设置位置和缩放，避免重复计算
                 this.currentCG.position.set(
                     baseCenterX + config.x,
@@ -1283,7 +1284,7 @@ class CanvasManager {
         // 设置基础位置为app.stage的中心（UI层中心）
         const baseCenterX = this.viewport.center.x;
         const baseCenterY = this.viewport.center.y;
-        
+
         // 应用位置偏移和缩放
         if (config) {
             // 基于中心位置应用偏移

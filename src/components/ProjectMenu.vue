@@ -39,16 +39,10 @@
                 </ul>
             </li>
         </ul>
-        
+
         <!-- 关于我们弹窗 -->
-        <AboutDialog 
-            :showDialog="isAboutDialogVisible" 
-            @close="closeAboutDialog" 
-        />
-        <WatermarkDialog 
-            :showDialog="isWatermarkDialogVisible" 
-            @close="closeWatermarkDialog" 
-        />
+        <AboutDialog :showDialog="isAboutDialogVisible" @close="closeAboutDialog" />
+        <WatermarkDialog :showDialog="isWatermarkDialogVisible" @close="closeWatermarkDialog" />
     </div>
 </template>
 
@@ -63,7 +57,7 @@ import { LOCAL_OPEN_KEY, ResType, ASSET_CHARACTER } from '../script/var';
 import { resolveResource } from '@tauri-apps/api/path';
 import { writeTextFile, readTextFile } from '@tauri-apps/plugin-fs';
 import { invoke } from '@tauri-apps/api/core';
-import { message, open } from '@tauri-apps/plugin-dialog';
+import { open } from '@tauri-apps/plugin-dialog';
 import { Spine } from 'pixi-spine';
 import ResourceManager from '../script/resource-manager';
 import CanvasManager from '../script/render/canvas-manager';
@@ -253,10 +247,9 @@ const closeProject = () => {
         CanvasManager.getInstance();
         CanvasManager.destroyInstance();
 
-        // 使用store关闭项目
-        projectStore.closeProject();
-
         setTimeout(() => {
+            // 使用store关闭项目
+            projectStore.closeProject();
             // 关闭下拉菜单
             dropdowns[0] = false;
         }, 100);
@@ -266,7 +259,7 @@ const closeProject = () => {
 
     } catch (error) {
         console.error('关闭项目失败:', error);
-       massage('关闭项目失败，请重试', 'error', 2000);
+        massage('关闭项目失败，请重试', 'error', 2000);
     }
 };
 
@@ -489,7 +482,7 @@ const executeUpdateSpine = async () => {
         console.error('执行 update_spine.ps1 时发生错误:', error);
         massage(`执行资源更新时发生错误: ${error}`, 'error', 2000);
     }
-    
+
     // 关闭下拉菜单
     dropdowns[2] = false;
 };
