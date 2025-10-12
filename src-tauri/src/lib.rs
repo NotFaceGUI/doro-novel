@@ -215,10 +215,6 @@ fn validate_project_file(file_path: String) -> Result<bool, String> {
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
-        .setup(|app| {
-            // 移除之前的启动参数处理逻辑，改为通过command调用
-            Ok(())
-        })
         .plugin(tauri_plugin_process::init())
         .plugin(tauri_plugin_updater::Builder::new().build())
         .plugin(tauri_plugin_fs::init())
