@@ -52,8 +52,7 @@ onMounted(async () => {
 const onCreateProject = (res: Project) => {
   console.log('Project created:', res);
   projectStore.openProject(res);
-  // 初始化AssetManager
-  AssetManager.getInstance();
+
 };
 
 const handleSpacePress = (event: KeyboardEvent) => {

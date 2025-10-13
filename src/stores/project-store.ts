@@ -1,20 +1,22 @@
 // stores/project-store.ts
 import { defineStore } from 'pinia';
-import { ref } from 'vue';
+import { nextTick, ref } from 'vue';
 import { LOCAL_OPEN_KEY, LOCAL_OPEN_PROJECT_SAVEPATH_KEY } from '../script/var';
 import { Project } from '../types/app';
 import massage from '../script/common/massage';
+import AssetManager from '../script/asset-manager';
+import CanvasManager from '../script/render/canvas-manager';
 
 export const useProjectStore = defineStore('project', () => {
   // 项目是否打开的状态
   const isOpenProject = ref<boolean>(false);
-  
+
   // 当前项目名称
   const currentProjectName = ref<string>('');
-  
+
   // 当前项目保存路径
   const currentProjectSavePath = ref<string>('');
-  
+
   // 初始化项目状态
   const initializeProjectState = () => {
     const projectName = localStorage.getItem(LOCAL_OPEN_KEY);
@@ -35,7 +37,12 @@ export const useProjectStore = defineStore('project', () => {
     localStorage.setItem(LOCAL_OPEN_PROJECT_SAVEPATH_KEY, project.savePath);
     currentProjectName.value = project.projectName;
     isOpenProject.value = true;
-    massage(`[${project.projectName}]项目已打开`, 'success', 2000);
+    nextTick(() => {
+      // 初始化AssetManager 和 CanvasManager
+      AssetManager.getInstance();
+      CanvasManager.getInstance();
+      massage(`[${project.projectName}]项目已打开`, 'success', 2000);
+    })
   };
 
   // 关闭项目
@@ -45,7 +52,7 @@ export const useProjectStore = defineStore('project', () => {
     currentProjectName.value = '';
     isOpenProject.value = false;
   };
- 
+
   return {
     isOpenProject,
     currentProjectName,
