@@ -9,13 +9,12 @@
             </div>
             <!-- 水印覆盖层：平铺模式 -->
             <div v-if="wm.settings.enabled && wm.settings.placement === 'tiled' && isFullScreen"
-                 :style="{ position: 'absolute', inset: '0', pointerEvents: 'none', zIndex: 100, backgroundRepeat: 'repeat', backgroundImage: wm.svgDataUrl }">
+                :style="{ position: 'absolute', inset: '0', pointerEvents: 'none', zIndex: 100, backgroundRepeat: 'repeat', backgroundImage: wm.svgDataUrl }">
             </div>
 
             <!-- 水印覆盖层：四角模式 -->
             <div v-if="wm.settings.enabled && wm.settings.placement !== 'tiled' && isFullScreen"
-                 class="watermark-corner"
-                 :style="cornerStyle">
+                class="watermark-corner" :style="cornerStyle">
                 {{ wm.settings.text }}
             </div>
 
@@ -199,6 +198,7 @@ import type { CharacterUrls, DropdownOption } from '../types/app';
 import { applyUIAnimationConfig, type UIAnimationConfig } from '../script/render/animation-config';
 import { OutlineFilter } from 'pixi-filters';
 import { useWatermarkStore } from '../stores/watermark-store';
+import { getCurrentWindow } from '@tauri-apps/api/window';
 
 
 const imgRef = ref<HTMLImageElement | null>(null);
@@ -428,14 +428,43 @@ const handleRenderType = (data: { url: string, type: ResType, characterUrls?: Ch
 
 const isFullScreen = ref(false);
 
-// Canvas 全屏预览
-const fullScreen = () => {
-    if (projectView.value) {
-        isFullScreen.value = !isFullScreen.value
+const wasMaximized = ref(false)
+const isSwitching = ref(false) // 防止快速重复点击
+
+const fullScreen = async () => {
+    if (!projectView.value || isSwitching.value) return
+
+    const window = getCurrentWindow()
+    isSwitching.value = true // 上锁，防止重复执行
+
+    try {
+        if (!isFullScreen.value) {
+            // === 进入全屏 ===
+            wasMaximized.value = await window.isMaximized()
+            if (wasMaximized.value) await window.unmaximize()
+
+            await window.setFullscreen(true)
+            isFullScreen.value = true
+        } else {
+            // === 退出全屏 ===
+            await window.setFullscreen(false)
+
+            if (wasMaximized.value) await window.maximize()
+            isFullScreen.value = false
+        }
+
+        // 触发重新布局
+        nextTick(() => {
+            dispatchEvent(new Event('resize'))
+        })
+    } catch (err) {
+        console.error('全屏切换失败：', err)
+    } finally {
+        // 延迟解锁，防止太快重复触发
+        setTimeout(() => {
+            isSwitching.value = false
+        }, 300)
     }
-    nextTick(() => {
-        window.dispatchEvent(new Event('resize'));
-    })
 }
 
 onMounted(() => {
@@ -556,7 +585,7 @@ const handleAnimationChange = (animationIndex: number) => {
         const animations = previewSpine.value.spineData.animations;
         if (animations[animationIndex]) {
             previewSpine.value.state.setAnimation(0, animations[animationIndex].name, true);
-            
+
             // 重新应用用户设置的透明度
             slotOptions.value.forEach(slotData => {
                 if (previewSpine.value && previewSpine.value.skeleton) {
@@ -578,7 +607,7 @@ const handleSkinChange = (skinIndex: number) => {
         if (skins[skinIndex]) {
             previewSpine.value.skeleton.setSkinByName(skins[skinIndex].name);
             previewSpine.value.skeleton.setSlotsToSetupPose();
-            
+
             // 重新应用用户设置的透明度
             slotOptions.value.forEach(slotData => {
                 if (previewSpine.value && previewSpine.value.skeleton) {
@@ -879,7 +908,7 @@ const handleSlotHover = (slotName: string) => {
 
     // 保存原始状态（只保存一次）
     if (!(slot as any)._originalColor) {
-        (slot as any)._originalColor = { 
+        (slot as any)._originalColor = {
             r: slot.color.r,
             g: slot.color.g,
             b: slot.color.b,
@@ -893,7 +922,7 @@ const handleSlotHover = (slotName: string) => {
     // ✅ 高亮（变成亮黄色），但保持用户设置的透明度
     const slotData = slotOptions.value.find(s => s.name === slotName);
     const userAlpha = slotData ? slotData.alpha : slot.color.a;
-    
+
     slot.color.r = 1.0;
     slot.color.g = 1.0;
     slot.color.b = 0.3; // 偏金黄
@@ -917,7 +946,7 @@ const handleSlotLeave = () => {
             // 查找用户设置的透明度值
             const slotData = slotOptions.value.find(s => s.name === slot.data.name);
             const userAlpha = slotData ? slotData.alpha : slot._originalColor.a;
-            
+
             slot.color.r = slot._originalColor.r;
             slot.color.g = slot._originalColor.g;
             slot.color.b = slot._originalColor.b;

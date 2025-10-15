@@ -4,7 +4,6 @@ import { DoroApp, type Project } from './types/app';
 import WelcomeGuide from './components/WelcomeGuide.vue';
 import AppHeader from './components/AppHeader.vue';
 import ProjectView from './views/ProjectView.vue';
-import AssetManager from './script/asset-manager';
 import InputActionItemType from './components/common/InputActionItemType.vue';
 import UpdateDialog from './components/UpdateDialog.vue';
 import { useSearchDialogStore } from './stores/search-dialog-store';
