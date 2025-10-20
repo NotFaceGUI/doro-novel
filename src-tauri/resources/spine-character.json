@@ -304,6 +304,18 @@
         }
     },
     {
+        "dirName": "c016_02",
+        "characterName": "c016_02",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c016_02",
+            "skel": "c016_02_00.skel",
+            "aimSkel": "c016_02_aim_00.skel",
+            "coverSkel": "c016_02_cover_00.skel"
+        }
+    },
+    {
         "dirName": "c020",
         "characterName": "c020",
         "quality": "sr",
@@ -337,6 +349,18 @@
             "skel": "c022_01_00.skel",
             "aimSkel": "c022_01_aim_00.skel",
             "coverSkel": "c022_01_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c023",
+        "characterName": "c023",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c023",
+            "skel": "c023_00.skel",
+            "aimSkel": "c023_aim_00.skel",
+            "coverSkel": "c023_cover_00.skel"
         }
     },
     {
@@ -5534,6 +5558,16 @@
         }
     },
     {
+        "dirName": "goninjathief",
+        "characterName": "goninjathief",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "goninjathief",
+            "skel": "goninjathief_00.skel"
+        }
+    },
+    {
         "dirName": "hightechtoy",
         "characterName": "hightechtoy",
         "quality": "sr",
@@ -5851,6 +5885,16 @@
         "path": {
             "name": "queensorder",
             "skel": "queensorder_00.skel"
+        }
+    },
+    {
+        "dirName": "rebornevil",
+        "characterName": "rebornevil",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "rebornevil",
+            "skel": "rebornevil_00.skel"
         }
     },
     {
