@@ -115,7 +115,7 @@ const options = [
     { value: ASIType.WAIT, label: "添加 阻塞", icon: '⏱️', desc: "阻塞程序执行指定时间" },
     { value: "分隔符", label: "高级" },
     { value: ASIType.TRANSITION, label: "设置 过渡", icon: '⏩', desc: "画面或场景渐变效果" },
-    { value: ASIType.BGM, label: "添加 特效[x]", icon: '✨', desc: "在场景中添加特效" },
+    { value: ASIType.EFFECT, label: "添加 特效", icon: '✨', desc: "在场景中添加特效" },
     { value: ASIType.BGM, label: "添加/删除 CRT效果[x]", icon: '🎫', desc: "模拟老式屏幕效果" },
     { value: ASIType.BGM, label: "添加 巴拉巴拉[x]", icon: '🙂', desc: "额外的自定义效果" },
     { value: "分隔符", label: "模板" },

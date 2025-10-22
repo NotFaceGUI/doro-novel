@@ -80,7 +80,7 @@ export enum ASIType {
     BGM = "Bgm",
     DIALOGUE = "Dialogue",
     CHECKDIALOGUE = "CheckDialogue",
-    EFFECT = "Effect",
+    EFFECT = "Effect", // 特效
     SCENE = "Scene",
     OPERATINGCAMERA = "OperatingCamera", // 操作摄像机
     AUDIO = "Audio", // 音频播放
