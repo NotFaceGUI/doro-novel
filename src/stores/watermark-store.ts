@@ -16,45 +16,59 @@ export interface WatermarkSettings {
 }
 
 const LOCAL_WATERMARK_KEY = 'doro_watermark_settings';
+const LOCAL_WATERMARK_VERSION_KEY = 'doro_watermark_settings_version';
+const WATERMARK_SETTINGS_VERSION = '2026-01-19';
+
+const DEFAULT_WATERMARK_SETTINGS: WatermarkSettings = {
+  enabled: true,
+  text: '由 @author 使用 Doro Novel 创作',
+  fontSize: 18,
+  color: '#DDDDDD55',
+  opacity: 1,
+  angle: 0,
+  spacingX: 220,
+  spacingY: 180,
+  offsetX: 10,
+  offsetY: 5,
+  placement: 'bottom-right',
+};
 
 export const useWatermarkStore = defineStore('watermark', () => {
-  const settings = ref<WatermarkSettings>({
-    enabled: true,
-    text: '由 @author 使用 Doro Novel 创作',
-    fontSize: 18,
-    color: '#DDDDDD55', // 灰色带透明度的水印颜色
-    opacity: 1,
-    angle: 0,
-    spacingX: 220,
-    spacingY: 180,
-    offsetX: 10,
-    offsetY: 5,
-    placement: 'bottom-right',
-  });
+  const settings = ref<WatermarkSettings>({ ...DEFAULT_WATERMARK_SETTINGS });
+
+  const persist = () => {
+    try {
+      localStorage.setItem(LOCAL_WATERMARK_KEY, JSON.stringify(settings.value));
+      localStorage.setItem(LOCAL_WATERMARK_VERSION_KEY, WATERMARK_SETTINGS_VERSION);
+    } catch (_) {}
+  };
 
   const initialize = () => {
     try {
+      const version = localStorage.getItem(LOCAL_WATERMARK_VERSION_KEY);
+      if (version !== WATERMARK_SETTINGS_VERSION) {
+        settings.value = { ...DEFAULT_WATERMARK_SETTINGS };
+        persist();
+        return;
+      }
+
       const raw = localStorage.getItem(LOCAL_WATERMARK_KEY);
       if (raw) {
         const data = JSON.parse(raw);
-        settings.value = { ...settings.value, ...data };
-        // 迁移旧数据：如果没有 placement 字段，默认设置为 'tiled'
+        settings.value = { ...DEFAULT_WATERMARK_SETTINGS, ...data };
         if (!('placement' in settings.value)) {
           (settings.value as WatermarkSettings).placement = 'tiled';
         }
       }
     } catch (_) {
-      // ignore
+      settings.value = { ...DEFAULT_WATERMARK_SETTINGS };
+      persist();
     }
   };
 
   const update = (next: Partial<WatermarkSettings>) => {
     settings.value = { ...settings.value, ...next };
-    try {
-      localStorage.setItem(LOCAL_WATERMARK_KEY, JSON.stringify(settings.value));
-    } catch (_) {
-      // ignore
-    }
+    persist();
   };
 
   const svgDataUrl = computed(() => {
