@@ -43,6 +43,9 @@ export class UIRender {
     // 是否开始文本播放
     private isStart: boolean = false;
     private isTextAni: boolean = false;
+    private autoPlayEnabled: boolean = false;
+    private autoPlayTimer?: ReturnType<typeof setTimeout>;
+    private pendingAutoAdvanceDelayMs: number = 0;
 
     // 摄像机是否正在移动的标志
     public static isCameraMoving: boolean = false;
@@ -587,6 +590,8 @@ export class UIRender {
      */
     public async startDialogue(messages: DialogTextData[], modification: Map<PropertyPath, Modification>, isEndVisible: boolean = false, hideDelay: number = 0) {
         this.isStart = true; // 开始处理文本
+        this.clearAutoAdvanceTimer();
+        this.resolveClick = undefined;
         this.hideWaitIcon();
 
         if (messages.length > 0) {
@@ -612,6 +617,8 @@ export class UIRender {
                     this.normalDialog.visible = false;
                     this.normalTextAera.visible = false;
                     this.commanderTextAera.visible = false;
+                    this.clearAutoAdvanceTimer();
+                    this.resolveClick = undefined;
                     this.isStart = false; // 结束
                 }, hideDelay)
             } else {
@@ -620,12 +627,14 @@ export class UIRender {
                 this.normalDialog.visible = false;
                 this.normalTextAera.visible = false;
                 this.commanderTextAera.visible = false;
+                this.clearAutoAdvanceTimer();
+                this.resolveClick = undefined;
                 this.isStart = false; // 结束
             }
         }
     }
 
-    private resolveClick?: () => void; // 解决点击等待的 Promise
+    private resolveClick?: () => void; // 解决推进等待的 Promise
 
     /**
     * 播放对话，每次等待用户点击继续
@@ -673,8 +682,8 @@ export class UIRender {
                     }, modification);
 
                     this.showWaitIcon(message.mode);
-                    // 等待用户点击，显示下一行
-                    await this.waitForClick();
+                    // 等待用户点击，或在自动播放模式下延迟推进
+                    await this.waitForAdvance(this.getAutoAdvanceDelay(line.text));
                 }
             }
 
@@ -1045,12 +1054,80 @@ export class UIRender {
     }
 
     /**
-     * 等待用户点击
+     * 根据文本长度和当前打字速度估算自动播放停留时间
      */
-    private waitForClick(): Promise<void> {
+    private getAutoAdvanceDelay(text: string): number {
+        const fullText = TextTagParser.parse(text).cleanText;
+        const baseDelay = 45;
+        const lengthFactor = 0.5;
+        const delayPerCharacter = Math.max(baseDelay - fullText.length * lengthFactor, 15);
+        const typingDurationMs = fullText.length * delayPerCharacter;
+        const readingDurationMs = fullText.length * 55;
+
+        return Math.round(Math.min(Math.max(typingDurationMs * 0.35 + readingDurationMs, 900), 4500));
+    }
+
+    /**
+     * 等待用户点击，或在自动播放模式下自动推进
+     */
+    private waitForAdvance(delayMs: number): Promise<void> {
         return new Promise(resolve => {
-            this.resolveClick = resolve; // 绑定 resolve，点击时触发
+            this.clearAutoAdvanceTimer();
+            this.pendingAutoAdvanceDelayMs = delayMs;
+            this.resolveClick = () => {
+                this.clearAutoAdvanceTimer();
+                this.pendingAutoAdvanceDelayMs = 0;
+                resolve();
+            };
+            this.scheduleAutoAdvance();
         });
+    }
+
+    public toggleAutoPlay(): boolean {
+        return this.setAutoPlayEnabled(!this.autoPlayEnabled);
+    }
+
+    public setAutoPlayEnabled(enabled: boolean): boolean {
+        if (this.autoPlayEnabled === enabled) {
+            return this.autoPlayEnabled;
+        }
+
+        this.autoPlayEnabled = enabled;
+        console.log(`自动播放已${enabled ? '开启' : '关闭'}`);
+
+        if (enabled) {
+            this.scheduleAutoAdvance();
+        } else {
+            this.clearAutoAdvanceTimer();
+        }
+
+        return this.autoPlayEnabled;
+    }
+
+    private scheduleAutoAdvance(): void {
+        if (!this.autoPlayEnabled || !this.resolveClick) {
+            return;
+        }
+
+        this.clearAutoAdvanceTimer();
+        this.autoPlayTimer = window.setTimeout(() => {
+            this.resolvePendingAdvance();
+        }, this.pendingAutoAdvanceDelayMs);
+    }
+
+    private clearAutoAdvanceTimer(): void {
+        if (this.autoPlayTimer !== undefined) {
+            clearTimeout(this.autoPlayTimer);
+            this.autoPlayTimer = undefined;
+        }
+    }
+
+    private resolvePendingAdvance(): void {
+        const resolve = this.resolveClick;
+        this.clearAutoAdvanceTimer();
+        this.resolveClick = undefined;
+        this.pendingAutoAdvanceDelayMs = 0;
+        resolve?.();
     }
 
     /**
@@ -1065,8 +1142,7 @@ export class UIRender {
         }
 
         if (this.resolveClick) {
-            this.resolveClick(); // 触发 Promise 继续播放
-            this.resolveClick = undefined;
+            this.resolvePendingAdvance(); // 触发 Promise 继续播放
         }
     }
 

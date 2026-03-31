@@ -51,6 +51,29 @@ class CanvasManager {
     // CG管理相关属性
     private currentCG: PIXI.Sprite | AnimatedGIF | null = null;
     private lastCGPath: string = '';
+    private readonly handleAutoPlayToggleKeyDown = (event: KeyboardEvent) => {
+        if (event.code !== 'ShiftLeft' || event.repeat) {
+            return;
+        }
+
+        const target = event.target as HTMLElement | null;
+        if (target && (
+            target.tagName === 'INPUT' ||
+            target.tagName === 'TEXTAREA' ||
+            target.tagName === 'SELECT' ||
+            target.isContentEditable
+        )) {
+            return;
+        }
+
+        const actionStore = useActionStore();
+        if (this.mode !== GameMode.PLAY || !actionStore.isPlaying) {
+            return;
+        }
+
+        event.preventDefault();
+        this.uiRender.toggleAutoPlay();
+    };
 
     public setMode(mode: GameMode = GameMode.PLAY, record: boolean = true) {
         console.log("切换模式为：", mode);
@@ -238,6 +261,7 @@ class CanvasManager {
 
         this.adjustScale(container, info);
         window.addEventListener("resize", () => this.adjustScale(container, info));
+        window.addEventListener('keydown', this.handleAutoPlayToggleKeyDown);
 
         this.setMouseEffectAnimation();
         this.setDefaultMaskEffect();
@@ -1038,6 +1062,7 @@ class CanvasManager {
 
     destroy() {
         if (this.app) {
+            window.removeEventListener('keydown', this.handleAutoPlayToggleKeyDown);
             this.app.destroy(true, {
                 children: true,
                 texture: true,
