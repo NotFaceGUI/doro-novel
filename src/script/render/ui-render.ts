@@ -13,11 +13,17 @@ import { DEFAULT_RESOLUTION } from '../var';
 import { Modification, PropertyPath } from '../common/snapshot';
 import { TextTagParser } from '../util/text-parser';
 import { executeTextTag, TagExecutionContext } from '../util/text-tag-handler';
-import { Raw } from 'vue';
+import { Raw, watch } from 'vue';
 import { Spine } from 'pixi-spine';
 import { ButtonComponent } from '../ui/button-component';
 import { Action } from 'pixijs-actions';
 import { useBranchStore } from '../../stores/branch-store';
+import {
+    resolveDialogueCommanderUiMetrics,
+    resolveDialogueNormalUiMetrics,
+    resolveDialogueVoiceoverUiMetrics,
+    useDialogueUiStore,
+} from '../../stores/dialogue-ui-store';
 import { setModification } from '../util/common';
 
 const t = i18n.global.t
@@ -46,6 +52,9 @@ export class UIRender {
     private autoPlayEnabled: boolean = false;
     private autoPlayTimer?: ReturnType<typeof setTimeout>;
     private pendingAutoAdvanceDelayMs: number = 0;
+    private dialogueUiStore = useDialogueUiStore();
+    private stopDialogueUiWatcher?: () => void;
+    private currentSpeakerColor: number = 0xff0000;
 
     // 摄像机是否正在移动的标志
     public static isCameraMoving: boolean = false;
@@ -57,6 +66,8 @@ export class UIRender {
     constructor(ui: Container, app: Application) {
         this.stage = ui;
         this.app = app;
+        this.dialogueUiStore.initialize();
+        this.dialogueUiStore.setActiveSceneMode(null);
 
         // 初始化Default文本
         const graphics = new Graphics();
@@ -71,41 +82,15 @@ export class UIRender {
         this.titleCharacterColorLeftBar.drawRect(35, app.view.height - 500, 6, 22);
         this.titleCharacterColorLeftBar.endFill();
 
-        // 创建文本样式
-        // 基于屏幕尺寸的响应式设计
-        const baseWidth = 1920; // 设计基准宽度
-        const scaleFactor = app.screen.width / baseWidth;
-
-        const contentStyle = new TextStyle({
-            fill: '#DDDDDD',
-            fontSize: Math.max(16, 40 * scaleFactor), // 最小字体16px
-            lineHeight: 60 * scaleFactor,
-            fontFamily: 'Noto Sans SC',
-            fontWeight: '600',
-            breakWords: true,
-            wordWrap: true,
-            wordWrapWidth: app.screen.width - (140 * (scaleFactor <= 1 ? 1.4 : scaleFactor)),
-        });
-
-        const titleStyle = new TextStyle({
-            fill: '#ffffff',
-            fontSize: Math.max(16, 40 * scaleFactor), // 最小字体16px
-            lineHeight: 45 * scaleFactor,
-            fontFamily: 'sourcehansans',
-            fontWeight: 'bold',
-            wordWrapWidth: app.screen.width,
-        });
+        const scaleFactor = this.getDialogueScaleFactor();
+        const contentStyle = this.createNormalContentStyle();
+        const titleStyle = this.createNormalTitleStyle();
 
         // 创建文本
         const titleText = new Text("阿妮斯", titleStyle);
         const chatText = new Text("下次作战我就不参加了。", contentStyle);
 
         // 响应式定位
-        titleText.x = 80 * scaleFactor;
-        titleText.y = app.screen.height - (500 * scaleFactor);
-        chatText.x = 80 * scaleFactor;
-        chatText.y = app.screen.height - (430 * scaleFactor);
-
         // 初始化等待图标
         this.initWaitIcon(scaleFactor);
 
@@ -114,19 +99,10 @@ export class UIRender {
             content: chatText,
         }
 
+        this.applyNormalDialogueLayout();
+
         // 创建文本样式
-        const contentSideStyle = new TextStyle({
-            fill: '#DDDDDD',
-            fontSize: Math.max(16, 45 * scaleFactor),
-            lineHeight: 60 * scaleFactor,
-            fontFamily: 'Noto Sans SC', // 使用 Noto Sans SC 字体
-            fontWeight: '600', // 确保字体加粗
-            breakWords: true,
-            wordWrap: true,       // 自动换行
-            align: 'center',
-            // textBaseline: 'middle',
-            wordWrapWidth: app.view.width - 650, // 让文字不会超出背景
-        });
+        const contentSideStyle = this.createVoiceoverContentStyle();
 
 
         this.currentSideText = {
@@ -215,6 +191,18 @@ export class UIRender {
             this.textWriter = res;
         });
 
+        this.stopDialogueUiWatcher = watch(
+            () => ({
+                normal: { ...this.dialogueUiStore.normalSettings },
+                voiceover: { ...this.dialogueUiStore.voiceoverSettings },
+                commander: { ...this.dialogueUiStore.commanderSettings },
+            }),
+            () => {
+                this.applyDialogueUiLayout();
+            },
+            { deep: true }
+        );
+
         // // 测试按钮数组
         // this.createButtonArray([
         //     '我觉得这件事你可以在考虑一下\n我觉得不妥\n何出此言',
@@ -243,6 +231,8 @@ export class UIRender {
         buttonWidth?: number;
         buttonHeight?: number;
         minWidth?: number;
+        textStyle?: Partial<TextStyle>;
+        autoSizeToText?: boolean;
         onButtonClick?: (text: string, index: number) => void;
         playEntrySound?: boolean;
         /** 是否使用底部中心定位（内容增多时向上扩展） */
@@ -284,6 +274,8 @@ export class UIRender {
                 height: config.buttonHeight,
                 minWidth: config.minWidth,
                 text: text,
+                textStyle: options?.textStyle,
+                autoSizeToText: options?.autoSizeToText,
                 orderNumber: index + 1,
                 soundOptions: {
                     enableEntry: index === 0 && config.playEntrySound && !hasPlayedEntrySound, // 只有第一个按钮播放入场音效
@@ -320,13 +312,129 @@ export class UIRender {
             button.y = adjustedStartY + (index * config.spacing);
             button.zIndex = 9999;
             button.scale.set(button.scale.x * options?.scaleFactor!);
-
             // 添加到舞台
             this.commanderTextAera.addChild(button);
             buttons.push(button);
         });
 
         return buttons;
+    }
+
+    private getDialogueScaleFactor(): number {
+        return this.app.screen.width / 1920;
+    }
+
+    private getNormalDialogueMetrics() {
+        return resolveDialogueNormalUiMetrics(
+            this.app.screen.width,
+            this.app.screen.height,
+            this.dialogueUiStore.normalSettings
+        );
+    }
+
+    private createNormalContentStyle(): TextStyle {
+        const metrics = this.getNormalDialogueMetrics();
+
+        return new TextStyle({
+            fill: '#DDDDDD',
+            fontSize: metrics.contentFontSize,
+            lineHeight: metrics.contentLineHeight,
+            fontFamily: 'Noto Sans SC',
+            fontWeight: '600',
+            breakWords: true,
+            wordWrap: true,
+            wordWrapWidth: metrics.contentWrapWidth,
+        });
+    }
+
+    private createNormalTitleStyle(): TextStyle {
+        const metrics = this.getNormalDialogueMetrics();
+
+        return new TextStyle({
+            fill: '#ffffff',
+            fontSize: metrics.nameFontSize,
+            lineHeight: metrics.nameLineHeight,
+            fontFamily: 'sourcehansans',
+            fontWeight: 'bold',
+            wordWrapWidth: this.app.screen.width,
+        });
+    }
+
+    private createVoiceoverContentStyle(): TextStyle {
+        const metrics = resolveDialogueVoiceoverUiMetrics(
+            this.app.screen.width,
+            this.dialogueUiStore.voiceoverSettings
+        );
+
+        return new TextStyle({
+            fill: '#DDDDDD',
+            fontSize: metrics.fontSize,
+            lineHeight: metrics.lineHeight,
+            fontFamily: 'Noto Sans SC',
+            fontWeight: '600',
+            breakWords: true,
+            wordWrap: true,
+            align: 'center',
+            wordWrapWidth: metrics.contentWrapWidth,
+        });
+    }
+
+    private createCommanderTextStyle(): Partial<TextStyle> {
+        const metrics = resolveDialogueCommanderUiMetrics(
+            this.app.screen.width,
+            this.dialogueUiStore.commanderSettings
+        );
+
+        return {
+            fontSize: metrics.fontSize,
+            lineHeight: metrics.lineHeight,
+            fontWeight: 'bold',
+            align: 'center',
+        };
+    }
+
+    private getCommanderButtonScaleFactor(): number {
+        return resolveDialogueCommanderUiMetrics(
+            this.app.screen.width,
+            this.dialogueUiStore.commanderSettings
+        ).scaleFactor;
+    }
+
+    private drawTitleColorBar(color: number): void {
+        const metrics = this.getNormalDialogueMetrics();
+
+        this.titleCharacterColorLeftBar.clear();
+        this.titleCharacterColorLeftBar.beginFill(color);
+        this.titleCharacterColorLeftBar.drawRect(
+            metrics.colorBarX,
+            metrics.colorBarY,
+            metrics.colorBarWidth,
+            metrics.colorBarHeight
+        );
+        this.titleCharacterColorLeftBar.endFill();
+    }
+
+    public applyNormalDialogueLayout(): void {
+        const metrics = this.getNormalDialogueMetrics();
+
+        this.currentDisplayText.title.style = this.createNormalTitleStyle();
+        this.currentDisplayText.content.style = this.createNormalContentStyle();
+        this.currentDisplayText.title.x = metrics.nameX;
+        this.currentDisplayText.title.y = metrics.nameY;
+        this.currentDisplayText.content.x = metrics.contentX;
+        this.currentDisplayText.content.y = metrics.contentY;
+        this.drawTitleColorBar(this.currentSpeakerColor);
+    }
+
+    public applyDialogueUiLayout(): void {
+        this.applyNormalDialogueLayout();
+        this.currentSideText.content.style = this.createVoiceoverContentStyle();
+
+        UIRender.buttonAllArrays = UIRender.buttonAllArrays.filter(button => !button.destroyed);
+        const commanderTextStyle = this.createCommanderTextStyle();
+        UIRender.buttonAllArrays.forEach(button => {
+            button.updateTextStyle(commanderTextStyle);
+        });
     }
 
     /**
@@ -420,6 +528,7 @@ export class UIRender {
 
         // 更新当前状态
         this.currentDialogueMode = mode;
+        this.dialogueUiStore.setActiveSceneMode(mode);
 
         const uiMap: Record<DialogueType, (Sprite | Container)[]> = {
             [DialogueType.NORMAL]: [this.normalDialog, this.normalTextAera],
@@ -594,6 +703,11 @@ export class UIRender {
         this.resolveClick = undefined;
         this.hideWaitIcon();
 
+        if (messages.length === 0) {
+            this.currentDialogueMode = null;
+            this.dialogueUiStore.setActiveSceneMode(null);
+        }
+
         if (messages.length > 0) {
             if (messages[0].mode === DialogueType.NORMAL) {
                 this.normalDialog.visible = true;
@@ -617,6 +731,8 @@ export class UIRender {
                     this.normalDialog.visible = false;
                     this.normalTextAera.visible = false;
                     this.commanderTextAera.visible = false;
+                    this.currentDialogueMode = null;
+                    this.dialogueUiStore.setActiveSceneMode(null);
                     this.clearAutoAdvanceTimer();
                     this.resolveClick = undefined;
                     this.isStart = false; // 结束
@@ -627,6 +743,8 @@ export class UIRender {
                 this.normalDialog.visible = false;
                 this.normalTextAera.visible = false;
                 this.commanderTextAera.visible = false;
+                this.currentDialogueMode = null;
+                this.dialogueUiStore.setActiveSceneMode(null);
                 this.clearAutoAdvanceTimer();
                 this.resolveClick = undefined;
                 this.isStart = false; // 结束
@@ -898,14 +1016,8 @@ export class UIRender {
                 break;
         }
 
-        // 基于屏幕尺寸的响应式设计
-        const baseWidth = 1920; // 设计基准宽度
-        const scaleFactor = this.app.screen.width / baseWidth;
-
-        this.titleCharacterColorLeftBar.clear();
-        this.titleCharacterColorLeftBar.beginFill(message.speakerColor);
-        this.titleCharacterColorLeftBar.drawRect(45 * scaleFactor, this.app.screen.height - (500 * scaleFactor) + 5, 10, 40 * scaleFactor);
-        this.titleCharacterColorLeftBar.endFill();
+        this.currentSpeakerColor = message.speakerColor;
+        this.applyNormalDialogueLayout();
 
         // 解析出说话人名称 不带异格
         tempText.title.text = t(message.speaker).split('：')[0];
@@ -1346,12 +1458,8 @@ export class UIRender {
     // 添加COMMANDER模式的按钮渲染方法
     private async renderCommanderButtons(message: DialogTextData) {
         // 基于屏幕尺寸的响应式设计
-        let scaleFactor = this.app.screen.width / 1920;
-        let orgFactor = scaleFactor;
-        // 这个是适配一些x响应式的无奈举动
-        if (scaleFactor <= 1.4) {
-            scaleFactor = 1.3
-        }
+        const orgFactor = this.app.screen.width / 1920;
+        const scaleFactor = this.getCommanderButtonScaleFactor();
 
         console.log("project scaleFactor", scaleFactor);
 
@@ -1374,6 +1482,7 @@ export class UIRender {
                 buttonWidth: 457,
                 buttonHeight: 90,
                 minWidth: 457,
+                textStyle: this.createCommanderTextStyle(),
                 useBottomCenterAnchor: true,
                 onButtonClick: (text: string, index: number) => {
                     console.log(`COMMANDER选择了选项 ${index}: ${text}`);
@@ -1409,5 +1518,11 @@ export class UIRender {
             // 加入按钮数组
             UIRender.buttonAllArrays.push(...buttonArray);
         });
+    }
+
+    public destroy(): void {
+        this.currentDialogueMode = null;
+        this.dialogueUiStore.setActiveSceneMode(null);
+        this.stopDialogueUiWatcher?.();
     }
 }

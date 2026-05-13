@@ -1062,6 +1062,7 @@ class CanvasManager {
 
     destroy() {
         if (this.app) {
+            this.uiRender?.destroy();
             window.removeEventListener('keydown', this.handleAutoPlayToggleKeyDown);
             this.app.destroy(true, {
                 children: true,

@@ -169,10 +169,25 @@
                 <ScriptEditor v-model="scriptContent" placeholder="在这里编写剧情脚本..." />
             </div>
 
+            <div
+                class="dialogue-ui-trigger"
+                :class="{ 'panel-open': showDialogueUiPanel }"
+                v-if="activeTab === 'canvas'"
+                @click="showDialogueUiPanel = !showDialogueUiPanel"
+            >
+                ⚙️
+            </div>
+
             <div class="full-screen" v-if="activeTab != 'script'" :style="'opacity:' + (isFullScreen ? 0.2 : 0.8)"
                 @click="fullScreen">
                 🔲
             </div>
+
+            <DialogueUiFloatingPanel
+                v-if="activeTab === 'canvas'"
+                :show="showDialogueUiPanel"
+                @close="showDialogueUiPanel = false"
+            />
         </div>
 
         <!-- 操作提示 -->
@@ -188,6 +203,7 @@ import Dropdown from '../components/common/Dropdown.vue';
 import ControlHint from '../components/common/ControlHint.vue';
 import SlotControl from '../components/common/SlotControl.vue';
 import ShaderEditor from '../components/common/ShaderEditor.vue';
+import DialogueUiFloatingPanel from '../components/DialogueUiFloatingPanel.vue';
 import { ResType } from '../script/var';
 import { createPixiApp, IApp, load, setupSpineInteraction } from '../script/render/preview-canvas';
 import { Spine } from 'pixi-spine';
@@ -198,6 +214,7 @@ import type { CharacterUrls, DropdownOption } from '../types/app';
 import { applyUIAnimationConfig, type UIAnimationConfig } from '../script/render/animation-config';
 import { OutlineFilter } from 'pixi-filters';
 import { useWatermarkStore } from '../stores/watermark-store';
+import { useDialogueUiStore } from '../stores/dialogue-ui-store';
 import { getCurrentWindow } from '@tauri-apps/api/window';
 
 
@@ -208,6 +225,8 @@ const projectView = ref<HTMLDivElement | null>(null)
 // 水印设置
 const wm = useWatermarkStore();
 wm.initialize();
+const dialogueUiStore = useDialogueUiStore();
+dialogueUiStore.initialize();
 
 // 计算四角水印的样式
 const cornerStyle = computed(() => {
@@ -244,6 +263,7 @@ const showImage = ref<boolean>(false);
 const showVideo = ref<boolean>(false);
 const showText = ref<boolean>(false);
 const showCanvas = ref<boolean>(false);
+const showDialogueUiPanel = ref(false);
 
 const previewAPP = ref<IApp>()
 
@@ -321,6 +341,12 @@ let _last_url = '';
 
 // 当前激活的 Tab ('canvas' | 'preview' | 'script')
 const activeTab = ref<'canvas' | 'preview' | 'script'>('canvas');
+
+watch(activeTab, (tab) => {
+    if (tab !== 'canvas') {
+        showDialogueUiPanel.value = false;
+    }
+});
 const actionStore = useActionStore();
 
 // Script 相关的响应式数据
@@ -1209,7 +1235,12 @@ const clearAllShaders = () => {
 
 
 .project-content-view:hover .full-screen {
-    display: block;
+    display: flex;
+}
+
+.project-content-view:hover .dialogue-ui-trigger,
+.dialogue-ui-trigger.panel-open {
+    display: flex;
 }
 
 
@@ -1235,16 +1266,45 @@ const clearAllShaders = () => {
     opacity: .4;
 }
 
+.dialogue-ui-trigger {
+    position: absolute;
+    bottom: 40px;
+    left: 8px;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    width: 24px;
+    height: 24px;
+    font-size: 18px;
+    line-height: 1;
+    background: transparent;
+    border: none;
+    color: inherit;
+    opacity: .5;
+    cursor: pointer;
+    transition: all .3s ease-in-out;
+    z-index: 120;
+    text-indent: 1px;
+}
+
+.dialogue-ui-trigger:hover,
+.dialogue-ui-trigger.panel-open {
+    opacity: 1;
+    transform: scale(1.1);
+}
+
 .full-screen {
     position: absolute;
     bottom: 10px;
-    left: 10px;
-
+    left: 8px;
+    width: 24px;
+    height: 24px;
     font-size: 18px;
     display: none;
-
+    align-items: center;
+    justify-content: center;
     opacity: .5;
-
     transition: all .3s ease-in-out;
 }
 

@@ -21,6 +21,8 @@ export interface ButtonOptions {
     minWidth?: number;
     /** 文本样式 */
     textStyle?: Partial<TextStyle>;
+    /** 是否根据文本自动调整按钮尺寸 */
+    autoSizeToText?: boolean;
     /** 点击回调函数 */
     onClick?: () => void;
     /** 释放回调函数 */
@@ -116,6 +118,7 @@ export class ButtonComponent extends Container {
                 align: 'center',
                 ...options.textStyle
             },
+            autoSizeToText: options.autoSizeToText !== false,
             onClick: options.onClick || (() => { }),
             onRelease: options.onRelease || (() => { }),
             orderNumber: options.orderNumber || 1,
@@ -227,7 +230,9 @@ export class ButtonComponent extends Container {
             this.createClickAnimation();
             this.createText();
             await this.createOrderIcon(); // 创建序号图标
-            this.adjustSizeToText();
+            if (this.options.autoSizeToText) {
+                this.adjustSizeToText();
+            }
 
             // 在所有组件创建完成后设置pivot，确保width和height已正确计算
             this.pivot.set(this.options.width / 2, this.options.height / 2 + 20);
@@ -429,11 +434,25 @@ export class ButtonComponent extends Container {
     }
 
     private createText(): void {
-        this.label = new Text(this.options.text, this.options.textStyle);
+        this.label = new Text(this.options.text, this.getTextStyleOptions());
         this.label.anchor.set(0.5);
         this.label.x = this.options.width / 2;
         this.label.y = this.options.height / 2;
         this.addChild(this.label);
+    }
+
+    private getTextStyleOptions(): Partial<TextStyle> {
+        const style: Partial<TextStyle> = {
+            ...this.options.textStyle,
+        };
+
+        if (!this.options.autoSizeToText) {
+            style.wordWrap = true;
+            style.wordWrapWidth = Math.max(60, this.options.width - 100);
+            style.breakWords = true;
+        }
+
+        return style;
     }
 
     /**
@@ -484,6 +503,15 @@ export class ButtonComponent extends Container {
         this.center.height = this.options.height - (ButtonComponent.SLICE_TOP * this.options.scaleFactor) - (ButtonComponent.SLICE_BOTTOM * this.options.scaleFactor);
         this.centerColor.width = this.center.width;
         this.centerColor.height = this.center.height;
+        this.centerColor.x = this.center.x * this.options.scaleFactor - 0.5;
+        this.centerColor.y = this.center.y * this.options.scaleFactor - 0.5;
+
+        if (this.colorMask) {
+            this.colorMask.width = this.options.width;
+            this.colorMask.height = this.options.height;
+            this.colorMask.x = this.options.width / 2;
+            this.colorMask.y = this.options.height / 2;
+        }
 
         // 更新装饰位置
         this.rightDecor.x = this.options.width - 6 * this.options.scaleFactor;
@@ -496,7 +524,7 @@ export class ButtonComponent extends Container {
 
         // 更新序号图标位置
         if (this.orderIcon) {
-            this.orderIcon.x = 0; // 超出按钮左边缘图标一半宽度
+            this.orderIcon.x = 0;
             this.orderIcon.y = this.options.height / 2;
         }
 
@@ -515,6 +543,7 @@ export class ButtonComponent extends Container {
             this.leftArrow.x = -arrowSize * 1.5 * this.options.scaleFactor; // 超出按钮左边缘箭头一半宽度
             this.leftArrow.y = this.options.height / 2; // 垂直居中
         }
+
     }
 
     /**
@@ -707,6 +736,25 @@ export class ButtonComponent extends Container {
             this.label.text = text;
             this.adjustSizeToText();
         }
+    }
+
+    /**
+     * 更新按钮文本样式
+     */
+    public updateTextStyle(style: Partial<TextStyle>): void {
+        this.options.textStyle = {
+            ...this.options.textStyle,
+            ...style,
+        };
+
+        if (!this.label) {
+            return;
+        }
+
+        this.label.style = new TextStyle(this.getTextStyleOptions());
+
+        this.label.x = this.options.width / 2;
+        this.label.y = this.options.height / 2;
     }
 
     /**
