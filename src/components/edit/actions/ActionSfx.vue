@@ -130,6 +130,20 @@ const selectedAudioKey = computed(() => {
     return '';
 });
 
+const restoreSelectedAudio = (audioKey?: string, fallbackIndex?: number) => {
+    if (audioKey) {
+        const audioIndex = availableSfxAudios.value.findIndex(audio => audio.value === audioKey);
+        if (audioIndex !== -1) {
+            selectedAudioOption.value = audioIndex;
+            return;
+        }
+    }
+
+    if (typeof fallbackIndex === 'number') {
+        selectedAudioOption.value = fallbackIndex;
+    }
+};
+
 // 主要的action执行函数
 const targetAction = () => {
     console.log("播放音效，组件ID:", props.id, "音效:", selectedAudioKey.value);
@@ -216,6 +230,7 @@ let audioListTimer: number | null = null;
 const serialization = () => {
     return {
         selectedAudioOption: selectedAudioOption.value,
+        selectedAudioKey: selectedAudioKey.value,
         volumeSettings: volumeSettings.value.map(setting => ({
             label: setting.label,
             value: setting.value,
@@ -232,9 +247,7 @@ const deserialization = (data: ActionItems) => {
         return;
     }
     if (actionData) {
-        if (typeof actionData.selectedAudioOption === 'number') {
-            selectedAudioOption.value = actionData.selectedAudioOption;
-        }
+        restoreSelectedAudio(actionData.selectedAudioKey, actionData.selectedAudioOption);
         
         if (Array.isArray(actionData.volumeSettings)) {
             volumeSettings.value = actionData.volumeSettings.map((setting: any) => ({
@@ -253,6 +266,9 @@ onMounted(() => {
     actionItem.serialize = serialization;
     modification = action.getCurrentModification(props.title, props.id);
 
+    // 先初始化音频列表，再恢复保存的选项
+    updateAudioList();
+
     // 反序列化数据
     deserialization(actionItem);
 
@@ -260,10 +276,6 @@ onMounted(() => {
     if (selectedAudioOption.value >= availableSfxAudios.value.length) {
         selectedAudioOption.value = 0;
     }
-    
-    // 初始化音频列表
-    updateAudioList();
-    
     // 设置定时器，每秒检查一次资源变化
     audioListTimer = window.setInterval(() => {
         updateAudioList();

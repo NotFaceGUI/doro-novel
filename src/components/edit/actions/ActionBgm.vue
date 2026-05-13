@@ -320,6 +320,17 @@ const selectedAudioKey = computed(() => {
     return '';
 });
 
+const restoreSelectedAudioByKey = (audioKey?: string) => {
+    if (!audioKey) {
+        return;
+    }
+
+    const audioIndex = availableAudios.value.findIndex(audio => audio.value === audioKey);
+    if (audioIndex !== -1) {
+        selectedAudioOption.value = audioIndex;
+    }
+};
+
 // 主要的action执行函数
 const targetAction = () => {
     const mode = AudioOperaMode.value[selectedOption.value].value;
@@ -519,12 +530,7 @@ const deserialization = (actionItem: ActionItems) => {
     }
 
     // 恢复选中的音频
-    if (bgmData.selectedAudio) {
-        const audioIndex = availableAudios.value.findIndex(audio => audio.value === bgmData.selectedAudio);
-        if (audioIndex !== -1) {
-            selectedAudioOption.value = audioIndex;
-        }
-    }
+    restoreSelectedAudioByKey(bgmData.selectedAudio);
 
     // 恢复音量设置
     if (bgmData.volume !== undefined) {
@@ -599,6 +605,9 @@ onMounted(() => {
     actionItem.serialize = serialization;
     modification = action.getCurrentModification(props.title, props.id);
 
+    // 先初始化音频列表，再按保存的key恢复选择
+    updateAudioList();
+
     // 反序列化数据
     const actionIndex = action.getAction(props.title).as.findIndex((item) => item.id === props.id);
     const currentActionItem = action.getAction(props.title).as[actionIndex];
@@ -608,10 +617,6 @@ onMounted(() => {
     if (selectedAudioOption.value >= availableAudios.value.length) {
         selectedAudioOption.value = 0;
     }
-    
-    // 初始化音频列表
-    updateAudioList();
-    
     // 设置定时器，每秒检查一次资源变化
     audioListTimer = window.setInterval(() => {
         updateAudioList();
