@@ -3144,13 +3144,16 @@ actionItem.deserialize = () => {
 };
 
 onMounted(() => {
-    // 初始化数据
-    updateActionData();
-
     // 如果有保存的数据，进行反序列化
     if (actionItem.actionData) {
         actionItem.deserialize?.();
+    } else {
+        // 新建动作时才写入默认值，避免覆盖已保存的特效类型
+        updateActionData();
     }
+
+    // 确保当前界面状态和 actionData 保持一致
+    updateActionData();
 });
 </script>
 
