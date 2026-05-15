@@ -10,6 +10,39 @@ import { Spine } from 'pixi-spine';
 import { ResType } from '../var';
 import { readTextFile } from '@tauri-apps/plugin-fs';
 import { useProjectStore } from '../../stores/project-store';
+import { LOCAL_OPEN_KEY } from '../var';
+import massage from './massage';
+import { i18n } from '../../locales/i18n';
+
+function resetCurrentProjectRuntime() {
+    const actionStore = useActionStore();
+
+    actionStore.currentSelectActionTitle = 'Default';
+    actionStore.currentSelectActionItemId = -1;
+    actionStore.actionMap = {
+        "Default": {
+            title: "Default",
+            as: []
+        }
+    };
+
+    actionStore.maxCharacter = [];
+
+    Object.entries(actionStore.loadResMap).forEach(([key, loadRes]) => {
+        ResourceManager.removeResource(key, loadRes.type);
+    });
+    actionStore.loadResMap = {} as Record<string, LoadRes>;
+    actionStore.isPlaying = false;
+    actionStore.isEditMode = false;
+    actionStore.previewSnapshot = {
+        camera: { x: 0, y: 0, zoom: 1 },
+        characters: new Map(),
+        background: { image: '', parallax: 0 },
+        sound: { bgm: '', sfx: [] }
+    };
+
+    CanvasManager.destroyInstance();
+}
 
 export function useCommonState(actionTitle: string, actionId: number) {
     const action = useActionStore();
@@ -104,7 +137,10 @@ export async function openProject(filePath: string) {
         const projectStore = useProjectStore();
         const actionStore = useActionStore();
 
-        // 使用项目store打开项目
+        if (localStorage.getItem(LOCAL_OPEN_KEY)) {
+            resetCurrentProjectRuntime();
+        }
+
         projectStore.openProject(project);
         await new Promise(resolve => setTimeout(resolve, 100));
 
@@ -197,6 +233,6 @@ export async function openProject(filePath: string) {
 
     } catch (error) {
         console.error('打开项目失败:', error);
-        // alert('打开项目失败，请检查文件格式是否正确');
+        massage(i18n.global.t('menu.messages.projectOpenFailed'), 'error', 2000);
     }
 };

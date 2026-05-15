@@ -6,6 +6,7 @@ import { Project } from '../types/app';
 import massage from '../script/common/massage';
 import AssetManager from '../script/asset-manager';
 import CanvasManager from '../script/render/canvas-manager';
+import { i18n } from '../locales/i18n';
 
 export const useProjectStore = defineStore('project', () => {
   // 项目是否打开的状态
@@ -36,12 +37,13 @@ export const useProjectStore = defineStore('project', () => {
     localStorage.setItem(LOCAL_OPEN_KEY, project.projectName);
     localStorage.setItem(LOCAL_OPEN_PROJECT_SAVEPATH_KEY, project.savePath);
     currentProjectName.value = project.projectName;
+    currentProjectSavePath.value = project.savePath;
     isOpenProject.value = true;
     nextTick(() => {
       // 初始化AssetManager 和 CanvasManager
       AssetManager.getInstance();
       CanvasManager.getInstance();
-      massage(`[${project.projectName}]项目已打开`, 'success', 2000);
+      massage(i18n.global.t('menu.messages.projectOpened', { projectName: project.projectName }), 'success', 2000);
     })
   };
 
@@ -50,6 +52,7 @@ export const useProjectStore = defineStore('project', () => {
     localStorage.removeItem(LOCAL_OPEN_KEY);
     localStorage.removeItem(LOCAL_OPEN_PROJECT_SAVEPATH_KEY);
     currentProjectName.value = '';
+    currentProjectSavePath.value = '';
     isOpenProject.value = false;
   };
 

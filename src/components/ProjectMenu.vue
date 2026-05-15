@@ -1,41 +1,54 @@
 <template>
     <div class="project-menu">
         <ul>
-            <li @click="toggleDropdown(0)">项目(P)
-                <ul v-show="dropdowns[0]" class="dropdown">
-                    <li @click="saveProject">保存项目<span class="keyword">Ctrl + S</span></li>
+            <li @click.stop="toggleDropdown(0)">{{ t('menu.project') }}
+                <ul v-show="dropdowns[0]" class="dropdown" @click.stop>
+                    <li @click.stop="saveProject">{{ t('menu.saveProject') }}<span class="keyword">Ctrl + S</span></li>
                     <hr />
-                    <li @click="openProject()">打开项目<span class="keyword">Ctrl + O</span></li>
-                    <li @click="closeProject">关闭项目<span class="keyword">Ctrl + Shift + Z</span></li>
-                    <li @click="openProjectFolder">打开项目文件夹<span class="keyword">Ctrl + Shift + O</span></li>
+                    <li @click.stop="openProject()">{{ t('menu.openProject') }}<span class="keyword">Ctrl + O</span></li>
+                    <li @click.stop="closeProject()">{{ t('menu.closeProject') }}<span class="keyword">Ctrl + Shift + Z</span></li>
+                    <li @click.stop="openProjectFolder">{{ t('menu.openProjectFolder') }}<span class="keyword">Ctrl + Shift + O</span></li>
                     <hr />
-                    <li>清除缓存<span class="keyword">Ctrl + Shift + C</span></li>
+                    <li>{{ t('menu.clearCache') }}<span class="keyword">Ctrl + Shift + C</span></li>
                 </ul>
             </li>
-            <li @click="toggleDropdown(1)">编辑(E)
-                <ul v-show="dropdowns[1]" class="dropdown">
-                    <li>撤销<span class="keyword">Ctrl + Z</span></li>
-                    <li>重做<span class="keyword">Ctrl + Y</span></li>
+            <li @click.stop="toggleDropdown(1)">{{ t('menu.edit') }}
+                <ul v-show="dropdowns[1]" class="dropdown" @click.stop>
+                    <li>{{ t('menu.undo') }}<span class="keyword">Ctrl + Z</span></li>
+                    <li>{{ t('menu.redo') }}<span class="keyword">Ctrl + Y</span></li>
                     <hr />
-                    <li>剪切<span class="keyword">Ctrl + X</span></li>
-                    <li>复制<span class="keyword">Ctrl + C</span></li>
-                    <li>粘贴<span class="keyword">Ctrl + V</span></li>
+                    <li>{{ t('menu.cut') }}<span class="keyword">Ctrl + X</span></li>
+                    <li>{{ t('menu.copy') }}<span class="keyword">Ctrl + C</span></li>
+                    <li>{{ t('menu.paste') }}<span class="keyword">Ctrl + V</span></li>
                     <hr />
-                    <li>查找<span class="keyword">Ctrl + F</span></li>
-                    <li>替换<span class="keyword">Ctrl + H</span></li>
+                    <li>{{ t('menu.find') }}<span class="keyword">Ctrl + F</span></li>
+                    <li>{{ t('menu.replace') }}<span class="keyword">Ctrl + H</span></li>
                     <hr />
-                    <li @click="openResourceFolder">打开资源文件夹</li>
-                    <li>导入资源<span class="keyword">Shift + Space</span></li>
+                    <li @click.stop="openResourceFolder">{{ t('menu.openResourceFolder') }}</li>
+                    <li>{{ t('menu.importResource') }}<span class="keyword">Shift + Space</span></li>
                 </ul>
             </li>
-            <li @click="toggleDropdown(2)">帮助(H)
-                <ul v-show="dropdowns[2]" class="dropdown">
-                    <li>查看帮助</li>
-                    <li>在线文档</li>
-                    <li>常见问题</li>
-                    <li @click="showWatermarkDialog">水印设置</li>
-                    <li @click="executeUpdateSpine">更新资源<span class="keyword">Ctrl + U</span></li>
-                    <li @click="showAboutDialog">关于我们</li>
+            <li @click.stop="toggleDropdown(2)">{{ t('menu.help') }}
+                <ul v-show="dropdowns[2]" class="dropdown" @click.stop>
+                    <li>{{ t('menu.viewHelp') }}</li>
+                    <li>{{ t('menu.onlineDocs') }}</li>
+                    <li>{{ t('menu.faq') }}</li>
+                    <li @click.stop="showWatermarkDialog">{{ t('menu.watermarkSettings') }}</li>
+                    <li @click.stop="executeUpdateSpine">{{ t('menu.updateResources') }}<span class="keyword">Ctrl + U</span></li>
+                    <li @click.stop="showAboutDialog">{{ t('menu.about') }}</li>
+                </ul>
+            </li>
+            <li @click.stop="toggleDropdown(3)">{{ t('language.menu') }}
+                <ul v-show="dropdowns[3]" class="dropdown dropdown-right" @click.stop>
+                    <li
+                        v-for="locale in localeOptions"
+                        :key="locale.value"
+                        @click.stop="changeLocale(locale.value)"
+                        :class="{ selected: currentLocale === locale.value }"
+                    >
+                        {{ locale.label }}
+                        <span class="keyword">{{ currentLocale === locale.value ? '●' : '' }}</span>
+                    </li>
                 </ul>
             </li>
         </ul>
@@ -47,7 +60,8 @@
 </template>
 
 <script setup lang="ts">
-import { onBeforeUnmount, onMounted, reactive, ref } from 'vue';
+import { computed, onBeforeUnmount, onMounted, reactive, ref, watch } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { useActionStore } from '../stores/action-store';
 import { useCharacterConfigStore } from '../stores/character-config-store';
 import { useBranchStore } from '../stores/branch-store';
@@ -65,8 +79,16 @@ import AboutDialog from './AboutDialog.vue';
 import WatermarkDialog from './WatermarkDialog.vue';
 import { PowerShellService } from '../script/powershell-service';
 import massage from '../script/common/massage';
+import { getCurrentLocale, setLocale } from '../locales/i18n';
+import { SUPPORTED_LOCALES, type SupportedLocale } from '../utils/i18n-loader';
 
-const dropdowns = reactive([false, false, false]);
+const { t } = useI18n();
+const dropdowns = reactive([false, false, false, false]);
+const currentLocale = ref<SupportedLocale>(getCurrentLocale());
+const localeOptions = computed(() => SUPPORTED_LOCALES.map((value) => ({
+    value,
+    label: t(`language.${value.replace('-', '')}`),
+})));
 
 // 关于我们弹窗状态
 const isAboutDialogVisible = ref(false);
@@ -77,6 +99,13 @@ const actionStore = useActionStore();
 const characterConfigStore = useCharacterConfigStore();
 const branchStore = useBranchStore();
 const projectStore = useProjectStore();
+
+const closeAllDropdowns = () => {
+    dropdowns[0] = false;
+    dropdowns[1] = false;
+    dropdowns[2] = false;
+    dropdowns[3] = false;
+};
 
 const toggleDropdown = (menuIndex: number) => {
     dropdowns[menuIndex] = !dropdowns[menuIndex];
@@ -164,7 +193,7 @@ const saveProject = async () => {
         // 获取当前项目名称
         const projectName = localStorage.getItem(LOCAL_OPEN_KEY);
         if (!projectName) {
-            massage('未找到当前项目信息', 'error', 2000);
+            massage(t('menu.messages.currentProjectNotFound'), 'error', 2000);
             return;
         }
 
@@ -178,7 +207,7 @@ const saveProject = async () => {
             existingProject = JSON.parse(existingContent);
         } catch (error) {
             console.error('读取项目文件失败:', error);
-            massage('读取项目文件失败', 'error', 2000);
+            massage(t('menu.messages.readProjectFailed'), 'error', 2000);
             return;
         }
 
@@ -196,76 +225,82 @@ const saveProject = async () => {
         await writeTextFile(projectPath, JSON.stringify(updatedProject, null, 2));
 
         console.log('项目保存成功');
-        massage('项目保存成功！', 'success', 2000);
+        massage(t('menu.messages.projectSaved'), 'success', 2000);
 
-        // 关闭下拉菜单
-        dropdowns[0] = false;
+        closeAllDropdowns();
 
     } catch (error) {
         console.error('保存项目失败:', error);
-        massage('保存项目失败，请重试', 'error', 2000);
+        massage(t('menu.messages.projectSaveFailed'), 'error', 2000);
     }
 };
 
-// 关闭项目
-const closeProject = () => {
-    try {
-        if (!localStorage.getItem(LOCAL_OPEN_KEY)) {
-            console.log('未找到当前项目信息');
-            return
+const resetCurrentProjectRuntime = () => {
+    // 清空actionStore数据
+    actionStore.currentSelectActionTitle = 'Default';
+    actionStore.currentSelectActionItemId = -1;
+    actionStore.actionMap = {
+        "Default": {
+            title: "Default",
+            as: []
         }
-        // 清空actionStore数据
-        actionStore.currentSelectActionTitle = 'Default';
-        actionStore.currentSelectActionItemId = -1;
-        actionStore.actionMap = {
-            "Default": {
-                title: "Default",
-                as: []
-            }
-        };
+    };
 
-        actionStore.maxCharacter = [];
+    actionStore.maxCharacter = [];
 
-        // 正确清理loadResMap中的资源
-        Object.entries(actionStore.loadResMap).forEach(([key, loadRes]) => {
-            // 使用ResourceManager释放资源
-            ResourceManager.removeResource(key, loadRes.type);
-        });
-        actionStore.loadResMap = {} as Record<string, LoadRes>;
-        actionStore.isPlaying = false;
-        actionStore.isEditMode = false;
+    // 正确清理loadResMap中的资源
+    Object.entries(actionStore.loadResMap).forEach(([key, loadRes]) => {
+        ResourceManager.removeResource(key, loadRes.type);
+    });
+    actionStore.loadResMap = {} as Record<string, LoadRes>;
+    actionStore.isPlaying = false;
+    actionStore.isEditMode = false;
 
-        // 重置预览快照
-        actionStore.previewSnapshot = {
-            camera: { x: 0, y: 0, zoom: 1 },
-            characters: new Map(),
-            background: { image: '', parallax: 0 },
-            sound: { bgm: '', sfx: [] }
-        };
+    // 重置预览快照
+    actionStore.previewSnapshot = {
+        camera: { x: 0, y: 0, zoom: 1 },
+        characters: new Map(),
+        background: { image: '', parallax: 0 },
+        sound: { bgm: '', sfx: [] }
+    };
 
-        // 清空CanvasManager画布内容，但不销毁实例
-        CanvasManager.getInstance();
-        CanvasManager.destroyInstance();
+    CanvasManager.destroyInstance();
+};
 
-        setTimeout(() => {
-            // 使用store关闭项目
+// 关闭项目
+const closeProject = (options?: { updateProjectStore?: boolean; showMessage?: boolean; }) => {
+    const updateProjectStore = options?.updateProjectStore ?? true;
+    const showMessage = options?.showMessage ?? true;
+
+    try {
+        closeAllDropdowns();
+
+        if (!localStorage.getItem(LOCAL_OPEN_KEY) && updateProjectStore) {
+            console.log('未找到当前项目信息');
+            return;
+        }
+
+        resetCurrentProjectRuntime();
+
+        if (updateProjectStore) {
             projectStore.closeProject();
-            // 关闭下拉菜单
-            dropdowns[0] = false;
-        }, 100);
+        }
 
         console.log('项目已关闭，所有数据已清空');
-        massage('项目已关闭', 'success', 2000);
-
+        if (showMessage) {
+            massage(t('menu.messages.projectClosed'), 'success', 2000);
+        }
     } catch (error) {
         console.error('关闭项目失败:', error);
-        massage('关闭项目失败，请重试', 'error', 2000);
+        massage(t('menu.messages.projectCloseFailed'), 'error', 2000);
     }
 };
 
 // 打开项目
 const openProject = async (filePath?: string) => {
     try {
+        closeAllDropdowns();
+
         let selected: string | null = null;
 
         if (filePath) {
@@ -274,10 +309,10 @@ const openProject = async (filePath?: string) => {
             const defaultPath = await resolveResource("project");
             // 打开文件选择对话框
             selected = await open({
-                title: '选择项目文件',
+                title: t('menu.selectProjectFile'),
                 defaultPath,
                 filters: [{
-                    name: 'Doro项目文件',
+                    name: t('menu.projectFileFilterName'),
                     extensions: ['doro', "Doro", "DORO"]
                 }],
                 multiple: false
@@ -292,8 +327,11 @@ const openProject = async (filePath?: string) => {
         project.savePath = selected;
 
 
-        // 使用项目store打开项目
-        closeProject();
+        // 先清理当前项目运行时状态，再切换到新项目，避免延迟关闭把新项目状态打回欢迎页
+        closeProject({
+            updateProjectStore: false,
+            showMessage: false,
+        });
         projectStore.openProject(project);
         await new Promise(resolve => setTimeout(resolve, 100));
 
@@ -394,14 +432,13 @@ const openProject = async (filePath?: string) => {
             // }
         }
 
-        // 关闭下拉菜单
-        dropdowns[0] = false;
+        closeAllDropdowns();
 
         console.log('项目加载成功:', project.projectName);
 
     } catch (error) {
         console.error('打开项目失败:', error);
-        massage('打开项目失败，请检查文件格式是否正确', 'error', 2000);
+        massage(t('menu.messages.projectOpenFailed'), 'error', 2000);
     }
 };
 
@@ -415,12 +452,11 @@ const openProjectFolder = async () => {
         // 使用自定义的Rust命令打开文件夹
         await invoke('open_folder', { path: projectPath });
 
-        // 关闭下拉菜单
-        dropdowns[0] = false;
+        closeAllDropdowns();
 
     } catch (error) {
         console.error('打开项目文件夹失败:', error);
-        massage('打开项目文件夹失败，请检查项目是否存在', 'error', 2000);
+        massage(t('menu.messages.projectFolderOpenFailed'), 'error', 2000);
     }
 };
 
@@ -435,16 +471,20 @@ const openResourceFolder = async () => {
         dropdowns[1] = false;
     } catch (error) {
         console.error('打开资源文件夹失败:', error);
-        massage('打开资源文件夹失败，请检查资源目录是否存在', 'error', 2000);
+        massage(t('menu.messages.resourceFolderOpenFailed'), 'error', 2000);
     }
+};
+
+const changeLocale = (locale: SupportedLocale) => {
+    setLocale(locale);
+    currentLocale.value = locale;
+    closeAllDropdowns();
 };
 
 const handleClickOutside = (event: MouseEvent) => {
     const menu = document.querySelector('.project-menu');
     if (menu && !menu.contains(event.target as Node)) {
-        dropdowns.forEach((_, index) => {
-            dropdowns[index] = false;
-        });
+        closeAllDropdowns();
     }
 };
 
@@ -477,10 +517,10 @@ const executeUpdateSpine = async () => {
     try {
         console.log('以分离(detached)方式执行 update_spine.ps1 脚本...');
         await PowerShellService.executeUpdateSpineDetached();
-        massage(`已启动资源更新，详细日志请在弹出的控制台窗口查看。`, 'success', 2000);
+        massage(t('menu.messages.updateResourcesStarted'), 'success', 2000);
     } catch (error) {
         console.error('执行 update_spine.ps1 时发生错误:', error);
-        massage(`执行资源更新时发生错误: ${error}`, 'error', 2000);
+        massage(t('menu.messages.updateResourcesFailed', { error: String(error) }), 'error', 2000);
     }
 
     // 关闭下拉菜单
@@ -488,14 +528,28 @@ const executeUpdateSpine = async () => {
 };
 
 onMounted(() => {
-    document.addEventListener('click', handleClickOutside);
+    document.addEventListener('click', handleClickOutside, true);
     document.addEventListener('keydown', handleKeyDown);
 });
 
 onBeforeUnmount(() => {
-    document.removeEventListener('click', handleClickOutside);
+    document.removeEventListener('click', handleClickOutside, true);
     document.removeEventListener('keydown', handleKeyDown);
 });
+
+watch(
+    () => projectStore.isOpenProject,
+    () => {
+        closeAllDropdowns();
+    }
+);
+
+watch(
+    () => getCurrentLocale(),
+    (locale) => {
+        currentLocale.value = locale;
+    }
+);
 
 // 处理键盘快捷键
 const handleKeyDown = (event: KeyboardEvent) => {
@@ -579,6 +633,11 @@ const handleKeyDown = (event: KeyboardEvent) => {
     padding: 5px 0;
 }
 
+.dropdown-right {
+    left: auto;
+    right: 0;
+}
+
 @keyframes dropdownAnimation {
     0% {
         opacity: .8;
@@ -599,6 +658,10 @@ const handleKeyDown = (event: KeyboardEvent) => {
     display: flex;
     align-items: center;
     justify-content: space-between;
+}
+
+.dropdown li.selected {
+    background-color: var(--high-hover-bg);
 }
 
 .dropdown hr {

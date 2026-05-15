@@ -1,15 +1,15 @@
 <template>
     <header data-tauri-drag-region class="app-header">
-        <div data-tauri-drag-region class="app-header-img">
+        <div class="app-header-img">
             <img data-tauri-drag-region src="../assets/Icon.jpg" alt="Doro Novel" width="20" height="20">
             <ProjectMenu></ProjectMenu>
         </div>
         <div data-tauri-drag-region class="app-header-content">
             {{ app.name }}
             <span data-tauri-drag-region class="app-version">
-                {{ app.version }}
+                {{ t('app.versionPrefix') }} {{ app.version }}
             </span>
-            <span data-tauri-drag-region class="app-project-name">
+            <span v-if="projectStore.isOpenProject" data-tauri-drag-region class="app-project-name">
                 -- {{ currentProjectName }}
             </span>
         </div>
@@ -22,21 +22,23 @@
 </template>
 
 <script setup lang="ts">
+import { computed } from 'vue';
+import { useI18n } from 'vue-i18n';
+import { getCurrentWindow } from "@tauri-apps/api/window";
 import { DoroApp } from '../types/app';
+import { useProjectStore } from '../stores/project-store';
+import ProjectMenu from './ProjectMenu.vue';
+
 defineProps<{
     app: DoroApp;
 }>();
 
+const { t } = useI18n();
 const projectStore = useProjectStore();
 
 const currentProjectName = computed(() => {
     return projectStore.currentProjectName;
 });
-
-import { getCurrentWindow } from "@tauri-apps/api/window";
-import ProjectMenu from './ProjectMenu.vue';
-import { computed } from 'vue';
-import { useProjectStore } from '../stores/project-store';
 const window = getCurrentWindow();
 const minimizeWindow = () => {
     window.minimize();
@@ -82,6 +84,12 @@ const closeWindow = () => {
     justify-content: center;
     align-items: center;
     margin-left: 5px;
+}
+
+.app-header-img :deep(.project-menu),
+.app-header-img :deep(.project-menu *) {
+    -webkit-app-region: no-drag;
+    app-region: no-drag;
 }
 
 .app-header-buttons {
