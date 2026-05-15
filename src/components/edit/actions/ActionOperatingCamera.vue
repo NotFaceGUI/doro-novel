@@ -30,7 +30,7 @@
 
             <ActionBottomLine></ActionBottomLine>
 
-            <template v-if="CameraOperaMode[selectedOption].value === 'tween'">
+            <template v-if="currentCameraOperationMode === 'tween'">
 
                 <div>
                     <DynamicInputs v-model="timeDuration" :columns="timeDuration.length">
@@ -69,7 +69,7 @@
             <ActionBottomLine></ActionBottomLine>
 
             <!-- 结构问题 暂时不适用v-show -->
-            <template v-if="CameraOperaMode[selectedOption].value === 'fixed'">
+            <template v-if="currentCameraOperationMode === 'fixed'">
                 <div class="action-title">
                     设置摄像机位置
                     <div @click="setCamera('fixed')" title="点击操控摄像机 开关">
@@ -81,7 +81,7 @@
                     </DynamicInputs>
                 </div>
             </template>
-            <template v-if="CameraOperaMode[selectedOption].value === 'tween'">
+            <template v-if="currentCameraOperationMode === 'tween'">
                 <div class="action-title">
                     自定义起点位置
                     <ToggleSwitch v-model="isCustomOpen"></ToggleSwitch>
@@ -133,6 +133,7 @@ import ActionBottomLine from '../../common/ActionBottomLine.vue';
 import { EasingFunction, getEasingFunctionOptions } from '../../../script/camera-stand';
 import { delay } from 'lodash';
 import { useActionStore } from '../../../stores/action-store';
+import { cloneControlPoints, DEFAULT_CUBIC_BEZIER_POINTS } from '../../../utils/cubic-bezier';
 type modelCameraType = 'fixed' | 'tween-end' | 'tween-start' | 'none';
 
 let canvas = CanvasManager.getInstance();
@@ -150,8 +151,21 @@ const selectedEaseOption = ref(0)
 // 使用类型安全的缓动函数配置
 const easingFunctionOptions = ref(getEasingFunctionOptions());
 
+const clampIndex = (index: number, length: number) => {
+    if (length <= 0) {
+        return 0;
+    }
+
+    return Math.min(Math.max(index, 0), length - 1);
+};
+
+const currentCameraOperationMode = computed(() => {
+    const option = CameraOperaMode.value[clampIndex(selectedOption.value, CameraOperaMode.value.length)];
+    return option?.value ?? 'fixed';
+});
+
 const selectedEaseValue = computed(() => {
-    return easingFunctionOptions.value[selectedEaseOption.value]?.value ?? EasingFunction.Linear
+    return easingFunctionOptions.value[clampIndex(selectedEaseOption.value, easingFunctionOptions.value.length)]?.value ?? EasingFunction.Linear
 })
 
 const isCustomOpen = ref(false)
@@ -236,16 +250,7 @@ const props = defineProps<{
 const { action, actionItem } = useCommonState(props.title, props.id);
 let modification: Map<PropertyPath, Modification>;
 
-const points = ref<ControlPoint[]>([
-    { x: 0, y: 0 },  // 起始点
-    { x: 0.25, y: 0.5 }, // 控制点 1
-    { x: 0.75, y: 0.5 }, // 控制点 2
-    { x: 1, y: 1 }  // 终点
-])
-
-watchEffect(() => {
-    console.log(points.value, "points");
-})
+const points = ref<ControlPoint[]>(cloneControlPoints(DEFAULT_CUBIC_BEZIER_POINTS))
 
 const handleCallback = (pointCallback: (t: number, b: number, c: number, d: number) => number) => {
     callback = pointCallback;
@@ -445,7 +450,7 @@ const targetAction = async () => {
     viewport.emit('moved');
     viewport.emit('zoomed');
 
-    if (CameraOperaMode.value[selectedOption.value].value === 'fixed') {
+    if (currentCameraOperationMode.value === 'fixed') {
         // 固定类型，直接设置值
         viewport.setZoom(targetFixedCameraValues.value[2].value);
         viewport.moveCenter(
@@ -578,11 +583,11 @@ const deserialization = (data: ActionItems) => {
     console.log("deserialization", actionData)
     if (actionData) {
         if (typeof actionData.selectedOption === 'number') {
-            selectedOption.value = actionData.selectedOption;
+            selectedOption.value = clampIndex(actionData.selectedOption, CameraOperaMode.value.length);
         }
 
         if (typeof actionData.selectedEaseOption === 'number') {
-            selectedEaseOption.value = actionData.selectedEaseOption;
+            selectedEaseOption.value = clampIndex(actionData.selectedEaseOption, easingFunctionOptions.value.length);
         }
 
         if (typeof actionData.customCurve === 'boolean') {
@@ -642,13 +647,7 @@ const deserialization = (data: ActionItems) => {
         }
 
         if (Array.isArray(actionData.points)) {
-            // 更新现有数组的属性，而不是重新创建数组
-            actionData.points.forEach((point: any, index: number) => {
-                if (points.value[index]) {
-                    points.value[index].x = point.x || 0;
-                    points.value[index].y = point.y || 0;
-                }
-            });
+            points.value = cloneControlPoints(actionData.points);
         }
     }
 };
@@ -713,7 +712,7 @@ watchEffect(() => {
     if (isSelectedCurrentActionItem.value) {
         // handleSceneState(canvas, props);
         // 如果选中了当前项, 则设置摄像机为目标
-        if (CameraOperaMode.value[selectedOption.value].value === 'fixed') {
+        if (currentCameraOperationMode.value === 'fixed') {
             viewport.setZoom(targetFixedCameraValues.value[2].value);
             viewport.moveCenter(targetFixedCameraValues.value[0].value, targetFixedCameraValues.value[1].value);
             viewport.emit('moved')
