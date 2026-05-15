@@ -53,7 +53,7 @@
                 </CharacterItem> -->
                 <div class="character-item-list" v-for="(item, index) in action.maxCharacter" :key="index">
                     <div class="character-header">
-                        <div class="character-name">{{ item.character.characterName }}</div>
+                        <div class="character-name">{{ getCharacterDisplayName(item.character.characterName) }}</div>
                         <div class="drag-handle" @mousedown="startDrag($event, index)"
                             :title="t('actionInitScene.dragPositionHint')">
                             <span>⋮⋮</span>
@@ -90,7 +90,7 @@
                     <div class="character-control">
                         | |
                     </div>
-                    {{ item.character.characterName }}
+                    {{ getCharacterDisplayName(item.character.characterName) }}
                     <span>[x: {{ item.x }} y: {{ item.y }} scale: {{ item.scale }}]</span>
                 </div> -->
 
@@ -124,6 +124,7 @@ import Tooltip from '../../common/Tooltip.vue';
 import Dropdown from '../../common/Dropdown.vue';
 import { useI18n } from 'vue-i18n';
 import { useViewportStore } from '../../../stores/viewport-store';
+import { getCharacterDisplayName } from '../../../utils/character-name';
 
 const canvasManager = CanvasManager.getInstance();
 let viewport = canvasManager.viewport;

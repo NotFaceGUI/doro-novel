@@ -24,7 +24,7 @@
                 <template v-if="slelectOptions.length > 0">
                     <div class="type-action-content" v-for="option in slelectOptions" :key="option.path">
                         <div class="type-action-item" @click="selectCharacterType(option)">
-                            {{ option.name }}
+                            {{ getCharacterDisplayName(option.name) }}
                         </div>
                     </div>
                 </template>
@@ -41,7 +41,7 @@
                     <div class="type-action-content" v-for="(character, index) in sceneCharacterOptions" :key="index">
                         <div class="type-action-item" @click="selectSceneCharacterType(character)">
                             <div class="scene-character-info">
-                                <span class="character-name">{{ character.character.characterName }}</span>
+                                <span class="character-name">{{ getCharacterDisplayName(character.character.characterName) }}</span>
                                 <span class="character-position">({{ character.x }}, {{ character.y }})</span>
                                 <span class="character-scale">{{ t('inputActionType.scale') }}: {{ character.scale }}</span>
                             </div>
@@ -85,6 +85,7 @@ import { useActionStore } from '../../stores/action-store';
 import AssetManager from '../../script/asset-manager';
 import ResourceManager from '../../script/resource-manager';
 import { useI18n } from 'vue-i18n'
+import { getCharacterDisplayName } from '../../utils/character-name';
 const { t } = useI18n()
 
 const search = ref<HTMLInputElement | null>(null);

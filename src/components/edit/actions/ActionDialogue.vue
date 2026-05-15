@@ -210,7 +210,7 @@
                 </button>
                 <div v-else class="pre-selected-character">
                     <button @click.stop="preBindCharacter" class="pre-bind-btn">
-                        👤 {{ preSelectedCharacter.characterName }}
+                        👤 {{ getCharacterDisplayName(preSelectedCharacter.characterName) }}
                     </button>
                     <button @click.stop="clearPreSelectedCharacter" class="clear-btn" :title="t('actionDialogue.clearPreselectedCharacter')">
                         ✕
@@ -291,6 +291,7 @@ import {
     isDialoguePlaceholderSpeaker,
     normalizeDialogueSpeaker,
 } from '../../../utils/dialogue-speaker';
+import { getCharacterDisplayName } from '../../../utils/character-name';
 
 const props = defineProps<{
     title: string,
@@ -424,7 +425,7 @@ const preBindCharacter = () => {
         }
 
         console.log("object:", preSelectedCharacter.value);
-        massage(t('actionDialogue.messages.preselectedCharacter', { character: characterName }), 'success', 2000);
+        massage(t('actionDialogue.messages.preselectedCharacter', { character: getCharacterDisplayName(characterName) }), 'success', 2000);
     }).catch((err) => {
         console.log(err);
     });

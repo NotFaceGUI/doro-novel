@@ -1,7 +1,9 @@
 <template>
     <div class="dropdown-container" :class="{ disabled }">
         <div ref="dropdown" class="dropdown" @click.stop="toggleDropdown">
-            <div class="selected-option">{{ options[modelValue].label }}</div>
+            <div class="selected-option" :class="{ placeholder: !selectedOption }">
+                {{ selectedOption?.label ?? emptyLabel }}
+            </div>
             <div class="arrow" :class="{ 'arrow-open': isDropdownVisible }">▶</div>
         </div>
         <teleport to="body">
@@ -19,7 +21,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, onMounted, onUnmounted } from "vue";
+import { computed, onMounted, onUnmounted, ref } from "vue";
 import type { DropdownOption } from "../../types/app";
 
 const props = defineProps<{
@@ -35,6 +37,19 @@ const emit = defineEmits<{
 const isDropdownVisible = ref(false);
 const dropdown = ref<HTMLDivElement>();
 const dropdownOptionsStyle = ref({});
+const emptyLabel = "暂无选项";
+
+const selectedOption = computed(() => {
+    if (!Array.isArray(props.options) || props.options.length === 0) {
+        return null;
+    }
+
+    if (props.modelValue < 0 || props.modelValue >= props.options.length) {
+        return null;
+    }
+
+    return props.options[props.modelValue] ?? null;
+});
 
 const updateDropdownPosition = () => {
     const el = dropdown.value;
@@ -49,7 +64,7 @@ const updateDropdownPosition = () => {
 };
 
 const toggleDropdown = () => {
-    if (props.disabled) return;
+    if (props.disabled || props.options.length === 0) return;
     isDropdownVisible.value = !isDropdownVisible.value;
     if (isDropdownVisible.value) {
         updateDropdownPosition();
@@ -110,6 +125,10 @@ onUnmounted(() => {
 .selected-option {
     font-size: 14px;
     color: var(--primary-text);
+}
+
+.selected-option.placeholder {
+    color: var(--sec-text-color);
 }
 
 .arrow {

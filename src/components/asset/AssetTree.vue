@@ -33,9 +33,9 @@
                 <li v-for="char in gameCharacters" :key="char.characterName">
                     <div @click="toggleSpine(char)" class="el no-wrap" draggable="true"
                         @dragstart="handleDragStart($event, char)">
-                        {{ formatI18nKey(t(char.characterName), char.characterName) }} <span
-                            style="font-size: 10px;color: #888;" v-if="char.characterName.startsWith('c')">{{
-                                t(char.characterName) }}</span>
+                        {{ getCharacterDisplayName(char.characterName) }} <span
+                            style="font-size: 10px;color: #888;" v-if="char.characterName.startsWith('c') && getCharacterTranslatedName(char.characterName) !== char.characterName">{{
+                                getCharacterTranslatedName(char.characterName) }}</span>
                     </div>
                 </li>
             </ul>
@@ -53,7 +53,7 @@
                 <li v-for="char in otherCharacters" :key="char.characterName">
                     <div @click="toggleSpine(char)" class="el no-wrap" draggable="true"
                         @dragstart="handleDragStart($event, char)">
-                        {{ formatI18nKey(t(char.characterName), char.characterName) }}
+                        {{ getCharacterDisplayName(char.characterName) }}
                     </div>
                 </li>
             </ul>
@@ -70,10 +70,7 @@ import { resolveResource } from '@tauri-apps/api/path';
 import { convertFileSrc } from '@tauri-apps/api/core';
 import { DirEntry } from '@tauri-apps/plugin-fs';
 import AssetManager from '../../script/asset-manager';
-
-import { useI18n } from 'vue-i18n'
-
-const { t } = useI18n()
+import { getCharacterDisplayName, getCharacterTranslatedName } from '../../utils/character-name';
 
 // 父组件传递的文件数据
 const props = defineProps<{
@@ -117,13 +114,6 @@ onMounted(async () => {
         })
     }
 });
-
-// 如果名称以 c 开头（角色标识），则按中文冒号或英文冒号分割，取第一段作为 i18n 键
-const formatI18nKey = (name: string, key: string) => {
-    if (!name) return '';
-    return key.startsWith('c') ? name.split(/[:：]/)[0] : name;
-}
-
 
 const handleDragStart = (event: DragEvent, file: dirs | CharacterType) => {
     event.stopPropagation();

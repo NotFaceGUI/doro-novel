@@ -1,5 +1,6 @@
 import { i18n } from '../locales/i18n'
 import { DialogueType } from '../types/app'
+import { getCharacterDisplayName } from './character-name'
 
 export const DIALOGUE_SPEAKER_PLACEHOLDER = '__dialogue_select_character__'
 export const DIALOGUE_SPEAKER_VOICEOVER = '__dialogue_voiceover__'
@@ -63,5 +64,5 @@ export function getDialogueSpeakerDisplay(speaker: string, mode: DialogueType): 
     return t('actionDialogue.systemSpeakers.commander')
   }
 
-  return speaker
+  return getCharacterDisplayName(speaker)
 }

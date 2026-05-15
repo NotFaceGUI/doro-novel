@@ -61,21 +61,21 @@
             <DynamicInputs v-model="targetStateOptions" :columns="targetStateOptions.length" />
 
             <!-- 补间模式的额外设置 -->
-            <template v-if="operationModeOptions[selectedOperationMode].value === 'tween'">
+            <template v-if="currentOperationMode === 'tween'">
                 <div>
                     <DynamicInputs v-model="timeDuration" :columns="timeDuration.length">
                     </DynamicInputs>
                 </div>
 
-                <!-- <div class="action-title">
+                <div class="action-title">
                     自定义缓动曲线
                     <ToggleSwitch v-model="customCurve"></ToggleSwitch>
                 </div>
                 <div v-if="customCurve">
-                    <CustomEaseRender v-model="points" @update:callback="handleCallback"></CustomEaseRender>
-                </div> -->
+                    <CustomEaseRender v-model="points"></CustomEaseRender>
+                </div>
 
-                <div class="action-title">
+                <div class="action-title" v-else>
                     {{ t('actionCharacter.easeCurve') }}
                     <Tooltip position="left">
                         <div class="mode-description">
@@ -90,7 +90,7 @@
 
             <!-- 显示/隐藏模式的额外设置 -->
             <template
-                v-if="operationModeOptions[selectedOperationMode].value === 'show' || operationModeOptions[selectedOperationMode].value === 'hide'">
+                v-if="currentOperationMode === 'show' || currentOperationMode === 'hide'">
                 <div class="action-title">
                     <div style="display: flex; align-items: center;gap: 5px;">
                         {{ t('actionCharacter.useStippleEffect') }}
@@ -128,6 +128,9 @@ import { Spine } from 'pixi-spine';
 import { TransformGizmo } from '../../../script/render/transform-gizmo';
 import { Action, Timing } from 'pixijs-actions';
 import { ControlPoint } from '../../../types/app';
+import CustomEaseRender from '../../common/render/CustomEaseRender.vue';
+import { cloneControlPoints, createProgressBezierEasing, DEFAULT_CUBIC_BEZIER_POINTS } from '../../../utils/cubic-bezier';
+import { getCharacterDisplayName } from '../../../utils/character-name';
 
 import { createStippleTransparencyFilter, createAlphaFilter } from '../../../script/common/effect';
 
@@ -158,7 +161,7 @@ transformGizmo.visible = false; // 默认隐藏
 const selectedCharacterIndex = ref(0);
 const characterOptions = computed(() => {
     return action.maxCharacter.map((character, index) => ({
-        label: character.character.characterName || `${t('actionCharacter.roleFallback')} ${index + 1}`,
+        label: getCharacterDisplayName(character.character.characterName) || `${t('actionCharacter.roleFallback')} ${index + 1}`,
         value: index
     }));
 });
@@ -198,7 +201,20 @@ const createTimingOptions = () => {
 };
 
 const easingFunctionOptions = ref(createTimingOptions());
-const points = ref<ControlPoint[]>([]);
+const points = ref<ControlPoint[]>(cloneControlPoints(DEFAULT_CUBIC_BEZIER_POINTS));
+
+const clampIndex = (index: number, length: number) => {
+    if (length <= 0) {
+        return 0;
+    }
+
+    return Math.min(Math.max(index, 0), length - 1);
+};
+
+const currentOperationMode = computed(() => {
+    const option = operationModeOptions.value[clampIndex(selectedOperationMode.value, operationModeOptions.value.length)];
+    return option?.value ?? 'fixed';
+});
 
 // 时间设置
 const timeDuration = ref<InputOption[]>([
@@ -214,9 +230,6 @@ watchEffect(() => {
     timeDuration.value[0].label = t('actionCharacter.durationMs');
 });
 
-
-// 自定义缓动曲线回调函数
-const customEaseCallback = ref<((t: number) => number) | null>(null);
 
 // 点阵剔除效果开关
 const useStippleEffect = ref(true);
@@ -297,6 +310,7 @@ const targetState = ref({
 
 // 角色选择变化处理
 const onSelectCharacter = (index: number) => {
+    index = clampIndex(index, action.maxCharacter.length);
     console.log("选择角色索引:", index);
 
     // 先清理之前的选择状态
@@ -343,12 +357,12 @@ const onSelectCharacter = (index: number) => {
 
 // 操作模式选择处理
 const onSelectOperationMode = (index: number) => {
-    selectedOperationMode.value = index;
+    selectedOperationMode.value = clampIndex(index, operationModeOptions.value.length);
 };
 
 // 缓动函数选择处理
 const onSelectEaseOption = (index: number) => {
-    selectedEaseOption.value = index;
+    selectedEaseOption.value = clampIndex(index, easingFunctionOptions.value.length);
 };
 
 // 更新角色信息
@@ -387,7 +401,7 @@ const applyToScene = async () => {
 
 
     if (spine) {
-        const operationMode = operationModeOptions.value[selectedOperationMode.value].value;
+        const operationMode = currentOperationMode.value;
 
         if (operationMode === 'fixed') {
             // 固定模式：直接设置位置
@@ -606,12 +620,12 @@ const runCharacterTween = (spine: any): Promise<void> => {
         // 获取缓动函数
         let easingFunction: (t: number) => number;
 
-        if (customCurve.value && customEaseCallback.value) {
-            // 使用自定义缓动曲线
-            easingFunction = customEaseCallback.value;
+        if (customCurve.value) {
+            // 角色补间使用 progress easing，保证控制点 x/y 都真正参与计算
+            easingFunction = createProgressBezierEasing(points.value);
         } else {
             // 使用预设的缓动函数
-            const selectedEasing = easingFunctionOptions.value[selectedEaseOption.value];
+            const selectedEasing = easingFunctionOptions.value[clampIndex(selectedEaseOption.value, easingFunctionOptions.value.length)];
             easingFunction = Timing[selectedEasing.value];
         }
 
@@ -651,7 +665,7 @@ const targetAction = async () => {
         // const currentCharacter = action.maxCharacter[selectedCharacterIndex.value];
 
         // 应用角色操作
-        const operationMode = operationModeOptions.value[selectedOperationMode.value].value;
+        const operationMode = currentOperationMode.value;
         if (operationMode === 'fixed') {
             // 固定模式
             applyToScene();
@@ -695,7 +709,7 @@ const serialization = () => {
     return {
         character: {
             selectedCharacterIndex: selectedCharacterIndex.value,
-            operationMode: operationModeOptions.value[selectedOperationMode.value].value,
+            operationMode: currentOperationMode.value,
             useStippleEffect: useStippleEffect.value,
             targetState: {
                 x: targetState.value.x,
@@ -706,7 +720,7 @@ const serialization = () => {
                 duration: timeDuration.value[0].value || 400,
                 customCurve: customCurve.value,
                 selectedEaseOption: selectedEaseOption.value,
-                points: points.value
+                points: cloneControlPoints(points.value)
             },
             targetStateOptions: targetStateOptions.value.map(option => ({
                 label: option.label,
@@ -735,7 +749,7 @@ const deserialization = (actionItem: any) => {
 
     // 恢复选中的角色索引
     if (characterData.selectedCharacterIndex !== undefined) {
-        selectedCharacterIndex.value = characterData.selectedCharacterIndex;
+        selectedCharacterIndex.value = clampIndex(characterData.selectedCharacterIndex, action.maxCharacter.length);
     }
 
     // 恢复操作模式
@@ -767,12 +781,12 @@ const deserialization = (actionItem: any) => {
 
         // 恢复选中的缓动选项
         if (characterData.tweenSettings.selectedEaseOption !== undefined) {
-            selectedEaseOption.value = characterData.tweenSettings.selectedEaseOption;
+            selectedEaseOption.value = clampIndex(characterData.tweenSettings.selectedEaseOption, easingFunctionOptions.value.length);
         }
 
         // 恢复自定义缓动曲线点
         if (characterData.tweenSettings.points) {
-            points.value = characterData.tweenSettings.points;
+            points.value = cloneControlPoints(characterData.tweenSettings.points);
         }
     }
 
