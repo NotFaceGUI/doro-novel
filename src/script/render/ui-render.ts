@@ -6,7 +6,6 @@ import { textWriterSound, checkWaitTexture } from './default-load';
 import { Sound } from '@pixi/sound';
 
 import { DropShadowFilter } from 'pixi-filters';
-import { i18n } from "../../locales/i18n"
 import CanvasManager from './canvas-manager';
 import { CameraStandType, EasingFunction, setCameraByType } from '../camera-stand';
 import { DEFAULT_RESOLUTION } from '../var';
@@ -25,8 +24,7 @@ import {
     useDialogueUiStore,
 } from '../../stores/dialogue-ui-store';
 import { setModification } from '../util/common';
-
-const t = i18n.global.t
+import { getDialogueSpeakerDisplay } from '../../utils/dialogue-speaker';
 
 
 export class UIRender {
@@ -1020,7 +1018,7 @@ export class UIRender {
         this.applyNormalDialogueLayout();
 
         // 解析出说话人名称 不带异格
-        tempText.title.text = t(message.speaker).split('：')[0];
+        tempText.title.text = getDialogueSpeakerDisplay(message.speaker, message.mode).split('：')[0];
         tempText.content.text = '';
 
         let fullText = message.texts[0].text;

@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref } from "vue";
+import { useI18n } from "vue-i18n";
 import { type Project } from "../types/app";
 import { open } from '@tauri-apps/plugin-dialog';
 import { BaseDirectory, copyFile, exists, mkdir, writeTextFile } from '@tauri-apps/plugin-fs';
@@ -7,10 +8,12 @@ import { path } from "@tauri-apps/api";
 import { resolveResource } from "@tauri-apps/api/path";
 import { convertFileSrc } from "@tauri-apps/api/core";
 import massage from "../script/common/massage";
+import { openProject as openProjectFile } from "../script/common/common-action-item";
 
 const showCreateWindow = ref(false);
 const step = ref(1)
 const wEmit = defineEmits(['create'])
+const { t } = useI18n();
 
 const projectData = ref<Project>({
     projectName: "",
@@ -24,7 +27,7 @@ path.resourceDir().then(res => {
 });
 
 const openDocs = () => {
-    window.open("https://your-docs-url.com", "_blank");
+    window.open("https://github.com/NotFaceGUI/doro-novel", "_blank");
 };
 
 const createProject = () => {
@@ -35,7 +38,7 @@ const createProject = () => {
 const createOneProject = () => {
     // 检测数据是否完整
     if (!projectData.value.projectName || !projectData.value.savePath) {
-        massage("请填写完整的项目信息", 'error', 2000);
+        massage(t("welcome.messages.incompleteInfo"), 'error', 2000);
         return;
     }
     showCreateWindow.value = false;
@@ -46,7 +49,7 @@ const createOneProject = () => {
         wEmit('create', projectData.value);
     }).catch((error) => {
         console.error("项目保存失败", error);
-        massage("项目保存失败，请重试", 'error', 2000);
+        massage(t("welcome.messages.saveFailed"), 'error', 2000);
     });
 };
 
@@ -69,8 +72,20 @@ const saveJson = async () => {
     }
 };
 
-const openProject = () => {
-    console.log("打开已有项目");
+const openProject = async () => {
+    const selected = await open({
+        title: t('menu.selectProjectFile'),
+        defaultPath: await resolveResource("project"),
+        filters: [{
+            name: t('menu.projectFileFilterName'),
+            extensions: ['doro', 'Doro', 'DORO']
+        }],
+        multiple: false
+    });
+
+    if (selected) {
+        await openProjectFile(selected);
+    }
 };
 
 const closeGuide = () => {
@@ -115,74 +130,74 @@ async function selectPath() {
         <Transition name="slide-up" mode="out-in">
             <div v-if="!showCreateWindow" class="welcome-container">
                 <div>
-                    <h1>🎉 欢迎使用 Doro Novel</h1>
-                    <p>开始你的视觉小说创作之旅！</p>
+                    <h1>{{ t('welcome.title') }}</h1>
+                    <p>{{ t('welcome.subtitle') }}</p>
 
                     <div class="buttons">
-                        <button @click="createProject">🎬 创建全新项目</button>
-                        <button @click="openProject">📂 打开已有项目</button>
-                        <button @click="openDocs">📖 查看官方文档</button>
+                        <button @click="createProject">{{ t('welcome.createProject') }}</button>
+                        <button @click="openProject">{{ t('welcome.openProject') }}</button>
+                        <button @click="openDocs">{{ t('welcome.viewDocs') }}</button>
                     </div>
 
-                    <button class="close-btn" @click="closeGuide">✖ 关闭</button>
+                    <button class="close-btn" @click="closeGuide">✖ {{ t('common.close') }}</button>
                 </div>
 
             </div>
             <div v-else class="create-window">
                 <Transition name="fade" mode="out-in">
                     <div v-if="step === 1" key="step1">
-                        <h1>🎫 创建新项目</h1>
-                        <p>请输入一个项目名称</p>
+                        <h1>{{ t('welcome.createTitle') }}</h1>
+                        <p>{{ t('welcome.createDescription') }}</p>
 
                         <div class="form-group">
-                            <label for="project-name">项目名称</label>
-                            <input v-model="projectData.projectName" type="text" id="project-name" placeholder="输入项目名称">
+                            <label for="project-name">{{ t('welcome.projectName') }}</label>
+                            <input v-model="projectData.projectName" type="text" id="project-name" :placeholder="t('welcome.projectNamePlaceholder')">
                         </div>
 
                         <div class="buttons">
-                            <button @click="nextStep">下一步</button>
-                            <button @click="closeGuide">返&nbsp;&nbsp;&nbsp;回</button>
+                            <button @click="nextStep">{{ t('common.next') }}</button>
+                            <button @click="closeGuide">{{ t('common.back') }}</button>
                         </div>
-                        <button class="close-btn" @click="closeGuide">✖ 关闭</button>
+                        <button class="close-btn" @click="closeGuide">✖ {{ t('common.close') }}</button>
                     </div>
                     <div v-else-if="step === 2" key="step2">
-                        <h1>📂 选择项目路径</h1>
-                        <p>选择项目保存路径</p>
+                        <h1>{{ t('welcome.pathTitle') }}</h1>
+                        <p>{{ t('welcome.pathDescription') }}</p>
 
                         <div class="form-group">
-                            <label for="project-path">项目路径</label>
+                            <label for="project-path">{{ t('welcome.projectPath') }}</label>
                             <div class="input-wrapper">
                                 <input disabled v-model="projectData.savePath" type="text" id="project-path"
-                                    placeholder="选择项目路径" @click="selectPath">
+                                    :placeholder="t('welcome.projectPathPlaceholder')" @click="selectPath">
                             </div>
 
                         </div>
 
                         <div class="buttons">
-                            <button @click="nextStep">下一步</button>
-                            <button @click="prevStep">上一步</button>
+                            <button @click="nextStep">{{ t('common.next') }}</button>
+                            <button @click="prevStep">{{ t('common.previous') }}</button>
                         </div>
-                        <button class="close-btn" @click="closeGuide">✖ 关闭</button>
+                        <button class="close-btn" @click="closeGuide">✖ {{ t('common.close') }}</button>
 
                     </div>
                     <div v-else-if="step === 3" key="step3" style="width: 100%;">
-                        <h1>确认信息</h1>
-                        <p>请确认项目信息</p>
+                        <h1>{{ t('welcome.confirmTitle') }}</h1>
+                        <p>{{ t('welcome.confirmDescription') }}</p>
 
                         <div class="form-group" :class="{ 'error': !projectData.projectName }">
-                            <label :style="{ color: !projectData.projectName ? 'red' : 'inherit' }">项目名称: {{
-                                projectData.projectName || '未填写' }}</label>
+                            <label :style="{ color: !projectData.projectName ? 'red' : 'inherit' }">{{ t('welcome.projectName') }}: {{
+                                projectData.projectName || t('welcome.notFilled') }}</label>
                         </div>
                         <div class="form-group" :class="{ 'error': !projectData.savePath }">
-                            <label :style="{ color: !projectData.savePath ? 'red' : 'inherit' }">项目路径: {{
-                                projectData.savePath || '未填写' }}</label>
+                            <label :style="{ color: !projectData.savePath ? 'red' : 'inherit' }">{{ t('welcome.projectPath') }}: {{
+                                projectData.savePath || t('welcome.notFilled') }}</label>
                         </div>
 
                         <div class="buttons">
-                            <button @click="prevStep">上一步</button>
-                            <button @click="createOneProject">创&nbsp;&nbsp;&nbsp;建</button>
+                            <button @click="prevStep">{{ t('common.previous') }}</button>
+                            <button @click="createOneProject">{{ t('common.create') }}</button>
                         </div>
-                        <button class="close-btn" @click="closeGuide">✖ 关闭</button>
+                        <button class="close-btn" @click="closeGuide">✖ {{ t('common.close') }}</button>
 
                     </div>
                 </Transition>

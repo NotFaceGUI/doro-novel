@@ -1,14 +1,14 @@
 <template>
     <div class="action-item-main">
-        <ActionItemHead content="🔊 背景音乐" :title="title" :id="id" :is-collapsed="actionItem.isToggle"></ActionItemHead>
+        <ActionItemHead :content="t('actionBgm.head')" :title="title" :id="id" :is-collapsed="actionItem.isToggle"></ActionItemHead>
         <div class="action-item-content" v-show="!actionItem.isToggle">
             <div class="action-title">
-                阻塞执行
+                {{ t('actionCommon.waitExecution') }}
                 <ToggleSwitch v-model="actionItem.wait!"></ToggleSwitch>
             </div>
 
             <div class="action-title">
-                音频操作模式：
+                {{ t('actionBgm.operationMode') }}
             </div>
 
             <Dropdown v-model="selectedOption" @update:modelValue="onSelectModel" :options="AudioOperaMode"
@@ -18,13 +18,13 @@
 
             <template v-if="AudioOperaMode[selectedOption].value === 'play'">
                 <div class="action-title">
-                    选择音频文件
+                    {{ t('actionBgm.selectAudioFile') }}
                 </div>
                 <Dropdown style="width: 100%;overflow: hidden;" v-model="selectedAudioOption" @update:modelValue="onSelectAudio" :options="availableAudios"
                     :disabled="false" />
 
                 <div class="action-title">
-                    音量设置
+                    {{ t('actionBgm.volume') }}
                 </div>
                 <div>
                     <DynamicInputs v-model="volumeSettings" :columns="volumeSettings.length">
@@ -32,13 +32,13 @@
                 </div>
 
                 <div class="action-title">
-                    循环播放
+                    {{ t('actionBgm.loopPlayback') }}
                     <ToggleSwitch v-model="isLoop"></ToggleSwitch>
                 </div>
 
                 <!-- 淡入淡出设置 -->
                 <div class="action-title">
-                    淡入效果
+                    {{ t('actionBgm.fadeIn') }}
                     <ToggleSwitch v-model="enableFadeIn"></ToggleSwitch>
                 </div>
                 
@@ -50,7 +50,7 @@
                 </template>
 
                 <div class="action-title">
-                    淡出效果
+                    {{ t('actionBgm.fadeOut') }}
                     <ToggleSwitch v-model="enableFadeOut"></ToggleSwitch>
                 </div>
                 
@@ -63,7 +63,7 @@
 
                 <!-- 音频过滤器设置 -->
                 <div class="action-title">
-                    音频效果
+                    {{ t('actionBgm.audioEffects') }}
                     <ToggleSwitch v-model="enableFilters"></ToggleSwitch>
                 </div>
                 
@@ -74,12 +74,12 @@
                     </div>
                     
                     <div class="action-title">
-                        电话效果
+                        {{ t('actionBgm.telephoneEffect') }}
                         <ToggleSwitch v-model="enableTelephone"></ToggleSwitch>
                     </div>
                     
                     <div class="action-title">
-                        混响效果
+                        {{ t('actionBgm.reverbEffect') }}
                         <ToggleSwitch v-model="enableReverb"></ToggleSwitch>
                     </div>
                     
@@ -91,7 +91,7 @@
                     </template>
                     
                     <div class="action-title">
-                        均衡器
+                        {{ t('actionBgm.equalizer') }}
                         <ToggleSwitch v-model="enableEqualizer"></ToggleSwitch>
                     </div>
                     
@@ -106,12 +106,12 @@
 
             <template v-else-if="AudioOperaMode[selectedOption].value === 'stop'">
                 <div style="display: flex;justify-content: center;align-items: center;">
-                    停止当前播放的背景音乐
+                    {{ t('actionBgm.stopCurrentBgm') }}
                 </div>
                 
                 <!-- 停止时的淡出设置 -->
                 <div class="action-title">
-                    淡出停止
+                    {{ t('actionBgm.stopWithFadeOut') }}
                     <ToggleSwitch v-model="enableStopFadeOut"></ToggleSwitch>
                 </div>
                 
@@ -125,7 +125,7 @@
 
             <template v-else>
                 <div style="display: flex;justify-content: center;align-items: center;">
-                    无内容
+                    {{ t('actionBgm.noContent') }}
                 </div>
             </template>
 
@@ -133,7 +133,7 @@
 
             <!-- 预览控制 -->
             <div class="action-title">
-                预览控制
+                {{ t('actionBgm.previewControls') }}
                 <div class="preview-controls">
                     <button @click="previewPlay" class="preview-btn" :disabled="!canPreview">
                         {{ isPlaying ? '⏸️' : '▶️' }}
@@ -141,7 +141,7 @@
                     <button @click="previewStop" class="preview-btn">
                         ⏹️
                     </button>
-                    <button @click="clearAllFilters" class="preview-btn" title="清除所有音效">
+                    <button @click="clearAllFilters" class="preview-btn" :title="t('actionBgm.clearAllEffects')">
                         🔄
                     </button>
                 </div>
@@ -151,7 +151,8 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, ref, onUnmounted, watchEffect } from 'vue';
+import { computed, onMounted, ref, onUnmounted, watch, watchEffect } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { useCommonState } from '../../../script/common/common-action-item';
 import ActionItemHead from './ActionItemHead.vue';
 import { Modification, PropertyPath } from '../../../script/common/snapshot';
@@ -165,9 +166,10 @@ import { setModification } from '../../../script/util/common';
 import AudioManager, { FadeOptions, FilterOptions } from '../../../script/audio-manager';
 
 const selectedOption = ref(0);
-const AudioOperaMode = ref<DropdownOption[]>([
-    { label: "播放音频 (Play)", value: "play" },
-    { label: "停止音频 (Stop)", value: "stop" }
+const { t, locale } = useI18n();
+const AudioOperaMode = computed<DropdownOption[]>(() => [
+    { label: t('actionBgm.operationModes.play'), value: "play" },
+    { label: t('actionBgm.operationModes.stop'), value: "stop" }
 ]);
 
 const selectedAudioOption = ref(0);
@@ -183,7 +185,7 @@ const enableStopFadeOut = ref(false);
 
 const fadeInSettings = ref<InputOption[]>([
     {
-        label: '淡入时长 (秒)',
+        label: '',
         value: 3.0,
         type: 'number',
         disabled: false
@@ -192,7 +194,7 @@ const fadeInSettings = ref<InputOption[]>([
 
 const fadeOutSettings = ref<InputOption[]>([
     {
-        label: '淡出时长 (秒)',
+        label: '',
         value: 3.0,
         type: 'number',
         disabled: false
@@ -201,7 +203,7 @@ const fadeOutSettings = ref<InputOption[]>([
 
 const stopFadeOutSettings = ref<InputOption[]>([
     {
-        label: '停止淡出时长 (秒)',
+        label: '',
         value: 2.0,
         type: 'number',
         disabled: false
@@ -216,13 +218,13 @@ const enableEqualizer = ref(false);
 
 const filterSettings = ref<InputOption[]>([
     {
-        label: '立体声分离 (-1到1)',
+        label: '',
         value: 0,
         type: 'number',
         disabled: false
     },
     {
-        label: '失真效果 (0到1)',
+        label: '',
         value: 0,
         type: 'number',
         disabled: false
@@ -231,13 +233,13 @@ const filterSettings = ref<InputOption[]>([
 
 const reverbSettings = ref<InputOption[]>([
     {
-        label: '混响时间 (秒)',
+        label: '',
         value: 3,
         type: 'number',
         disabled: false
     },
     {
-        label: '衰减强度',
+        label: '',
         value: 2,
         type: 'number',
         disabled: false
@@ -260,7 +262,7 @@ const equalizerSettings = ref<InputOption[]>([
 
 const volumeSettings = ref<InputOption[]>([
     {
-        label: '音量 (0-1)',
+        label: '',
         value: 1.0,
         type: 'number',
         disabled: false
@@ -279,6 +281,7 @@ let modification: Map<PropertyPath, Modification>;
 
 // 获取可用的音频文件
 const availableAudios = computed(() => {
+    locale.value;
     const audioKeys = Object.keys(audioList.value).filter(key => {
         // 检查是否是音频文件（通过文件扩展名）
         const url = audioList.value[key];
@@ -292,7 +295,7 @@ const availableAudios = computed(() => {
 
     // 如果没有音频文件，返回一个默认选项
     if (audioOptions.length === 0) {
-        return [{ label: '无可用音频文件', value: '' }];
+        return [{ label: t('actionBgm.noAvailableAudioFiles'), value: '' }];
     }
 
     return audioOptions;
@@ -475,6 +478,17 @@ const clearAllFilters = () => {
     console.log("已清除所有音频过滤器");
 };
 
+const syncLabels = () => {
+    volumeSettings.value[0].label = t('actionBgm.inputs.volume');
+    fadeInSettings.value[0].label = t('actionBgm.inputs.fadeInDuration');
+    fadeOutSettings.value[0].label = t('actionBgm.inputs.fadeOutDuration');
+    stopFadeOutSettings.value[0].label = t('actionBgm.inputs.stopFadeOutDuration');
+    filterSettings.value[0].label = t('actionBgm.inputs.stereoSeparation');
+    filterSettings.value[1].label = t('actionBgm.inputs.distortion');
+    reverbSettings.value[0].label = t('actionBgm.inputs.reverbTime');
+    reverbSettings.value[1].label = t('actionBgm.inputs.reverbDecay');
+};
+
 // 序列化方法
 const serialization = () => {
     return {
@@ -622,6 +636,8 @@ onMounted(() => {
         updateAudioList();
     }, 1000);
 });
+
+watch(locale, syncLabels, { immediate: true });
 
 onUnmounted(() => {
     // 组件卸载时停止音频

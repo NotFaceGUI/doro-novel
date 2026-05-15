@@ -9,7 +9,7 @@
   >
     <div class="panel-header" @mousedown="startDrag">
       <div class="panel-title-group">
-        <div class="panel-title">⚙️ 对话排版设置</div>
+        <div class="panel-title">{{ t('dialogueUi.title') }}</div>
         <div class="panel-subtitle">{{ headerSubtitle }}</div>
       </div>
       <button class="panel-close" @click="emit('close')">×</button>
@@ -23,14 +23,14 @@
             :class="{ active: !isForceMode }"
             @click="disableForceMode"
           >
-            跟随场景
+            {{ t('dialogueUi.followScene') }}
           </button>
           <button
             class="mode-chip"
             :class="{ active: isForceMode }"
             @click="enableForceMode()"
           >
-            强制设置
+            {{ t('dialogueUi.forceMode') }}
           </button>
         </div>
       </div>
@@ -44,7 +44,7 @@
             :class="{ active: forcedMode === mode }"
             @click="enableForceMode(mode)"
           >
-            {{ modeMeta[mode].icon }} {{ modeMeta[mode].label }}
+            {{ modeMeta[mode].icon }} {{ t(modeMeta[mode].labelKey) }}
           </button>
         </div>
       </div>
@@ -55,7 +55,7 @@
         <div class="status-head">
           <div class="status-copy">
             <div class="status-kicker">
-              {{ resolvedMode ? modeMeta[resolvedMode].icon + ' ' + modeMeta[resolvedMode].label : '未检测到对话' }}
+              {{ resolvedMode ? modeMeta[resolvedMode].icon + ' ' + t(modeMeta[resolvedMode].labelKey) : t('dialogueUi.noDialogueDetected') }}
             </div>
             <div class="status-title">{{ statusTitle }}</div>
           </div>
@@ -65,7 +65,7 @@
             class="inline-btn"
             @click="enableForceMode()"
           >
-            强制设置
+            {{ t('dialogueUi.forceOpen') }}
           </button>
         </div>
         <div class="status-desc">{{ statusDescription }}</div>
@@ -76,8 +76,8 @@
 
         <div v-for="item in section.controls" :key="item.key" class="control-row">
           <div class="control-copy">
-            <div class="control-label">{{ item.label }}</div>
-            <div class="control-desc">{{ item.description }}</div>
+            <div class="control-label">{{ t(item.label) }}</div>
+            <div class="control-desc">{{ t(item.description) }}</div>
           </div>
 
           <div class="control-inputs">
@@ -114,15 +114,16 @@
         :disabled="!resolvedMode"
         @click="resetCurrentSettings"
       >
-        恢复当前
+        {{ t('common.restoreCurrent') }}
       </button>
-      <button class="panel-btn panel-btn-primary" @click="emit('close')">完成</button>
+      <button class="panel-btn panel-btn-primary" @click="emit('close')">{{ t('common.done') }}</button>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
 import { computed, nextTick, onBeforeUnmount, ref, watch } from 'vue';
+import { useI18n } from 'vue-i18n';
 import CanvasManager from '../script/render/canvas-manager';
 import {
   resolveDialogueCommanderUiMetrics,
@@ -142,6 +143,7 @@ const props = defineProps<{
 const emit = defineEmits<{
   (e: 'close'): void;
 }>();
+const { t } = useI18n();
 
 type SettingGroup = 'normal' | 'voiceover' | 'commander';
 type SettingKey =
@@ -181,37 +183,37 @@ const modeOptions: DialogueType[] = [
   DialogueType.COMMANDER,
 ];
 
-const modeMeta: Record<DialogueType, { label: string; icon: string }> = {
-  [DialogueType.NORMAL]: { label: '角色对话', icon: '💬' },
-  [DialogueType.VOICEOVER]: { label: '旁白', icon: '📢' },
-  [DialogueType.COMMANDER]: { label: '回答', icon: '🗨️' },
+const modeMeta: Record<DialogueType, { labelKey: string; icon: string }> = {
+  [DialogueType.NORMAL]: { labelKey: 'dialogueUi.modes.normal', icon: '💬' },
+  [DialogueType.VOICEOVER]: { labelKey: 'dialogueUi.modes.voiceover', icon: '📢' },
+  [DialogueType.COMMANDER]: { labelKey: 'dialogueUi.modes.commander', icon: '🗨️' },
 };
 
 const normalFontControls: ControlItem[] = [
-  { group: 'normal', key: 'nameFontOffset', label: '角色名字号', description: '角色名字体大小偏移', min: -24, max: 40, step: 1 },
-  { group: 'normal', key: 'contentFontOffset', label: '对话正文字号', description: '角色对话正文大小偏移', min: -24, max: 40, step: 1 },
+  { group: 'normal', key: 'nameFontOffset', label: 'dialogueUi.controls.nameFontOffset.label', description: 'dialogueUi.controls.nameFontOffset.description', min: -24, max: 40, step: 1 },
+  { group: 'normal', key: 'contentFontOffset', label: 'dialogueUi.controls.contentFontOffset.label', description: 'dialogueUi.controls.contentFontOffset.description', min: -24, max: 40, step: 1 },
 ];
 
 const voiceoverControls: ControlItem[] = [
-  { group: 'voiceover', key: 'fontOffset', label: '旁白字号', description: '旁白文本大小偏移', min: -24, max: 40, step: 1 },
+  { group: 'voiceover', key: 'fontOffset', label: 'dialogueUi.controls.voiceoverFontOffset.label', description: 'dialogueUi.controls.voiceoverFontOffset.description', min: -24, max: 40, step: 1 },
 ];
 
 const commanderControls: ControlItem[] = [
-  { group: 'commander', key: 'fontOffset', label: '回答字号', description: '回答按钮文本大小偏移', min: -24, max: 40, step: 1 },
+  { group: 'commander', key: 'fontOffset', label: 'dialogueUi.controls.commanderFontOffset.label', description: 'dialogueUi.controls.commanderFontOffset.description', min: -24, max: 40, step: 1 },
 ];
 
 const layoutControls: ControlItem[] = [
-  { group: 'normal', key: 'nameContentGapOffset', label: '名字与正文间距', description: '角色名字和正文之间的垂直间距', min: -20, max: 80, step: 1 },
-  { group: 'normal', key: 'groupYOffset', label: '整体垂直偏移', description: '整组角色名字和正文上下移动', min: -120, max: 120, step: 1 },
-  { group: 'normal', key: 'nameXOffset', label: '名字水平偏移', description: '单独调整角色名字位置', min: -120, max: 120, step: 1 },
-  { group: 'normal', key: 'contentXOffset', label: '正文水平偏移', description: '单独调整角色对话正文位置', min: -120, max: 120, step: 1 },
+  { group: 'normal', key: 'nameContentGapOffset', label: 'dialogueUi.controls.nameContentGapOffset.label', description: 'dialogueUi.controls.nameContentGapOffset.description', min: -20, max: 80, step: 1 },
+  { group: 'normal', key: 'groupYOffset', label: 'dialogueUi.controls.groupYOffset.label', description: 'dialogueUi.controls.groupYOffset.description', min: -120, max: 120, step: 1 },
+  { group: 'normal', key: 'nameXOffset', label: 'dialogueUi.controls.nameXOffset.label', description: 'dialogueUi.controls.nameXOffset.description', min: -120, max: 120, step: 1 },
+  { group: 'normal', key: 'contentXOffset', label: 'dialogueUi.controls.contentXOffset.label', description: 'dialogueUi.controls.contentXOffset.description', min: -120, max: 120, step: 1 },
 ];
 
 const colorBarControls: ControlItem[] = [
-  { group: 'normal', key: 'colorBarHeightOffset', label: '色条高度', description: '角色色条高度补偿', min: -40, max: 120, step: 1 },
-  { group: 'normal', key: 'colorBarWidthOffset', label: '色条宽度', description: '角色色条宽度补偿', min: -8, max: 24, step: 1 },
-  { group: 'normal', key: 'colorBarXOffset', label: '色条水平偏移', description: '角色色条左右移动', min: -80, max: 80, step: 1 },
-  { group: 'normal', key: 'colorBarYOffset', label: '色条垂直偏移', description: '角色色条上下移动', min: -80, max: 80, step: 1 },
+  { group: 'normal', key: 'colorBarHeightOffset', label: 'dialogueUi.controls.colorBarHeightOffset.label', description: 'dialogueUi.controls.colorBarHeightOffset.description', min: -40, max: 120, step: 1 },
+  { group: 'normal', key: 'colorBarWidthOffset', label: 'dialogueUi.controls.colorBarWidthOffset.label', description: 'dialogueUi.controls.colorBarWidthOffset.description', min: -8, max: 24, step: 1 },
+  { group: 'normal', key: 'colorBarXOffset', label: 'dialogueUi.controls.colorBarXOffset.label', description: 'dialogueUi.controls.colorBarXOffset.description', min: -80, max: 80, step: 1 },
+  { group: 'normal', key: 'colorBarYOffset', label: 'dialogueUi.controls.colorBarYOffset.label', description: 'dialogueUi.controls.colorBarYOffset.description', min: -80, max: 80, step: 1 },
 ];
 
 const panelStyle = computed(() => ({
@@ -235,38 +237,38 @@ const hasMatchingSceneElement = computed(() => {
 
 const headerSubtitle = computed(() => {
   if (isForceMode.value) {
-    return `强制设置 ${modeMeta[forcedMode.value].label}，未出现时也会先保存配置`;
+    return t('dialogueUi.forceModeSubtitle', { mode: t(modeMeta[forcedMode.value].labelKey) });
   }
 
   if (!activeSceneMode.value) {
-    return '当前场景没有可识别的对话元素，可切到强制设置';
+    return t('dialogueUi.emptySubtitle');
   }
 
-  return `当前场景：${modeMeta[activeSceneMode.value].label}，修改会实时作用到画面`;
+  return t('dialogueUi.sceneModeSubtitle', { mode: t(modeMeta[activeSceneMode.value].labelKey) });
 });
 
 const statusTitle = computed(() => {
   if (!resolvedMode.value) {
-    return '场景没有对应元素';
+    return t('dialogueUi.emptyStatusTitle');
   }
 
   if (!hasMatchingSceneElement.value) {
-    return `当前场景没有${modeMeta[resolvedMode.value].label}元素`;
+    return t('dialogueUi.missingStatusTitle', { mode: t(modeMeta[resolvedMode.value].labelKey) });
   }
 
-  return `正在调整${modeMeta[resolvedMode.value].label}`;
+  return t('dialogueUi.activeStatusTitle', { mode: t(modeMeta[resolvedMode.value].labelKey) });
 });
 
 const statusDescription = computed(() => {
   if (!resolvedMode.value) {
-    return '先让场景里出现角色对话、旁白或回答，或者点强制设置直接改并保存。';
+    return t('dialogueUi.emptyStatusDesc');
   }
 
   if (!hasMatchingSceneElement.value) {
-    return '当前画面不会立刻显示这类元素，但配置会立即保存，等它下次出现时直接生效。';
+    return t('dialogueUi.missingStatusDesc');
   }
 
-  return '当前显示的就是对应类型，拖动滑块后会实时刷新这块文本排版。';
+  return t('dialogueUi.activeStatusDesc');
 });
 
 const statusCardClass = computed(() => ({
@@ -283,17 +285,17 @@ const visibleSections = computed<ControlSection[]>(() => {
   switch (resolvedMode.value) {
     case DialogueType.NORMAL:
       return [
-        { key: 'normal-fonts', title: '💬 角色对话', controls: normalFontControls },
-        { key: 'normal-layout', title: '📐 名字与正文', controls: layoutControls },
-        { key: 'normal-color-bar', title: '🎨 角色色条', controls: colorBarControls },
+        { key: 'normal-fonts', title: t('dialogueUi.sections.normalFonts'), controls: normalFontControls },
+        { key: 'normal-layout', title: t('dialogueUi.sections.normalLayout'), controls: layoutControls },
+        { key: 'normal-color-bar', title: t('dialogueUi.sections.colorBar'), controls: colorBarControls },
       ];
     case DialogueType.VOICEOVER:
       return [
-        { key: 'voiceover-font', title: '📢 旁白', controls: voiceoverControls },
+        { key: 'voiceover-font', title: t('dialogueUi.sections.voiceover'), controls: voiceoverControls },
       ];
     case DialogueType.COMMANDER:
       return [
-        { key: 'commander-font', title: '🗨️ 回答', controls: commanderControls },
+        { key: 'commander-font', title: t('dialogueUi.sections.commander'), controls: commanderControls },
       ];
     default:
       return [];
@@ -323,20 +325,20 @@ const metricItems = computed(() => {
   switch (resolvedMode.value) {
     case DialogueType.NORMAL:
       return [
-        `名字 ${metrics.value.nameFontSize.toFixed(0)}px`,
-        `正文 ${metrics.value.contentFontSize.toFixed(0)}px`,
-        `间距 ${Math.max(0, metrics.value.contentY - metrics.value.nameY - metrics.value.nameLineHeight).toFixed(0)}px`,
-        `色条高 ${metrics.value.colorBarHeight.toFixed(0)}px`,
+        t('dialogueUi.metrics.name', { value: metrics.value.nameFontSize.toFixed(0) }),
+        t('dialogueUi.metrics.content', { value: metrics.value.contentFontSize.toFixed(0) }),
+        t('dialogueUi.metrics.gap', { value: Math.max(0, metrics.value.contentY - metrics.value.nameY - metrics.value.nameLineHeight).toFixed(0) }),
+        t('dialogueUi.metrics.colorBarHeight', { value: metrics.value.colorBarHeight.toFixed(0) }),
       ];
     case DialogueType.VOICEOVER:
       return [
-        `旁白 ${voiceoverMetrics.value.fontSize.toFixed(0)}px`,
-        `行高 ${voiceoverMetrics.value.lineHeight.toFixed(0)}px`,
+        t('dialogueUi.metrics.voiceover', { value: voiceoverMetrics.value.fontSize.toFixed(0) }),
+        t('dialogueUi.metrics.lineHeight', { value: voiceoverMetrics.value.lineHeight.toFixed(0) }),
       ];
     case DialogueType.COMMANDER:
       return [
-        `回答 ${commanderMetrics.value.fontSize.toFixed(0)}px`,
-        `行高 ${commanderMetrics.value.lineHeight.toFixed(0)}px`,
+        t('dialogueUi.metrics.commander', { value: commanderMetrics.value.fontSize.toFixed(0) }),
+        t('dialogueUi.metrics.lineHeight', { value: commanderMetrics.value.lineHeight.toFixed(0) }),
       ];
     default:
       return [];

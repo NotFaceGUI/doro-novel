@@ -20,15 +20,16 @@
 
             <div class="project-tab" v-if="!isFullScreen">
                 <div class="tab-card" :class="{ 'tab-active': activeTab === 'canvas' }" @click="activeTab = 'canvas'">
-                    Canvas</div>
+                    {{ t('projectView.tabs.canvas') }}</div>
                 <div class="tab-card" :class="{ 'tab-active': activeTab === 'preview' }" @click="activeTab = 'preview'">
-                    Preview</div>
+                    {{ t('projectView.tabs.preview') }}</div>
                 <div class="tab-card" :class="{ 'tab-active': activeTab === 'script' }" @click="activeTab = 'script'">
-                    Script</div>
+                    {{ t('projectView.tabs.script') }}</div>
             </div>
 
             <div class="project-canvas"
                 :class="{ 'edit-mode': actionStore.isEditMode, 'editing': actionStore.isEditMode }" id="canvas"
+                :data-editing-label="t('projectView.editing')"
                 v-show="activeTab == 'canvas'">
                 <div id="canvas-info">
 
@@ -38,24 +39,24 @@
             <div class="project-preview" v-show="activeTab == 'preview'">
                 <img ref="imgRef" src="" alt="" srcset="" v-show="showImage">
                 <video ref="videoRef" src="" v-show="showVideo" autoplay controls loop muted></video>
-                <span v-show="showText">不支持该文件的预览</span>
+                <span v-show="showText">{{ t('projectView.unsupportedPreview') }}</span>
                 <div id="preview-canvas" v-show="showCanvas">
                     <!-- 动画选择下拉框 -->
                     <div class="animation-selector" v-if="showCanvas && animationOptions.length > 0">
-                        <label>选择动画:</label>
+                        <label>{{ t('projectView.selectAnimation') }}</label>
                         <Dropdown v-model="selectedAnimationIndex" @update:modelValue="handleAnimationChange"
                             :options="animationOptions" :disabled="false" />
                     </div>
                     <!-- 皮肤选择下拉框 -->
                     <div class="skin-selector" v-if="showCanvas && skinOptions.length > 0">
-                        <label>选择皮肤:</label>
+                        <label>{{ t('projectView.selectSkin') }}</label>
                         <Dropdown v-model="selectedSkinIndex" @update:modelValue="handleSkinChange"
                             :options="skinOptions" :disabled="false" />
                     </div>
 
                     <!-- 角色类型选择下拉框 -->
                     <div class="character-type-selector" v-if="showCanvas && hasCharacterAssets">
-                        <label>角色类型:</label>
+                        <label>{{ t('projectView.characterType') }}</label>
                         <Dropdown v-model="selectedCharacterType" @update:modelValue="handleCharacterTypeChange"
                             :options="characterTypeOptions" :disabled="false" />
                     </div>
@@ -154,7 +155,7 @@
                         <Transition name="shader-panel">
                             <div class="shader-editor-panel" v-if="showShaderEditor">
                                 <div class="shader-editor-header">
-                                    <h3>Shader 特效编辑器</h3>
+                                    <h3>{{ t('projectView.shaderEditorTitle') }}</h3>
                                     <button @click="toggleShaderEditor" class="close-btn">×</button>
                                 </div>
                                 <ShaderEditor :ref="shaderEditorRef" @apply-shader="handleApplyShader"
@@ -166,7 +167,7 @@
             </div>
 
             <div class="project-script" v-show="activeTab == 'script'">
-                <ScriptEditor v-model="scriptContent" placeholder="在这里编写剧情脚本..." />
+                <ScriptEditor v-model="scriptContent" :placeholder="t('projectView.scriptPlaceholder')" />
             </div>
 
             <div
@@ -197,6 +198,7 @@
 
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted, nextTick, watch, computed } from 'vue';
+import { useI18n } from 'vue-i18n';
 import LeftBar from '../components/LeftBar.vue';
 import ScriptEditor from '../components/edit/ScriptEditor.vue';
 import Dropdown from '../components/common/Dropdown.vue';
@@ -217,6 +219,7 @@ import { useWatermarkStore } from '../stores/watermark-store';
 import { useDialogueUiStore } from '../stores/dialogue-ui-store';
 import { getCurrentWindow } from '@tauri-apps/api/window';
 
+const { t } = useI18n();
 
 const imgRef = ref<HTMLImageElement | null>(null);
 const videoRef = ref<HTMLVideoElement | null>(null);
@@ -283,20 +286,20 @@ const selectedSkinIndex = ref<number>(0);
 // 角色类型切换相关的响应式数据
 const hasCharacterAssets = ref<boolean>(false);
 const selectedCharacterType = ref<number>(0);
-const characterTypeOptions = ref<DropdownOption[]>([
-    { label: 'Default', value: 'default' },
-    { label: 'Aim', value: 'aim' },
-    { label: 'Cover', value: 'cover' }
+const characterTypeOptions = computed<DropdownOption[]>(() => [
+    { label: t('projectView.characterTypes.default'), value: 'default' },
+    { label: t('projectView.characterTypes.aim'), value: 'aim' },
+    { label: t('projectView.characterTypes.cover'), value: 'cover' }
 ]);
 
 // 动画混合配置相关的响应式数据
 const mixDuration = ref<number>(0.3);
 const selectedMixPresetIndex = ref<number>(0);
-const mixPresetOptions = ref<DropdownOption[]>([
-    { label: '默认混合', value: 0 },
-    { label: '快速混合', value: 1 },
-    { label: '慢速混合', value: 2 },
-    { label: '自定义混合', value: 3 }
+const mixPresetOptions = computed<DropdownOption[]>(() => [
+    { label: t('projectView.mixPresets.default'), value: 0 },
+    { label: t('projectView.mixPresets.fast'), value: 1 },
+    { label: t('projectView.mixPresets.slow'), value: 2 },
+    { label: t('projectView.mixPresets.custom'), value: 3 }
 ]);
 
 // 自定义混合配置
@@ -1341,7 +1344,7 @@ const clearAllShaders = () => {
 }
 
 .project-canvas::after {
-    content: '正在编辑';
+    content: attr(data-editing-label);
     position: absolute;
     bottom: 8px;
     right: 12px;

@@ -1,23 +1,23 @@
 <template>
     <div class="action-item-main" :data-component-id="id">
-        <ActionItemHead content="💬 设置对话" :title="title" :id="id" :is-collapsed="actionItem.isToggle"></ActionItemHead>
+        <ActionItemHead :content="t('actionDialogue.head')" :title="title" :id="id" :is-collapsed="actionItem.isToggle"></ActionItemHead>
         <div class="action-item-content" v-show="!actionItem.isToggle">
             <div class="action-title">
-                阻塞执行
+                {{ t('actionCommon.waitExecution') }}
                 <ToggleSwitch v-model="actionItem.wait!"></ToggleSwitch>
             </div>
             <div class="action-title">
-                对话结束后隐藏UI
+                {{ t('actionDialogue.hideUiAfterDialogue') }}
                 <ToggleSwitch v-model="hideUIAfterDialogue"></ToggleSwitch>
             </div>
             <div class="action-title" style="align-items: center;" v-if="hideUIAfterDialogue">
-                延迟消失时间(ms)
+                {{ t('actionDialogue.hideDelayMs') }}
                 <div style="display: flex;">
                     <input type="number" v-model.number="hideUIDelay" min="0" step="10" class="delay-input"
                         placeholder="0" />
                     <Tooltip position="left">
                         <div>
-                            可以指定对话UI<span style="color: var(--button-bg);">延迟消失</span>的时间
+                            {{ t('actionDialogue.hideDelayTooltipPrefix') }}<span style="color: var(--button-bg);">{{ t('actionDialogue.hideDelayTooltipHighlight') }}</span>{{ t('actionDialogue.hideDelayTooltipSuffix') }}
                         </div>
                     </Tooltip>
                 </div>
@@ -29,7 +29,7 @@
             <div class="action-item-content dialogue-item" v-for="(message, messageIndex) in messages"
                 :key="message.id || messageIndex">
                 <!-- 拖拽手柄 -->
-                <div class="drag-handle" title="拖拽排序">⋮⋮</div>
+                <div class="drag-handle" :title="t('actionDialogue.dragSort')">⋮⋮</div>
 
                 <div class="left-content">
 
@@ -44,7 +44,7 @@
                             @update:modelValue="updateSpeakerColor(messageIndex, $event)" />
                     </div>
                     <div class="character-name" v-if="!editing[messageIndex]" @click="editName(messageIndex)">
-                        {{ t(message.speaker).split('：')[0] }}
+                        {{ getSpeakerDisplay(message).split('：')[0] }}
                         <span class="dialogue-type-tag" :class="getDialogueTypeClass(message.mode)">
                             {{ getDialogueTypeLabel(message.mode) }}
                         </span>
@@ -53,12 +53,12 @@
                         @blur="saveName(message.speaker, messageIndex)"
                         @keydown.enter="saveName(message.speaker, messageIndex)" type="text" class="name-input" />
 
-                    <div class="name-edit" title="点击设置别名" @click="editName(messageIndex)">🖍</div>
+                    <div class="name-edit" :title="t('actionDialogue.editAlias')" @click="editName(messageIndex)">🖍</div>
 
                     <!-- 高级模式开关 -->
                     <div class="advanced-mode-toggle">
                         <label @click="message.advancedMode = !message.advancedMode"
-                            class="advanced-label">🔧高级模式</label>
+                            class="advanced-label">🔧{{ t('actionDialogue.advancedMode') }}</label>
                     </div>
 
                     <!-- 对话操作按钮 -->
@@ -75,33 +75,33 @@
                         title="下移">
                     ↓
                 </button> -->
-                        <button class="control-btn delete-btn" @click="deleteMessage(messageIndex)" title="删除">
+                        <button class="control-btn delete-btn" @click="deleteMessage(messageIndex)" :title="t('actionDialogue.delete')">
                             ✕
                         </button>
                     </div>
                     <div class="character-tip"
-                        v-if="message.speaker === '请选择角色' && message.mode === DialogueType.NORMAL">
-                        点击头像绑定角色</div>
+                        v-if="isPlaceholderSpeaker(message.speaker) && message.mode === DialogueType.NORMAL">
+                        {{ t('actionDialogue.bindCharacterTip') }}</div>
                 </div>
                 <!-- 分支条件设置，在高级模式下显示 -->
                 <div class="branch-condition-setting" v-if="message.advancedMode">
                     <div>
-                        <label class="branch-condition-label">🏷️分支条件：</label>
-                        <input type="text" v-model="message.requiredBranchTag" placeholder="A 或 A,B&C 或 (A,B)&C"
+                        <label class="branch-condition-label">🏷️{{ t('actionDialogue.branchCondition') }}</label>
+                        <input type="text" v-model="message.requiredBranchTag" :placeholder="t('actionDialogue.branchConditionPlaceholder')"
                             class="branch-condition-input" @input="updateRequiredBranchTag(messageIndex, $event)" />
                     </div>
 
                     <Tooltip position="left">
                         <div>
-                            设置此对话需要的<span style="color: var(--button-bg);">分支标签</span>
+                            {{ t('actionDialogue.branchConditionTooltipPrefix') }}<span style="color: var(--button-bg);">{{ t('actionDialogue.branchConditionTooltipHighlight') }}</span>
                             <div style="text-align: left;font-size: 10px;margin-top: 5px;">
-                                支持多种格式：
-                                <p><strong>A</strong> - 单个标签</p>
-                                <p><strong>A,B,C</strong> - 任意一个标签（OR逻辑）</p>
-                                <p><strong>A&B&C</strong> - 所有标签（AND逻辑）</p>
-                                <p><strong>A,B&C</strong> - 混合逻辑（A 或者 B且C）</p>
-                                <p><strong>(A,B)&C</strong> - 括号优先级（(A或B) 且 C）</p>
-                                <p>只有满足条件的玩家才能看到此对话</p>
+                                {{ t('actionDialogue.branchFormats.title') }}
+                                <p><strong>A</strong> - {{ t('actionDialogue.branchFormats.single') }}</p>
+                                <p><strong>A,B,C</strong> - {{ t('actionDialogue.branchFormats.or') }}</p>
+                                <p><strong>A&B&C</strong> - {{ t('actionDialogue.branchFormats.and') }}</p>
+                                <p><strong>A,B&C</strong> - {{ t('actionDialogue.branchFormats.mixed') }}</p>
+                                <p><strong>(A,B)&C</strong> - {{ t('actionDialogue.branchFormats.priority') }}</p>
+                                <p>{{ t('actionDialogue.branchFormats.visibleRule') }}</p>
                             </div>
                         </div>
                     </Tooltip>
@@ -110,25 +110,25 @@
                     <div class="text-input" v-for="(text, textIndex) in message.texts"
                         :key="message.id || (text + textIndex.toString())">
                         <div class="editable-div" contenteditable="true" @input="updateTextContent($event, text)"
-                            @paste="handlePaste($event)" :data-placeholder="'请输入文本……'"></div>
+                            @paste="handlePaste($event)" :data-placeholder="t('actionDialogue.textPlaceholder')"></div>
                         <div class="text-controls" v-if="message.advancedMode">
-                            <label class="text-control-label">摄像机代理：</label>
+                            <label class="text-control-label">{{ t('actionDialogue.cameraProxy') }}</label>
                             <ToggleSwitch v-model="(text.isCameraProxy as boolean)"></ToggleSwitch>
                         </div>
                         <!-- 分支标签设置，只在指挥官回答且有多个选项时显示 -->
                         <div class="text-controls"
                             v-if="message.mode === DialogueType.COMMANDER && message.texts.length >= 2">
                             <div>
-                                <label class="text-control-label">分支标签：</label>
-                                <input type="text" v-model="text.branchTag" placeholder="输入分支标签 (如: A, B)"
+                                <label class="text-control-label">{{ t('actionDialogue.branchTag') }}</label>
+                                <input type="text" v-model="text.branchTag" :placeholder="t('actionDialogue.branchTagPlaceholder')"
                                     class="branch-tag-input"
                                     @input="updateBranchTag(messageIndex, textIndex, $event)" />
                             </div>
 
                             <Tooltip position="left">
                                 <div>
-                                    为指挥官的每个选项设置<span style="color: var(--button-bg);">分支标签</span>
-                                    <div>根据选择的标签来<span style="color: var(--button-bg);">显示不同内容</span></div>
+                                    {{ t('actionDialogue.branchTagTooltipPrefix') }}<span style="color: var(--button-bg);">{{ t('actionDialogue.branchTagTooltipHighlight') }}</span>
+                                    <div>{{ t('actionDialogue.branchTagTooltipSuffixPrefix') }}<span style="color: var(--button-bg);">{{ t('actionDialogue.branchTagTooltipSuffixHighlight') }}</span></div>
                                 </div>
                             </Tooltip>
                         </div>
@@ -137,7 +137,7 @@
                             <div class="camera-controls"
                                 v-if="message.parms && message.advancedMode && textIndex === message.texts.length - 1">
                                 <div class="camera-control-row">
-                                    <label class="control-label">机位选择：</label>
+                                    <label class="control-label">{{ t('actionDialogue.cameraStand') }}</label>
                                     <Dropdown v-model="message.parms.cameraStandTypeIndex!" @update:modelValue="(value) => {
                                         if (messages[messageIndex].parms) {
                                             messages[messageIndex].parms.cameraStandTypeIndex = value;
@@ -147,12 +147,12 @@
                                 </div>
 
                                 <div class="camera-control-row">
-                                    <label class="control-label">启用移动：</label>
+                                    <label class="control-label">{{ t('actionDialogue.enableMove') }}</label>
                                     <ToggleSwitch v-model="message.parms.isMove"></ToggleSwitch>
                                 </div>
 
                                 <div class="camera-control-row" v-if="message.parms.isMove">
-                                    <label class="control-label">缓动函数：</label>
+                                    <label class="control-label">{{ t('actionDialogue.easeFunction') }}</label>
                                     <Dropdown v-model="message.parms.easeIndex!" @update:modelValue="(value) => {
                                         if (messages[messageIndex].parms) {
                                             messages[messageIndex].parms.easeIndex = value;
@@ -162,7 +162,7 @@
                                 </div>
 
                                 <div class="camera-control-row" v-if="message.parms.isMove">
-                                    <label class="control-label">动画时长：</label>
+                                    <label class="control-label">{{ t('actionDialogue.duration') }}</label>
                                     <input type="number" v-model.number="message.parms.duration" min="100" max="5000"
                                         step="100" class="camera-input">
                                     <span class="unit-label">ms</span>
@@ -170,7 +170,7 @@
 
                                 <div class="camera-control-row"
                                     v-if="message.parms?.amintionOption && message.parms.amintionOption.length > 0">
-                                    <label class="control-label">选择名称：</label>
+                                    <label class="control-label">{{ t('actionDialogue.animationName') }}</label>
                                     <Dropdown v-model="message.parms.animationIndex!" @update:modelValue="(value) => {
                                         if (messages[messageIndex].parms) {
                                             messages[messageIndex].parms.animationIndex = value;
@@ -180,19 +180,19 @@
                                 </div>
 
                                 <div class="camera-control-row">
-                                    <label class="control-label">动画循环：</label>
+                                    <label class="control-label">{{ t('actionDialogue.animationLoop') }}</label>
                                     <ToggleSwitch v-model="message.parms.isLoop"></ToggleSwitch>
                                 </div>
 
                                 <div class="camera-control-row">
-                                    <label class="control-label">机位偏移X：</label>
+                                    <label class="control-label">{{ t('actionDialogue.cameraOffsetX') }}</label>
                                     <input type="number" v-model.number="message.parms.xOffSet" class="camera-input"
                                         step="10">
                                     <span class="unit-label">px</span>
                                 </div>
 
                                 <div class="camera-control-row">
-                                    <label class="control-label">机位偏移Y：</label>
+                                    <label class="control-label">{{ t('actionDialogue.cameraOffsetY') }}</label>
                                     <input type="number" v-model.number="message.parms.yOffSet" class="camera-input"
                                         step="10">
                                     <span class="unit-label">px</span>
@@ -206,13 +206,13 @@
         <div v-show="!actionItem.isToggle">
             <div class="pre-bind-section">
                 <button v-if="!preSelectedCharacter" @click.stop="preBindCharacter" class="pre-bind-btn">
-                    👤 预选角色
+                    👤 {{ t('actionDialogue.preselectCharacter') }}
                 </button>
                 <div v-else class="pre-selected-character">
                     <button @click.stop="preBindCharacter" class="pre-bind-btn">
-                        👤 {{ t(preSelectedCharacter.characterName) }}
+                        👤 {{ preSelectedCharacter.characterName }}
                     </button>
-                    <button @click.stop="clearPreSelectedCharacter" class="clear-btn" title="清除预选角色">
+                    <button @click.stop="clearPreSelectedCharacter" class="clear-btn" :title="t('actionDialogue.clearPreselectedCharacter')">
                         ✕
                     </button>
                 </div>
@@ -221,19 +221,19 @@
         <div class="action-dialogue-tool" v-show="!actionItem.isToggle">
             <div style="display: flex;flex-direction: column;align-items: center;justify-content: center;flex: 1;">
                 <button class="action-dialogue-tool-button " style="width: 100%;"
-                    @click.stop="showDialogueTypeSelector">✨&emsp;新增</button>
+                    @click.stop="showDialogueTypeSelector">✨&emsp;{{ t('actionDialogue.addNew') }}</button>
                 <div style="width: 100%;display: flex;">
                     <button @click.stop="selectDialogueType(DialogueType.NORMAL)"
-                        class="quick-button action-dialogue-tool-button ">💬 普通</button>
+                        class="quick-button action-dialogue-tool-button ">💬 {{ t('actionDialogue.quickTypes.normal') }}</button>
                     <button @click.stop="selectDialogueType(DialogueType.VOICEOVER)"
-                        class="quick-button action-dialogue-tool-button ">📢 旁白</button>
+                        class="quick-button action-dialogue-tool-button ">📢 {{ t('actionDialogue.quickTypes.voiceover') }}</button>
                     <button @click.stop="selectDialogueType(DialogueType.COMMANDER)"
-                        class="quick-button action-dialogue-tool-button ">👨‍✈️ 自己</button>
+                        class="quick-button action-dialogue-tool-button ">👨‍✈️ {{ t('actionDialogue.quickTypes.commander') }}</button>
                 </div>
 
             </div>
             <div style="height: 25px; border-left: 1px dashed #88888855;"></div>
-            <button @click.stop="readditionMsg">📌&emsp;追加</button>
+            <button @click.stop="readditionMsg">📌&emsp;{{ t('actionDialogue.append') }}</button>
         </div>
 
         <!-- 对话类型选择弹窗 -->
@@ -241,7 +241,7 @@
             <div class="dialogue-type-modal" v-if="showTypeSelector" @click.self="showTypeSelector = false">
                 <div class="dialogue-type-modal-content">
                     <div class="dialogue-type-modal-header">
-                        <h3>选择对话类型</h3>
+                        <h3>{{ t('actionDialogue.selectDialogueType') }}</h3>
                         <span class="close-btn" @click="showTypeSelector = false">×</span>
                     </div>
                     <div class="dialogue-type-modal-body">
@@ -262,7 +262,7 @@
 
 <script setup lang="ts">
 // 在 script setup 部分添加
-import { markRaw, onMounted, onUnmounted, Raw, ref, watch } from 'vue';
+import { computed, markRaw, onMounted, onUnmounted, Raw, ref, watch } from 'vue';
 import { ActionItems, DialogTextData, DialogueType } from '../../../types/app';
 import ActionItemHead from './ActionItemHead.vue';
 import massage from '../../../script/common/massage';
@@ -284,6 +284,13 @@ import { VueDraggable } from 'vue-draggable-plus';
 import ResourceManager from '../../../script/resource-manager';
 import { ASSET_CHARACTER, ResType } from '../../../script/var';
 import { Spine } from 'pixi-spine';
+import {
+    createDialogueSpeaker,
+    DIALOGUE_SPEAKER_PLACEHOLDER,
+    getDialogueSpeakerDisplay,
+    isDialoguePlaceholderSpeaker,
+    normalizeDialogueSpeaker,
+} from '../../../utils/dialogue-speaker';
 
 const props = defineProps<{
     title: string,
@@ -323,31 +330,31 @@ const preSelectedCharacter = ref<{
 } | null>(null);
 
 // 对话类型定义
-const dialogueTypes = [
+const dialogueTypes = computed(() => [
     {
-        label: '普通对话',
+        label: t('actionDialogue.types.normal.label'),
         value: DialogueType.NORMAL,
         icon: '💬',
-        description: '角色之间的标准对话'
+        description: t('actionDialogue.types.normal.description')
     },
     {
-        label: '旁白',
+        label: t('actionDialogue.types.voiceover.label'),
         value: DialogueType.VOICEOVER,
         icon: '📢',
-        description: '叙述性文本，没有特定角色'
+        description: t('actionDialogue.types.voiceover.description')
     },
     {
-        label: '指挥官回答',
+        label: t('actionDialogue.types.commander.label'),
         value: DialogueType.COMMANDER,
         icon: '👨‍✈️',
-        description: '玩家角色的对话内容'
+        description: t('actionDialogue.types.commander.description')
     }
-];
+]);
 
 // 获取对话类型标签
 const getDialogueTypeLabel = (type: DialogueType) => {
-    const dialogueType = dialogueTypes.find(t => t.value === type);
-    return dialogueType ? dialogueType.label : '普通对话';
+    const dialogueType = dialogueTypes.value.find(item => item.value === type);
+    return dialogueType ? dialogueType.label : t('actionDialogue.types.normal.label');
 };
 
 // 获取对话类型CSS类
@@ -358,6 +365,18 @@ const getDialogueTypeClass = (type: DialogueType) => {
         'commander-type': type === DialogueType.COMMANDER
     };
 };
+
+const cameraStandOptions = computed<DropdownOption[]>(() => [
+    { label: t('actionDialogue.cameraStands.large'), value: 'large' },
+    { label: t('actionDialogue.cameraStands.medium'), value: 'medium' },
+    { label: t('actionDialogue.cameraStands.small'), value: 'small' }
+]);
+
+// 获取缓动函数选项
+const easingOptions = computed<DropdownOption[]>(() => getEasingFunctionOptions());
+
+const getSpeakerDisplay = (message: DialogTextData) => getDialogueSpeakerDisplay(message.speaker, message.mode);
+const isPlaceholderSpeaker = (speaker: string) => isDialoguePlaceholderSpeaker(speaker);
 
 // 显示对话类型选择器
 const showDialogueTypeSelector = () => {
@@ -405,7 +424,7 @@ const preBindCharacter = () => {
         }
 
         console.log("object:", preSelectedCharacter.value);
-        massage(`已预选角色：${characterName}`, 'success', 2000);
+        massage(t('actionDialogue.messages.preselectedCharacter', { character: characterName }), 'success', 2000);
     }).catch((err) => {
         console.log(err);
     });
@@ -414,18 +433,8 @@ const preBindCharacter = () => {
 // 清除预绑定角色
 const clearPreSelectedCharacter = () => {
     preSelectedCharacter.value = null;
-    massage('已清除预选角色', 'info', 2000);
+    massage(t('actionDialogue.messages.clearedPreselectedCharacter'), 'info', 2000);
 };
-
-// 添加机位选项
-const cameraStandOptions = ref<DropdownOption[]>([
-    { label: '大(全景镜头)', value: 'large' },
-    { label: '中(半身镜头)', value: 'medium' },
-    { label: '小(特写镜头)', value: 'small' }
-]);
-
-// 获取缓动函数选项
-const easingOptions = ref<DropdownOption[]>(getEasingFunctionOptions());
 
 // 修改选择对话类型并添加新对话的方法
 const selectDialogueType = (type: DialogueType) => {
@@ -435,7 +444,7 @@ const selectDialogueType = (type: DialogueType) => {
     let newMessage: DialogTextData = {
         id: generateUniqueId(),
         speakerColor: 0xfaaaaa,
-        speaker: '请选择角色',
+        speaker: createDialogueSpeaker(type),
         texts: [{
             text: '',
             isCameraProxy: true,
@@ -486,16 +495,16 @@ const selectDialogueType = (type: DialogueType) => {
         //     duration: 300,
         //     isLoop: true, // 默认循环播放动画
         // };
-        massage('请先选择角色', 'error', 2000);
+        massage(t('actionDialogue.messages.selectCharacterFirst'), 'error', 2000);
         return;
     }
     // 如果是旁白，修改默认值
     else if (type === DialogueType.VOICEOVER) {
-        newMessage.speaker = '旁白';
+        newMessage.speaker = createDialogueSpeaker(type);
     }
     // 如果是指挥官回答，修改默认值
     else if (type === DialogueType.COMMANDER) {
-        newMessage.speaker = '指挥官';
+        newMessage.speaker = createDialogueSpeaker(type);
         newMessage.speakerColor = 0x3399ff; // 蓝色
     }
 
@@ -567,7 +576,7 @@ const addMsg = () => {
     messages.value.push({
         id: generateUniqueId(),
         speakerColor: 0xfaaaaa,
-        speaker: '请选择角色',
+        speaker: DIALOGUE_SPEAKER_PLACEHOLDER,
         texts: [{
             text: '',
         }],
@@ -583,7 +592,7 @@ const deleteMessage = (index: number) => {
     // }
 
     messages.value.splice(index, 1);
-    massage('已删除对话', 'success', 1500);
+    massage(t('actionDialogue.messages.deletedDialogue'), 'success', 1500);
 };
 
 // 移动对话位置
@@ -600,7 +609,7 @@ const moveMessage = (index: number, direction: 'up' | 'down') => {
     const [movedItem] = messages.value.splice(index, 1);
     messages.value.splice(newIndex, 0, movedItem);
 
-    massage(`已${direction === 'up' ? '上移' : '下移'}对话`, 'success', 1500);
+    massage(t(direction === 'up' ? 'actionDialogue.messages.movedUp' : 'actionDialogue.messages.movedDown'), 'success', 1500);
 };
 
 // 拖拽开始事件
@@ -611,12 +620,12 @@ const onDragStart = (evt: any) => {
 // 拖拽结束事件
 const onDragEnd = (evt: any) => {
     console.log('拖拽结束', evt);
-    massage('对话顺序已更新', 'success', 1500);
+    massage(t('actionDialogue.messages.orderUpdated'), 'success', 1500);
 };
 
 const readditionMsg = () => {
     if (messages.value.length === 0) {
-        massage('请先添加对话', 'error', 2000);
+        massage(t('actionDialogue.messages.addDialogueFirst'), 'error', 2000);
         return;
     }
     messages.value[messages.value.length - 1].texts.push({
@@ -631,7 +640,7 @@ const editName = (index: number) => {
 
 const saveName = (speaker: string, index: number) => {
     editing.value[index] = false;
-    messages.value[index].speaker = speaker;
+    messages.value[index].speaker = normalizeDialogueSpeaker(speaker, messages.value[index].mode);
 };
 
 // 更新角色颜色并保存到store
@@ -640,7 +649,7 @@ const updateSpeakerColor = (messageIndex: number, color: number) => {
     message.speakerColor = color;
 
     // 如果是绑定了角色的对话，保存颜色到store
-    if (message.speaker && message.speaker !== '请选择角色') {
+    if (message.speaker && !isDialoguePlaceholderSpeaker(message.speaker)) {
         characterConfigStore.saveCharacterConfig({
             characterName: message.speaker,
             speakerColor: color,
@@ -653,7 +662,7 @@ const updateSpeakerColor = (messageIndex: number, color: number) => {
 // 监听messages变化，自动保存角色配置
 watch(messages, (newMessages) => {
     newMessages.forEach(message => {
-        if (message.mode === DialogueType.NORMAL && message.isBind && message.speaker !== '请选择角色') {
+        if (message.mode === DialogueType.NORMAL && message.isBind && !isDialoguePlaceholderSpeaker(message.speaker)) {
             // 更新store中的角色配置
             characterConfigStore.updateCharacterConfig(message.speaker, {
                 speakerColor: message.speakerColor,
@@ -784,6 +793,7 @@ const deserialization = (data: ActionItems) => {
     if (actionData.messages) {
         messages.value = actionData.messages.map((message: any) => ({
             ...message,
+            speaker: normalizeDialogueSpeaker(message.speaker, message.mode),
             parms: message.parms ? {
                 ...message.parms,
                 // 根据spineResourceKey重新获取spine实例

@@ -2,55 +2,55 @@
   <div v-if="showDialog" class="update-dialog-overlay" @click.self="emitClose">
     <div class="update-dialog">
       <div class="dialog-header">
-        <h3>水印设置</h3>
+        <h3>{{ t('watermark.title') }}</h3>
         <button class="close-btn" @click="emitClose">×</button>
       </div>
 
       <div class="dialog-content">
         <div class="wm-form">
           <div class="wm-row">
-            <span>启用水印</span>
+            <span>{{ t('watermark.enabled') }}</span>
             <ToggleSwitch v-model="form.enabled" />
           </div>
 
           <div class="wm-row">
-            <span>水印文本</span>
-            <input type="text" v-model="form.text" placeholder="请输入水印内容" class="wm-input" />
+            <span>{{ t('watermark.text') }}</span>
+            <input type="text" v-model="form.text" :placeholder="t('watermark.textPlaceholder')" class="wm-input" />
           </div>
 
           <div class="wm-row">
-            <span>字体大小(px)</span>
+            <span>{{ t('watermark.fontSize') }}</span>
             <input type="number" v-model.number="form.fontSize" min="10" max="120" class="wm-input" />
           </div>
 
           <div class="wm-row">
-            <span>颜色</span>
+            <span>{{ t('watermark.color') }}</span>
             <!-- <ColorPicker v-model="colorNumber" /> -->
-            <input type="text" v-model="form.color" placeholder="请输入颜色" class="wm-input" />
+            <input type="text" v-model="form.color" :placeholder="t('watermark.colorPlaceholder')" class="wm-input" />
           </div>
 
           <div class="wm-row">
-            <FilterSlider style="" label="透明度" v-model="form.opacity" :min="0" :max="1" :step="0.05" :precision="2" />
+            <FilterSlider style="" :label="t('watermark.opacity')" v-model="form.opacity" :min="0" :max="1" :step="0.05" :precision="2" />
           </div>
 
           <div class="wm-row">
-            <FilterSlider style="width: 100%;" label="倾斜角度(°)" v-model="form.angle" :min="-90" :max="90" :step="1"
+            <FilterSlider style="width: 100%;" :label="t('watermark.angle')" v-model="form.angle" :min="-90" :max="90" :step="1"
               :precision="0" />
           </div>
 
           <div class="wm-row">
-            <span>显示位置</span>
+            <span>{{ t('watermark.placement') }}</span>
             <Dropdown v-model="placementIndex" :options="placementOptions" :disabled="false" />
           </div>
 
           <!-- 仅平铺模式下展示间距设置 -->
           <template v-if="form.placement === 'tiled'">
             <div class="wm-row">
-              <FilterSlider style="width: 100%;" label="水平间距(px)" v-model="form.spacingX" :min="40" :max="600"
+              <FilterSlider style="width: 100%;" :label="t('watermark.spacingX')" v-model="form.spacingX" :min="40" :max="600"
                 :step="10" :precision="0" />
             </div>
             <div class="wm-row">
-              <FilterSlider style="width: 100%;" label="垂直间距(px)" v-model="form.spacingY" :min="40" :max="600"
+              <FilterSlider style="width: 100%;" :label="t('watermark.spacingY')" v-model="form.spacingY" :min="40" :max="600"
                 :step="10" :precision="0" />
             </div>
           </template>
@@ -58,11 +58,11 @@
           <!-- 四角模式下的偏移设置 -->
           <template v-else>
             <div class="wm-row">
-              <FilterSlider style="width: 100%;" label="水平偏移(px)" v-model="form.offsetX" :min="-200" :max="200"
+              <FilterSlider style="width: 100%;" :label="t('watermark.offsetX')" v-model="form.offsetX" :min="-200" :max="200"
                 :step="5" :precision="0" />
             </div>
             <div class="wm-row">
-              <FilterSlider style="width: 100%;" label="垂直偏移(px)" v-model="form.offsetY" :min="-200" :max="200"
+              <FilterSlider style="width: 100%;" :label="t('watermark.offsetY')" v-model="form.offsetY" :min="-200" :max="200"
                 :step="5" :precision="0" />
             </div>
           </template>
@@ -70,8 +70,8 @@
       </div>
 
       <div class="dialog-actions">
-        <button class="btn btn-secondary" @click="emitClose">取消</button>
-        <button class="btn btn-primary" @click="save">保存</button>
+        <button class="btn btn-secondary" @click="emitClose">{{ t('common.cancel') }}</button>
+        <button class="btn btn-primary" @click="save">{{ t('common.save') }}</button>
       </div>
     </div>
   </div>
@@ -79,15 +79,16 @@
 
 <script setup lang="ts">
 import { reactive, watchEffect, computed } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { useWatermarkStore, type WatermarkSettings } from '../stores/watermark-store';
 import ToggleSwitch from './common/ToggleSwitch.vue';
-import ColorPicker from './common/ColorPicker.vue';
 import FilterSlider from './common/FilterSlider.vue';
 import Dropdown from './common/Dropdown.vue';
 import type { DropdownOption } from '../types/app';
 
-const props = defineProps<{ showDialog: boolean }>();
+defineProps<{ showDialog: boolean }>();
 const emit = defineEmits<{ (e: 'close'): void }>();
+const { t } = useI18n();
 
 const wm = useWatermarkStore();
 wm.initialize();
@@ -128,31 +129,22 @@ const save = () => {
 
 const emitClose = () => emit('close');
 
-// 颜色在 Store 中是字符串（HEX），ColorPicker 使用数值，做双向转换
-const numberToHex = (num: number): string => '#' + num.toString(16).padStart(6, '0');
-const hexToNumber = (hex: string): number => parseInt(hex.replace('#', ''), 16);
-
-const colorNumber = computed<number>({
-  get() { return hexToNumber(form.color); },
-  set(v: number) { form.color = numberToHex(v); }
-});
-
 // 位置选择下拉
-const placementOptions: DropdownOption[] = [
-  { label: '平铺（全屏）', value: 'tiled' },
-  { label: '左上角', value: 'top-left' },
-  { label: '右上角', value: 'top-right' },
-  { label: '左下角', value: 'bottom-left' },
-  { label: '右下角', value: 'bottom-right' },
-];
+const placementOptions = computed<DropdownOption[]>(() => [
+  { label: t('watermark.placements.tiled'), value: 'tiled' },
+  { label: t('watermark.placements.topLeft'), value: 'top-left' },
+  { label: t('watermark.placements.topRight'), value: 'top-right' },
+  { label: t('watermark.placements.bottomLeft'), value: 'bottom-left' },
+  { label: t('watermark.placements.bottomRight'), value: 'bottom-right' },
+]);
 
 const placementIndex = computed<number>({
   get() {
-    const idx = placementOptions.findIndex(o => o.value === form.placement);
+    const idx = placementOptions.value.findIndex(o => o.value === form.placement);
     return idx === -1 ? 0 : idx;
   },
   set(i: number) {
-    const opt = placementOptions[i] || placementOptions[0];
+    const opt = placementOptions.value[i] || placementOptions.value[0];
     form.placement = opt.value as WatermarkSettings['placement'];
   }
 });

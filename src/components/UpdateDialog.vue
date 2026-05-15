@@ -181,7 +181,7 @@ const startUpdate = async () => {
     await manualUpdate(callbacks);
   } catch (error) {
     isDownloading.value = false;
-    const errorMessage = error instanceof Error ? error.message : '更新失败';
+    const errorMessage = error instanceof Error ? error.message : t('update.updateError');
     console.error('更新失败:', errorMessage);
     emit('updateError', errorMessage);
   }
@@ -206,7 +206,7 @@ const installAndRestart = async () => {
     emit('close');
   } catch (error) {
     console.error('安装失败:', error);
-    emit('updateError', error instanceof Error ? error.message : '安装失败');
+    emit('updateError', error instanceof Error ? error.message : t('update.installError'));
   }
 };
 

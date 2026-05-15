@@ -5,10 +5,12 @@
                 v-for="(item, _path) in actionStore.loadResMap" :key="item.name" :load="item" />
         </Action>
         <div class="canvas-mode" style="opacity: 1;padding-right: 5px;">
-            <span style="opacity: .3;display: flex;align-items: center;">当前画布模式为：{{ actionStore.gameMode }}</span>
+            <span style="opacity: .3;display: flex;align-items: center;">
+                {{ t('timeLine.currentCanvasMode', { mode: currentCanvasModeLabel }) }}
+            </span>
             <!-- <div>播放</div> -->
             <button class="play-button" @click="handlePlay">
-                <span class="play-icon">▶</span> 播放 <span class="shortcut-hint">[CTRL + 空格]</span>
+                <span class="play-icon">▶</span> {{ t('timeLine.play') }} <span class="shortcut-hint">[CTRL + Space]</span>
             </button>
         </div>
         <Action @hover="handleTitle" v-for="(item, title) in actionStore.actionMap" @click="selectAction(title)"
@@ -19,16 +21,17 @@
 
     <div class="time-line-tool-bar">
         <div style="overflow: hidden;">
-            <div style="line-height: 30px;white-space: nowrap;">实时预览</div>
+            <div style="line-height: 30px;white-space: nowrap;">{{ t('timeLine.realTimePreview') }}</div>
             <ToggleSwitch v-model="actionStore.realTimePreview"></ToggleSwitch>
             <div style="font-size: 14px;opacity: .5;white-space: nowrap;text-overflow: ellipsis;overflow: hidden;">⚠
-                即时内容无法预览</div>
+                {{ t('timeLine.realTimePreviewHint') }}</div>
         </div>
     </div>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted } from 'vue';
+import { computed, ref, onMounted, onUnmounted } from 'vue';
+import { useI18n } from 'vue-i18n';
 import showMessage from '../../script/common/massage';
 import { ActionItemtype, CharacterType, DragType, GameMode, dirs } from '../../types/app';
 import Action from './Action.vue';
@@ -42,6 +45,18 @@ import CanvasManager from '../../script/render/canvas-manager';
 const initAction = ref("Init Load Action")
 
 const actionStore = useActionStore();
+const { t, locale } = useI18n();
+
+const currentCanvasModeLabel = computed(() => {
+    locale.value;
+    switch (actionStore.gameMode) {
+        case GameMode.PREVIEW:
+            return t('timeLine.modes.preview');
+        case GameMode.SCENE:
+        default:
+            return t('timeLine.modes.scene');
+    }
+});
 
 
 const selectHoverActionTitle = ref(initAction.value);
@@ -116,18 +131,18 @@ const handleDrop = async (event: DragEvent) => {
 
             if (!result) {
                 if (event.target === timeRef.value || selectHoverActionTitle.value === initAction.value) {
-                    showMessage(`${name}：已存在`, "error", 2000);
+                    showMessage(t('timeLine.messages.alreadyExists', { name }), "error", 2000);
 
                 }
             } else {
-                showMessage(`预加载: ${name} `, "success", 2000);
+                showMessage(t('timeLine.messages.preloaded', { name }), "success", 2000);
 
             }
         }
 
     }
     else {
-        showMessage(`无法处理：${data} `, "error", 2000);
+        showMessage(t('timeLine.messages.cannotProcess', { type: data || '' }), "error", 2000);
     }
 
 }

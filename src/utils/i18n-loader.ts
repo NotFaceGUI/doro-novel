@@ -62,7 +62,7 @@ export async function loadAllLocaleMessages(): Promise<Record<SupportedLocale, R
  */
 export async function checkLocaleExists(locale: SupportedLocale): Promise<boolean> {
   try {
-    const resourcePath = await resolveResource(`locales/${locale}.json`)
+    const resourcePath = await resolveResource(`${ASSET_LOCALES}${locale}.json`)
     await readTextFile(resourcePath)
     return true
   } catch {

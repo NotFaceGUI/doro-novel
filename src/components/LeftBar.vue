@@ -3,16 +3,16 @@
         <div class="bar-font-icon ">🎬
         </div>
         <div class="top-bottom"></div>
-        <div class="bar-font-icon" :class="{ active: selectedTab === 'Character & Story' }"
+        <div class="bar-font-icon" :title="t('leftBar.characterStory')" :class="{ active: selectedTab === 'Character & Story' }"
             @click="selectTab('Character & Story')">🕵️‍♂️
         </div>
-        <div class="bar-font-icon" :class="{ active: selectedTab === 'Image' }" @click="selectTab('Image')">🖼
+        <div class="bar-font-icon" :title="t('leftBar.image')" :class="{ active: selectedTab === 'Image' }" @click="selectTab('Image')">🖼
         </div>
-        <div class="bar-font-icon" :class="{ active: selectedTab === 'Video' }" @click="selectTab('Video')">📺
+        <div class="bar-font-icon" :title="t('leftBar.video')" :class="{ active: selectedTab === 'Video' }" @click="selectTab('Video')">📺
         </div>
-        <div class="bar-font-icon" :class="{ active: selectedTab === 'Sound' }" @click="selectTab('Sound')">🎶
+        <div class="bar-font-icon" :title="t('leftBar.sound')" :class="{ active: selectedTab === 'Sound' }" @click="selectTab('Sound')">🎶
         </div>
-        <div class="bar-font-icon" :class="{ active: selectedTab === 'Package' }" @click="selectTab('Package')">📦
+        <div class="bar-font-icon" :title="t('leftBar.package')" :class="{ active: selectedTab === 'Package' }" @click="selectTab('Package')">📦
         </div>
     </div>
     <div class="tab-content" ref="tabContent" :style="{ width: tabContentWidth + 'px' }">
@@ -45,7 +45,7 @@
         <div class="look-audio" v-show="selectedTab === 'Sound'">
             <audio ref="audioPlayer" class="audio-player" controls controlslist="nodownload">
                 <source type="audio/mp3" />
-                Your browser does not support the audio element.
+                {{ t('leftBar.audioUnsupported') }}
             </audio>
         </div>
 
@@ -61,13 +61,14 @@
         <div class="resizer" @mousedown="initResize"></div>
     </div>
 
-    <ResizableTab title="🎬 Time Line"  :min-width="300" :default-width="400">
+    <ResizableTab :title="`🎬 ${t('leftBar.timeline')}`"  :min-width="300" :default-width="400">
         <TimeLine></TimeLine>
     </ResizableTab>
 </template>
 
 <script setup lang="ts">
 import { ref, onMounted, onBeforeUnmount } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { ASSET_AUDIO, /* DEFAULT_WIDTH ,*/ MAX_WIDTH, MIN_WIDTH, ResType } from '../script/var';
 import AssetManager from '../script/asset-manager';
 import { CharacterUrls, dirs } from '../types/app';
@@ -77,6 +78,7 @@ import ResizableTab from './asset/ResizableTab.vue';
 import { invoke } from '@tauri-apps/api/core';
 import TimeLine from './edit/TimeLine.vue';
 
+const { t } = useI18n();
 const selectedTab = ref(''); // 默认选中的选项卡
 
 const audioFiles = ref<dirs[]>([])

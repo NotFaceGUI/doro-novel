@@ -1,20 +1,20 @@
 <template>
     <div class="action-item-main">
-        <ActionItemHead content="🎶 音效播放" :title="title" :id="id" :is-collapsed="actionItem.isToggle"></ActionItemHead>
+        <ActionItemHead :content="t('actionSfx.head')" :title="title" :id="id" :is-collapsed="actionItem.isToggle"></ActionItemHead>
         <div class="action-item-content" v-show="!actionItem.isToggle">
             <div class="action-title">
-                阻塞执行
+                {{ t('actionCommon.waitExecution') }}
                 <ToggleSwitch v-model="actionItem.wait!"></ToggleSwitch>
             </div>
 
             <div class="action-title">
-                选择音效文件
+                {{ t('actionSfx.selectAudioFile') }}
             </div>
             <Dropdown style="width: 100%;overflow: hidden;" v-model="selectedAudioOption" @update:modelValue="onSelectAudio" :options="availableSfxAudios"
                 :disabled="false" />
 
             <div class="action-title">
-                音量设置
+                {{ t('actionSfx.volume') }}
             </div>
             <div>
                 <DynamicInputs v-model="volumeSettings" :columns="volumeSettings.length">
@@ -25,7 +25,7 @@
 
             <!-- 预览控制 -->
             <div class="action-title">
-                预览控制
+                {{ t('actionSfx.previewControls') }}
                 <div class="preview-controls">
                     <button @click="previewPlay" class="preview-btn" :disabled="!canPreview">
                         {{ isPlaying ? '⏸️' : '▶️' }}
@@ -40,7 +40,8 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, ref, onUnmounted } from 'vue';
+import { computed, onMounted, ref, onUnmounted, watch } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { useCommonState } from '../../../script/common/common-action-item';
 import ActionItemHead from './ActionItemHead.vue';
 import { Modification, PropertyPath } from '../../../script/common/snapshot';
@@ -57,10 +58,11 @@ const selectedAudioOption = ref(0);
 const isPlaying = ref(false);
 const audioList = ref<Record<string, string>>({});
 let currentSfxSound: Sound | null = null;
+const { t, locale } = useI18n();
 
 const volumeSettings = ref<InputOption[]>([
     {
-        label: '音量 (0-1)',
+        label: '',
         value: 1.0,
         type: 'number',
         disabled: false
@@ -77,6 +79,7 @@ let modification: Map<PropertyPath, Modification>;
 
 // 获取可用的音效文件（只选择路径包含sfx的音频文件）
 const availableSfxAudios = computed(() => {
+    locale.value;
     const audioKeys = Object.keys(audioList.value).filter(key => {
         const url = audioList.value[key];
         // 检查是否是音频文件且路径包含sfx
@@ -104,7 +107,7 @@ const availableSfxAudios = computed(() => {
 
     // 如果没有音效文件，返回一个默认选项
     if (audioOptions.length === 0) {
-        return [{ label: '无可用音效文件', value: '' }];
+        return [{ label: t('actionSfx.noAvailableAudioFiles'), value: '' }];
     }
 
     return audioOptions;
@@ -223,6 +226,10 @@ const onSelectAudio = () => {
     previewStop();
 };
 
+const syncLabels = () => {
+    volumeSettings.value[0].label = t('actionSfx.inputs.volume');
+};
+
 // 定时器引用
 let audioListTimer: number | null = null;
 
@@ -251,7 +258,7 @@ const deserialization = (data: ActionItems) => {
         
         if (Array.isArray(actionData.volumeSettings)) {
             volumeSettings.value = actionData.volumeSettings.map((setting: any) => ({
-                label: setting.label || '音量 (0-1)',
+                label: setting.label || t('actionSfx.inputs.volume'),
                 value: setting.value || 1.0,
                 type: setting.type || 'number',
                 disabled: setting.disabled || false
@@ -281,6 +288,8 @@ onMounted(() => {
         updateAudioList();
     }, 1000);
 });
+
+watch(locale, syncLabels, { immediate: true });
 
 onUnmounted(() => {
     // 组件卸载时停止音频

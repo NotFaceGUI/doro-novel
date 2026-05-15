@@ -1,20 +1,22 @@
 <template>
     <div class="action-item-tool">
-        <button class="play-btn" @click.stop="play">▶</button>
-        <button @click="onDelete">🗑</button>
-        <button class="collapse-btn" @click.stop="toggleCollapse" :title="actionItem.isToggle ? '展开' : '折叠'">
+        <button class="play-btn" @click.stop="play" :title="t('actionItemTool.preview')">▶</button>
+        <button @click="onDelete" :title="t('actionItemTool.delete')">🗑</button>
+        <button class="collapse-btn" @click.stop="toggleCollapse" :title="actionItem.isToggle ? t('actionItemTool.expand') : t('actionItemTool.collapse')">
             {{ actionItem.isToggle ? '▼' : '▲' }}
         </button>
     </div>
 </template>
 
 <script setup lang="ts">
+import { useI18n } from 'vue-i18n';
 import CanvasManager from '../../../script/render/canvas-manager';
 import { useActionStore } from '../../../stores/action-store';
 import { GameMode } from '../../../types/app';
 import { useCommonState } from '../../../script/common/common-action-item';
 
 const actions = useActionStore();
+const { t } = useI18n();
 
 
 const props = defineProps<{

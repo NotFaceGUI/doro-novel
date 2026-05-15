@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, onUnmounted, ref } from 'vue';
+import { computed, onMounted, onUnmounted } from 'vue';
 import { DoroApp, type Project } from './types/app';
 import WelcomeGuide from './components/WelcomeGuide.vue';
 import AppHeader from './components/AppHeader.vue';
@@ -19,10 +19,10 @@ const projectStore = useProjectStore();
 // 初始化更新功能
 const updater = useUpdater();
 
-const app = ref<DoroApp>({
+const app = computed<DoroApp>(() => ({
   name: 'Doro Novel',
-  version: 'ver ' + APP_VERSION,
-});
+  version: APP_VERSION,
+}));
 
 onMounted(async () => {
   // 初始化项目状态

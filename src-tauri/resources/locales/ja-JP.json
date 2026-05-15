@@ -1,4 +1,573 @@
 {
+  "app": {
+    "versionPrefix": "ver"
+  },
+  "common": {
+    "back": "戻る",
+    "close": "閉じる",
+    "cancel": "キャンセル",
+    "delete": "削除",
+    "save": "保存",
+    "create": "作成",
+    "next": "次へ",
+    "previous": "前へ",
+    "done": "完了",
+    "restoreCurrent": "現在値に戻す"
+  },
+  "language": {
+    "menu": "言語(L)",
+    "zhCN": "简体中文",
+    "enUS": "English",
+    "jaJP": "日本語",
+    "koKR": "한국어"
+  },
+  "menu": {
+    "project": "プロジェクト(P)",
+    "edit": "編集(E)",
+    "help": "ヘルプ(H)",
+    "saveProject": "プロジェクトを保存",
+    "openProject": "プロジェクトを開く",
+    "closeProject": "プロジェクトを閉じる",
+    "openProjectFolder": "プロジェクトフォルダを開く",
+    "clearCache": "キャッシュをクリア",
+    "undo": "元に戻す",
+    "redo": "やり直す",
+    "cut": "切り取り",
+    "copy": "コピー",
+    "paste": "貼り付け",
+    "find": "検索",
+    "replace": "置換",
+    "openResourceFolder": "リソースフォルダを開く",
+    "importResource": "リソースをインポート",
+    "viewHelp": "ヘルプを見る",
+    "onlineDocs": "オンラインドキュメント",
+    "faq": "よくある質問",
+    "watermarkSettings": "透かし設定",
+    "updateResources": "リソースを更新",
+    "about": "このソフトについて",
+    "selectProjectFile": "プロジェクトファイルを選択",
+    "projectFileFilterName": "Doroプロジェクトファイル",
+    "messages": {
+      "currentProjectNotFound": "現在のプロジェクト情報が見つかりません",
+      "readProjectFailed": "プロジェクトファイルの読み込みに失敗しました",
+      "projectSaved": "プロジェクトを保存しました！",
+      "projectOpened": "[{projectName}] プロジェクトを開きました",
+      "projectSaveFailed": "プロジェクトの保存に失敗しました。再試行してください",
+      "projectClosed": "プロジェクトを閉じました",
+      "projectCloseFailed": "プロジェクトのクローズに失敗しました。再試行してください",
+      "projectOpenFailed": "プロジェクトを開けませんでした。ファイル形式が正しいか確認してください",
+      "projectFolderOpenFailed": "プロジェクトフォルダを開けませんでした。プロジェクトが存在するか確認してください",
+      "resourceFolderOpenFailed": "リソースフォルダを開けませんでした。リソースディレクトリが存在するか確認してください",
+      "updateResourcesStarted": "リソース更新を開始しました。詳細ログは開いたコンソールウィンドウを確認してください。",
+      "updateResourcesFailed": "リソース更新中にエラーが発生しました: {error}"
+    }
+  },
+  "welcome": {
+    "title": "🎉 Doro Novel へようこそ",
+    "subtitle": "ビジュアルノベル制作の旅を始めましょう！",
+    "createProject": "🎬 新規プロジェクトを作成",
+    "openProject": "📂 既存プロジェクトを開く",
+    "viewDocs": "📖 公式ドキュメントを見る",
+    "createTitle": "🎫 新規プロジェクト作成",
+    "createDescription": "プロジェクト名を入力してください",
+    "projectName": "プロジェクト名",
+    "projectNamePlaceholder": "プロジェクト名を入力",
+    "pathTitle": "📂 プロジェクト保存先を選択",
+    "pathDescription": "プロジェクトの保存先を選択してください",
+    "projectPath": "プロジェクトパス",
+    "projectPathPlaceholder": "プロジェクトパスを選択",
+    "confirmTitle": "情報の確認",
+    "confirmDescription": "プロジェクト情報を確認してください",
+    "notFilled": "未入力",
+    "messages": {
+      "incompleteInfo": "プロジェクト情報を入力してください",
+      "saveFailed": "プロジェクトの保存に失敗しました。再試行してください"
+    }
+  },
+  "about": {
+    "title": "このソフトについて",
+    "description": "🎨 Tauri ベースのビジュアルノベルエディタで、Nikke風のインタラクティブなビジュアルノベル制作向けに設計されています。ビジュアル編集、分岐、多言語ローカライズ、リアルタイムプレビューに対応しています。",
+    "authorRole": "プロジェクト作者 & 開発者",
+    "authorDescription": "創作をもっと簡単で楽しくする優れたオープンソースツール作りに取り組んでいます。",
+    "emailLabel": "メール: ",
+    "linksTitle": "関連リンク",
+    "githubTitle": "GitHub リポジトリ",
+    "githubDescription": "ソースコードと貢献を見る",
+    "bilibiliTitle": "Bilibili スペース",
+    "bilibiliDescription": "最新情報をフォロー",
+    "blablalinkDescription": "個人ホームページ",
+    "qqTitle": "QQ グループ",
+    "qqDescription": "コミュニティに参加",
+    "techTitle": "技術スタック",
+    "acknowledgementsTitle": "特別感謝",
+    "acknowledgementsNikkePrefix": "",
+    "acknowledgementsNikkeSuffix": " チームがコミュニティ向けに完全なキャラクターデータを含むオープンソースリソースリポジトリを維持してくれていることに感謝します。",
+    "acknowledgementsHaderinPrefix": "",
+    "acknowledgementsHaderinSuffix": " さんのプロジェクト支援と貢献に感謝します。"
+  },
+  "watermark": {
+    "title": "透かし設定",
+    "enabled": "透かしを有効化",
+    "text": "透かしテキスト",
+    "textPlaceholder": "透かし内容を入力",
+    "fontSize": "フォントサイズ(px)",
+    "color": "色",
+    "colorPlaceholder": "色を入力",
+    "opacity": "透明度",
+    "angle": "傾き(°)",
+    "placement": "表示位置",
+    "spacingX": "横方向間隔(px)",
+    "spacingY": "縦方向間隔(px)",
+    "offsetX": "横方向オフセット(px)",
+    "offsetY": "縦方向オフセット(px)",
+    "placements": {
+      "tiled": "タイル（全画面）",
+      "topLeft": "左上",
+      "topRight": "右上",
+      "bottomLeft": "左下",
+      "bottomRight": "右下"
+    }
+  },
+  "update": {
+    "title": "新しいバージョンが見つかりました",
+    "newVersion": "新バージョン",
+    "releaseDate": "公開日",
+    "releaseNotes": "更新内容",
+    "downloading": "ダウンロード中",
+    "updateNow": "今すぐ更新",
+    "later": "後で通知",
+    "restartNow": "今すぐ再起動",
+    "restartLater": "後で再起動",
+    "checkingUpdate": "更新を確認中...",
+    "noUpdate": "すでに最新版です",
+    "noAvailableUpdate": "利用可能な更新はありません",
+    "updateAvailable": "新しいバージョン {version} が見つかりました",
+    "downloadComplete": "ダウンロード完了",
+    "downloadCompleted": "ダウンロード完了",
+    "installComplete": "インストール完了",
+    "updateError": "更新に失敗しました",
+    "networkError": "ネットワーク接続に失敗しました",
+    "downloadError": "ダウンロードに失敗しました",
+    "installError": "インストールに失敗しました",
+    "readyToInstall": "更新パッケージの準備ができました",
+    "installPrompt": "今すぐインストールしてアプリを再起動しますか？",
+    "cancel": "キャンセル",
+    "installLater": "後でインストール",
+    "installAndRestart": "インストールして再起動",
+    "justChecked": "たった今確認",
+    "minutesAgo": "{count} 分前に確認",
+    "hoursAgo": "{count} 時間前に確認"
+  },
+  "leftBar": {
+    "characterStory": "キャラクター & ストーリー",
+    "image": "画像",
+    "video": "動画",
+    "sound": "音声",
+    "package": "パッケージ",
+    "timeline": "Time Line",
+    "audioUnsupported": "お使いのブラウザは audio 要素をサポートしていません。"
+  },
+  "controlHint": {
+    "moveView": "視点移動",
+    "zoomView": "ホイールでズーム"
+  },
+  "slotControl": {
+    "title": "部位コントロール",
+    "showAll": "すべて表示",
+    "hideAll": "すべて非表示"
+  },
+  "sortDialog": {
+    "title": "Action Items を並び替え",
+    "instructions": "下の ActionItem をドラッグして並び替えます。 ",
+    "warning": "順序を変えるとスナップショットの再現性が下がる場合があります",
+    "typeLabel": "タイプ",
+    "unknownType": "不明なタイプ",
+    "saveOrder": "並び順を保存",
+    "types": {
+      "background": "背景",
+      "bgm": "BGM",
+      "audio": "効果音",
+      "dialogue": "会話",
+      "scene": "シーン初期化",
+      "camera": "カメラ操作",
+      "transition": "トランジション",
+      "wait": "待機/ブロック",
+      "branchDialogue": "分岐会話",
+      "effect": "エフェクト",
+      "character": "キャラクター操作",
+      "cg": "CG画面"
+    }
+  },
+  "dialogueUi": {
+    "title": "⚙️ 会話レイアウト設定",
+    "followScene": "シーンに従う",
+    "forceMode": "強制設定",
+    "forceOpen": "強制設定",
+    "noDialogueDetected": "会話が検出されません",
+    "forceModeSubtitle": "{mode} を強制設定します。まだ表示されていなくても設定は保存されます",
+    "sceneModeSubtitle": "現在のシーン: {mode}。変更はすぐ画面に反映されます",
+    "emptySubtitle": "現在のシーンに認識可能な会話要素がありません。強制設定に切り替えられます",
+    "emptyStatusTitle": "シーンに対応要素がありません",
+    "missingStatusTitle": "現在のシーンに {mode} 要素がありません",
+    "activeStatusTitle": "{mode} を調整中",
+    "emptyStatusDesc": "シーンにキャラクター会話、ナレーション、回答を表示するか、強制設定で直接保存してください。",
+    "missingStatusDesc": "このタイプは今のシーンには表示されていませんが、設定はすぐ保存され、次回表示時に適用されます。",
+    "activeStatusDesc": "現在表示中の要素がこのタイプです。スライダー操作でリアルタイムに更新されます。",
+    "modes": {
+      "normal": "キャラクター会話",
+      "voiceover": "ナレーション",
+      "commander": "回答"
+    },
+    "sections": {
+      "normalFonts": "💬 キャラクター会話",
+      "normalLayout": "📐 名前と本文",
+      "colorBar": "🎨 キャラクターカラーバー",
+      "voiceover": "📢 ナレーション",
+      "commander": "🗨️ 回答"
+    },
+    "controls": {
+      "nameFontOffset": {
+        "label": "名前フォント",
+        "description": "キャラクター名フォントサイズのオフセット"
+      },
+      "contentFontOffset": {
+        "label": "本文フォント",
+        "description": "会話本文フォントサイズのオフセット"
+      },
+      "voiceoverFontOffset": {
+        "label": "ナレーションフォント",
+        "description": "ナレーションフォントサイズのオフセット"
+      },
+      "commanderFontOffset": {
+        "label": "回答フォント",
+        "description": "回答ボタン文字サイズのオフセット"
+      },
+      "nameContentGapOffset": {
+        "label": "名前と本文の間隔",
+        "description": "キャラクター名と本文の縦間隔"
+      },
+      "groupYOffset": {
+        "label": "全体縦オフセット",
+        "description": "名前と本文のグループ全体を上下移動"
+      },
+      "nameXOffset": {
+        "label": "名前横オフセット",
+        "description": "キャラクター名の位置を個別に調整"
+      },
+      "contentXOffset": {
+        "label": "本文横オフセット",
+        "description": "会話本文の位置を個別に調整"
+      },
+      "colorBarHeightOffset": {
+        "label": "カラーバー高さ",
+        "description": "キャラクターカラーバー高さの補正"
+      },
+      "colorBarWidthOffset": {
+        "label": "カラーバー幅",
+        "description": "キャラクターカラーバー幅の補正"
+      },
+      "colorBarXOffset": {
+        "label": "カラーバー横オフセット",
+        "description": "キャラクターカラーバーを左右に移動"
+      },
+      "colorBarYOffset": {
+        "label": "カラーバー縦オフセット",
+        "description": "キャラクターカラーバーを上下に移動"
+      }
+    },
+    "metrics": {
+      "name": "名前 {value}px",
+      "content": "本文 {value}px",
+      "gap": "間隔 {value}px",
+      "colorBarHeight": "バー高 {value}px",
+      "voiceover": "ナレーション {value}px",
+      "commander": "回答 {value}px",
+      "lineHeight": "行高 {value}px"
+    }
+  },
+  "projectView": {
+    "tabs": {
+      "canvas": "Canvas",
+      "preview": "Preview",
+      "script": "Script"
+    },
+    "unsupportedPreview": "このファイルはプレビューに対応していません",
+    "selectAnimation": "アニメーション:",
+    "selectSkin": "スキン:",
+    "characterType": "キャラクタータイプ:",
+    "characterTypes": {
+      "default": "Default",
+      "aim": "Aim",
+      "cover": "Cover"
+    },
+    "mixPresets": {
+      "default": "デフォルトミックス",
+      "fast": "高速ミックス",
+      "slow": "低速ミックス",
+      "custom": "カスタムミックス"
+    },
+    "shaderEditorTitle": "Shader エフェクトエディタ",
+    "scriptPlaceholder": "ここにストーリースクリプトを書いてください...",
+    "editing": "編集中"
+  },
+  "actionCommon": {
+    "waitExecution": "実行をブロック"
+  },
+  "actionItemTool": {
+    "preview": "プレビュー",
+    "delete": "削除",
+    "expand": "展開",
+    "collapse": "折りたたみ"
+  },
+  "inputActionType": {
+    "searchPlaceholder": "追加する操作を選択",
+    "searchPlaceholderWithFile": "{fileName} に対して何をしますか？",
+    "characterManager": "キャラクターマネージャー",
+    "sceneCharacterSelector": "シーンキャラクター選択",
+    "imageManager": "画像マネージャー",
+    "scale": "拡大率",
+    "noCharacterResources": "読み込まれたキャラクターリソースが見つかりません。先に追加してください",
+    "noSceneCharacters": "シーン内にキャラクターがありません。先に追加してください",
+    "noImageResources": "読み込まれた画像リソースが見つかりません。先に追加してください",
+    "sections": {
+      "init": "初期化",
+      "common": "一般",
+      "advanced": "高度",
+      "template": "テンプレート"
+    },
+    "items": {
+      "scene": { "label": "シーン初期化", "desc": "シーン状態をリセット" },
+      "character": { "label": "キャラクター操作", "desc": "移動/拡大縮小/動作/表情" },
+      "camera": { "label": "カメラ操作", "desc": "カメラ視点を調整" },
+      "dialogue": { "label": "会話追加", "desc": "キャラクターの台詞を追加" },
+      "cg": { "label": "CG追加/削除", "desc": "CG画面を挿入または削除" },
+      "audio": { "label": "効果音追加", "desc": "効果音を再生" },
+      "bgm": { "label": "BGM設定/解除", "desc": "BGMを変更または停止" },
+      "background": { "label": "背景設定/解除", "desc": "背景を設定または削除" },
+      "characterToggle": { "label": "キャラ追加/削除[x]", "desc": "キャラクターを追加または削除" },
+      "wait": { "label": "待機追加", "desc": "指定時間だけ処理をブロック" },
+      "transition": { "label": "トランジション設定", "desc": "画面やシーンの遷移効果" },
+      "effect": { "label": "エフェクト追加", "desc": "シーンに特殊効果を追加" },
+      "crt": { "label": "CRT追加/削除[x]", "desc": "古い画面風エフェクトを再現" },
+      "extra": { "label": "追加 バラバラ[x]", "desc": "追加のカスタム効果" },
+      "consultTemplate": { "label": "相談テンプレート[x]", "desc": "相談会話のプリセットテンプレート" },
+      "mainlineTemplate": { "label": "本線テンプレート[x]", "desc": "本編用テンプレート" }
+    }
+  },
+  "actionInitScene": {
+    "head": "🎬 シーン初期化",
+    "fadeIn": "オープニング遷移",
+    "initialCameraPosition": "カメラ初期位置",
+    "setBackground": "背景を設定",
+    "changeBackground": "背景を切り替え",
+    "setInitialCharacterPosition": "キャラクター初期位置を設定",
+    "positionTooltipPrefix": "シーン開始時の",
+    "positionTooltipHighlight": "キャラクター配置",
+    "shiftMoveHintPrefix": "",
+    "shiftMoveHintSuffix": "キーで水平移動",
+    "ctrlMoveHintPrefix": "",
+    "ctrlMoveHintSuffix": "キーで垂直移動",
+    "dragPositionHint": "ドラッグで位置調整 (Shift: 水平, Ctrl: 垂直)",
+    "animation": "アニメーション：",
+    "initVisible": "初期表示：",
+    "addCharacterToScene": "シーンにキャラクターを追加",
+    "parallaxFactor": "視差係数"
+  },
+  "actionCharacter": {
+    "head": "👤 キャラクター操作",
+    "selectCharacter": "キャラクター選択",
+    "selectCharacterDesc": "シーン内に存在するキャラクターを選んで操作します",
+    "warningTitle": "注意：",
+    "warningPrefix": "キャラクターを切り替えると",
+    "warningLoseState": "現在の目標状態が失われます",
+    "warningClearPrefix": "切り替え後、現在のキャラクターの",
+    "warningClearHighlight": "目標状態はクリアされます",
+    "warningResetPrefix": "そのキャラクターに戻ると、自動的に",
+    "warningResetHighlight": "シーン内の元の位置にリセットされます",
+    "operationArea": "キャラクター操作",
+    "operationAreaDesc": "キャラクターの目標状態と操作モードを設定します",
+    "operationMode": "操作モード",
+    "targetState": "目標状態",
+    "easeCurve": "イージング曲線",
+    "easeCurveDesc": "時間経過に対する変化率を指定します。",
+    "useStippleEffect": "点描フェードを使用",
+    "stippleEffectDesc": "有効にすると表示/非表示時に点描透明効果を使います",
+    "stippleEffectFallback": "無効時はシンプルなフェードを使います",
+    "roleFallback": "キャラクター",
+    "durationMs": "継続時間(ms)",
+    "operationModes": {
+      "fixed": "固定",
+      "tween": "トゥイーン",
+      "show": "表示",
+      "hide": "非表示"
+    }
+  },
+  "actionDialogue": {
+    "head": "💬 会話設定",
+    "hideUiAfterDialogue": "会話終了後にUIを隠す",
+    "hideDelayMs": "遅延非表示時間(ms)",
+    "hideDelayTooltipPrefix": "会話UIの",
+    "hideDelayTooltipHighlight": "遅延非表示",
+    "hideDelayTooltipSuffix": "時間を指定できます",
+    "dragSort": "ドラッグで並び替え",
+    "editAlias": "クリックして別名を設定",
+    "advancedMode": "高度モード",
+    "delete": "削除",
+    "bindCharacterTip": "アイコンをクリックしてキャラクターを紐付け",
+    "branchCondition": "分岐条件：",
+    "branchConditionPlaceholder": "A または A,B&C または (A,B)&C",
+    "branchConditionTooltipPrefix": "この会話に必要な",
+    "branchConditionTooltipHighlight": "分岐タグ",
+    "branchFormats": {
+      "title": "対応形式：",
+      "single": "単一タグ",
+      "or": "いずれか1つのタグ（OR）",
+      "and": "すべてのタグ（AND）",
+      "mixed": "混合ロジック（A または BかつC）",
+      "priority": "括弧優先 ((A または B) かつ C)",
+      "visibleRule": "条件を満たすプレイヤーだけがこの会話を見られます"
+    },
+    "textPlaceholder": "テキストを入力してください……",
+    "cameraProxy": "カメラ代理：",
+    "branchTag": "分岐タグ：",
+    "branchTagPlaceholder": "分岐タグを入力 (例: A, B)",
+    "branchTagTooltipPrefix": "各選択肢に",
+    "branchTagTooltipHighlight": "分岐タグ",
+    "branchTagTooltipSuffixPrefix": "を設定し、選択タグに応じて",
+    "branchTagTooltipSuffixHighlight": "異なる内容を表示",
+    "cameraStand": "機位選択：",
+    "enableMove": "移動有効：",
+    "easeFunction": "イージング：",
+    "duration": "アニメ時間：",
+    "animationName": "アニメ名：",
+    "animationLoop": "アニメループ：",
+    "cameraOffsetX": "機位オフセットX：",
+    "cameraOffsetY": "機位オフセットY：",
+    "preselectCharacter": "事前選択キャラクター",
+    "clearPreselectedCharacter": "事前選択をクリア",
+    "addNew": "追加",
+    "append": "追記",
+    "selectDialogueType": "会話タイプを選択",
+    "quickTypes": {
+      "normal": "通常",
+      "voiceover": "ナレーション",
+      "commander": "自分"
+    },
+    "cameraStands": {
+      "large": "大(全景)",
+      "medium": "中(半身)",
+      "small": "小(クローズアップ)"
+    },
+    "types": {
+      "normal": {
+        "label": "通常会話",
+        "description": "キャラクター同士の標準会話"
+      },
+      "voiceover": {
+        "label": "ナレーション",
+        "description": "特定の話者を持たない叙述テキスト"
+      },
+      "commander": {
+        "label": "指揮官回答",
+        "description": "プレイヤーキャラクターの会話内容"
+      }
+    },
+    "systemSpeakers": {
+      "selectCharacter": "キャラクターを選択",
+      "voiceover": "ナレーション",
+      "commander": "指揮官"
+    },
+    "messages": {
+      "preselectedCharacter": "事前選択キャラクター: {character}",
+      "clearedPreselectedCharacter": "事前選択キャラクターをクリアしました",
+      "selectCharacterFirst": "先にキャラクターを選択してください",
+      "deletedDialogue": "会話を削除しました",
+      "movedUp": "会話を上に移動しました",
+      "movedDown": "会話を下に移動しました",
+      "orderUpdated": "会話順を更新しました",
+      "addDialogueFirst": "先に会話を追加してください"
+    }
+  },
+  "timeLine": {
+    "currentCanvasMode": "現在のキャンバスモード：{mode}",
+    "play": "再生",
+    "realTimePreview": "リアルタイムプレビュー",
+    "realTimePreviewHint": "即時内容はプレビューできません",
+    "modes": {
+      "scene": "シーン",
+      "preview": "プレビュー"
+    },
+    "messages": {
+      "alreadyExists": "{name}：既に存在します",
+      "preloaded": "プリロード：{name}",
+      "cannotProcess": "処理できません：{type}"
+    }
+  },
+  "shaderEditor": {
+    "title": "Shader エフェクトエディタ【試作版】",
+    "apply": "効果を適用",
+    "reset": "リセット",
+    "loadPreset": "プリセットを読み込む",
+    "selectPreset": "プリセット効果を選択",
+    "fragmentShader": "Fragment Shader:",
+    "fragmentShaderPlaceholder": "フラグメントシェーダーコードを入力...",
+    "uniforms": "Uniform パラメータ",
+    "addUniform": "+ パラメータ追加",
+    "uniformNamePlaceholder": "パラメータ名",
+    "realTimePreview": "リアルタイムプレビュー",
+    "enableAnimation": "アニメーションを有効化",
+    "dissolveAnimationEnabled": "ディゾルブアニメーションが有効です",
+    "timeAnimationEnabled": "時間アニメーションが有効です",
+    "presets": {
+      "glow": "発光効果",
+      "wave": "波形ゆがみ",
+      "colorShift": "色相シフト",
+      "dissolve": "ディゾルブ効果"
+    }
+  },
+  "actionBgm": {
+    "head": "🔊 背景音楽",
+    "operationMode": "音声操作モード：",
+    "selectAudioFile": "音声ファイルを選択",
+    "volume": "音量設定",
+    "loopPlayback": "ループ再生",
+    "fadeIn": "フェードイン",
+    "fadeOut": "フェードアウト",
+    "audioEffects": "音声効果",
+    "telephoneEffect": "電話効果",
+    "reverbEffect": "リバーブ効果",
+    "equalizer": "イコライザー",
+    "stopCurrentBgm": "現在再生中の背景音楽を停止",
+    "stopWithFadeOut": "フェードアウト停止",
+    "noContent": "内容なし",
+    "previewControls": "プレビュー操作",
+    "clearAllEffects": "すべての効果をクリア",
+    "noAvailableAudioFiles": "利用可能な音声ファイルがありません",
+    "operationModes": {
+      "play": "音声を再生 (Play)",
+      "stop": "音声を停止 (Stop)"
+    },
+    "inputs": {
+      "volume": "音量 (0-1)",
+      "fadeInDuration": "フェードイン時間 (秒)",
+      "fadeOutDuration": "フェードアウト時間 (秒)",
+      "stopFadeOutDuration": "停止フェードアウト時間 (秒)",
+      "stereoSeparation": "ステレオ分離 (-1 から 1)",
+      "distortion": "ディストーション (0 から 1)",
+      "reverbTime": "リバーブ時間 (秒)",
+      "reverbDecay": "減衰"
+    }
+  },
+  "actionSfx": {
+    "head": "🎶 効果音再生",
+    "selectAudioFile": "効果音ファイルを選択",
+    "volume": "音量設定",
+    "previewControls": "プレビュー操作",
+    "noAvailableAudioFiles": "利用可能な効果音ファイルがありません",
+    "inputs": {
+      "volume": "音量 (0-1)"
+    }
+  },
   "777": "777",
   "absolute": "absolute",
   "acpufreeze": "acpufreeze",

@@ -2,7 +2,7 @@
   <div v-if="showDialog" class="about-dialog-overlay" @click.self="closeDialog">
     <div class="about-dialog">
       <div class="dialog-header">
-        <h3>关于我们</h3>
+        <h3>{{ t('about.title') }}</h3>
         <button class="close-btn" @click="closeDialog">×</button>
       </div>
       
@@ -14,10 +14,7 @@
           </div>
           <div class="project-details">
             <h2>Doro Novel</h2>
-            <p class="project-description">
-              🎨 一个基于 Tauri 的可视化小说编辑器，专为创建 Nikke 风格的交互式视觉小说而设计，
-              支持可视化编辑、剧情分支、多语言本地化和实时预览。
-            </p>
+            <p class="project-description">{{ t('about.description') }}</p>
             <div class="version-info">
               <span class="version-badge">ver {{ APP_VERSION }}</span>
             </div>
@@ -32,18 +29,16 @@
           </div>
           <div class="author-details">
             <h3>Ghost</h3>
-            <p class="author-role">项目作者 & 开发者</p>
-            <p class="author-description">
-              致力于创建优秀的开源工具，让创作变得更加简单和有趣。
-            </p>
-              邮箱：<strong>parsegamecn@gmail.com</strong>
+            <p class="author-role">{{ t('about.authorRole') }}</p>
+            <p class="author-description">{{ t('about.authorDescription') }}</p>
+              {{ t('about.emailLabel') }}<strong>parsegamecn@gmail.com</strong>
             <p></p>
           </div>
         </div>
         
         <!-- 链接区域 -->
         <div class="links-section">
-          <h4>相关链接</h4>
+          <h4>{{ t('about.linksTitle') }}</h4>
           <div class="links-grid">
             <a href="https://github.com/NotFaceGUI/doro-novel" target="_blank" class="link-item github">
               <div class="link-icon">
@@ -52,8 +47,8 @@
                 </svg>
               </div>
               <div class="link-content">
-                <span class="link-title">GitHub 仓库</span>
-                <span class="link-description">查看源代码和贡献</span>
+                <span class="link-title">{{ t('about.githubTitle') }}</span>
+                <span class="link-description">{{ t('about.githubDescription') }}</span>
               </div>
             </a>
             
@@ -64,8 +59,8 @@
                 </svg>
               </div>
               <div class="link-content">
-                <span class="link-title">Bilibili 空间</span>
-                <span class="link-description">关注最新动态</span>
+                <span class="link-title">{{ t('about.bilibiliTitle') }}</span>
+                <span class="link-description">{{ t('about.bilibiliDescription') }}</span>
               </div>
             </a>
             
@@ -75,7 +70,7 @@
               </div>
               <div class="link-content">
                 <span class="link-title">Blablalink</span>
-                <span class="link-description">个人主页</span>
+                <span class="link-description">{{ t('about.blablalinkDescription') }}</span>
               </div>
             </a>
             
@@ -86,8 +81,8 @@
                 </svg>
               </div>
               <div class="link-content">
-                <span class="link-title">QQ 交流群</span>
-                <span class="link-description">加入社区讨论</span>
+                <span class="link-title">{{ t('about.qqTitle') }}</span>
+                <span class="link-description">{{ t('about.qqDescription') }}</span>
               </div>
             </a>
           </div>
@@ -95,7 +90,7 @@
         
         <!-- 技术栈 -->
         <div class="tech-stack">
-          <h4>技术栈</h4>
+          <h4>{{ t('about.techTitle') }}</h4>
           <div class="tech-tags">
             <span class="tech-tag">Tauri</span>
             <span class="tech-tag">Vue.js</span>
@@ -107,15 +102,15 @@
         
         <!-- 致谢 -->
         <div class="acknowledgments">
-          <h4>特别致谢</h4>
-          <p>感谢 <a href="https://github.com/Nikke-db/Nikke-db.github.io" target="_blank" class="acknowledgment-link"><strong>Nikke-db</strong></a> 团队维护的开源资源仓库，为社区提供了完整的角色资源数据。</p>
-          <p>感谢 <a href="https://space.bilibili.com/30536903?spm_id_from=333.337.0.0" target="_blank" class="acknowledgment-link"><strong>哈德林</strong></a> 对项目的支持与贡献。</p>
+          <h4>{{ t('about.acknowledgementsTitle') }}</h4>
+          <p>{{ t('about.acknowledgementsNikkePrefix') }}<a href="https://github.com/Nikke-db/Nikke-db.github.io" target="_blank" class="acknowledgment-link"><strong>Nikke-db</strong></a>{{ t('about.acknowledgementsNikkeSuffix') }}</p>
+          <p>{{ t('about.acknowledgementsHaderinPrefix') }}<a href="https://space.bilibili.com/30536903?spm_id_from=333.337.0.0" target="_blank" class="acknowledgment-link"><strong>哈德林</strong></a>{{ t('about.acknowledgementsHaderinSuffix') }}</p>
         </div>
       </div>
       
       <div class="dialog-actions">
         <button class="btn btn-primary" @click="closeDialog">
-          关闭
+          {{ t('common.close') }}
         </button>
       </div>
     </div>
@@ -124,6 +119,7 @@
 
 <script setup lang="ts">
 import { APP_VERSION } from '../script/var';
+import { useI18n } from 'vue-i18n';
 
 // Props
 interface Props {
@@ -131,6 +127,7 @@ interface Props {
 }
 
 defineProps<Props>();
+const { t } = useI18n();
 
 // Emits
 const emit = defineEmits<{

@@ -1,32 +1,32 @@
 <template>
     <div class="action-item-main" @click="onClickActionItem">
-        <ActionItemHead content="👤 操作角色" :title="title" :id="id" :is-collapsed="actionItem.isToggle"></ActionItemHead>
+        <ActionItemHead :content="t('actionCharacter.head')" :title="title" :id="id" :is-collapsed="actionItem.isToggle"></ActionItemHead>
         <div class="action-item-content" v-show="!actionItem.isToggle">
             <div class="action-title">
-                阻塞执行
+                {{ t('actionCommon.waitExecution') }}
                 <ToggleSwitch v-model="actionItem.wait!"></ToggleSwitch>
             </div>
 
             <!-- 角色选择部分 -->
             <div class="action-title">
-                选择角色
+                {{ t('actionCharacter.selectCharacter') }}
                 <Tooltip position="left">
                     <div style="text-align: left;">
                         <div class="mode-description">
-                            选择场景中已存在的角色进行操作
+                            {{ t('actionCharacter.selectCharacterDesc') }}
                         </div>
                         <div style="line-height: 1.6; font-size: 10px;">
                             <p>
-                                <span style="color: red; font-weight: bold;">⚠ 注意：</span>
+                                <span style="color: red; font-weight: bold;">⚠ {{ t('actionCharacter.warningTitle') }}</span>
                                 <br>
-                                <span>切换角色将会</span>
-                                <span style="color: #d9534f; font-weight: bold;">失去当前角色的目标状态</span>。
+                                <span>{{ t('actionCharacter.warningPrefix') }}</span>
+                                <span style="color: #d9534f; font-weight: bold;">{{ t('actionCharacter.warningLoseState') }}</span>
                             </p>
                             <p>
-                                切换角色后，当前角色的 <span style="color: #d9534f; font-weight: bold;">目标状态将被清空</span>。
+                                {{ t('actionCharacter.warningClearPrefix') }} <span style="color: #d9534f; font-weight: bold;">{{ t('actionCharacter.warningClearHighlight') }}</span>
                             </p>
                             <p>
-                                当你切回该角色时，系统会自动 <span style="color: #5cb85c; font-weight: bold;">重置为角色在场景中的原位置</span>。
+                                {{ t('actionCharacter.warningResetPrefix') }} <span style="color: #5cb85c; font-weight: bold;">{{ t('actionCharacter.warningResetHighlight') }}</span>
                             </p>
                         </div>
                     </div>
@@ -38,10 +38,10 @@
 
             <!-- 角色操作区域 -->
             <div class="action-title">
-                角色操作
+                {{ t('actionCharacter.operationArea') }}
                 <Tooltip position="left">
                     <div class="mode-description">
-                        设置角色的目标状态和操作模式
+                        {{ t('actionCharacter.operationAreaDesc') }}
                     </div>
                 </Tooltip>
             </div>
@@ -49,14 +49,14 @@
 
             <!-- 操作模式选择 -->
             <div class="action-title">
-                操作模式
+                {{ t('actionCharacter.operationMode') }}
             </div>
             <Dropdown v-model="selectedOperationMode" @update:modelValue="onSelectOperationMode"
                 :options="operationModeOptions" :disabled="false" />
 
             <!-- 目标状态设置 -->
             <div class="action-title">
-                目标状态
+                {{ t('actionCharacter.targetState') }}
             </div>
             <DynamicInputs v-model="targetStateOptions" :columns="targetStateOptions.length" />
 
@@ -76,10 +76,10 @@
                 </div> -->
 
                 <div class="action-title">
-                    缓动曲线
+                    {{ t('actionCharacter.easeCurve') }}
                     <Tooltip position="left">
                         <div class="mode-description">
-                            指定参数随时间的变化率。
+                            {{ t('actionCharacter.easeCurveDesc') }}
                         </div>
                     </Tooltip>
                 </div>
@@ -93,14 +93,14 @@
                 v-if="operationModeOptions[selectedOperationMode].value === 'show' || operationModeOptions[selectedOperationMode].value === 'hide'">
                 <div class="action-title">
                     <div style="display: flex; align-items: center;gap: 5px;">
-                        使用点阵剔除效果
+                        {{ t('actionCharacter.useStippleEffect') }}
                         <ToggleSwitch v-model="useStippleEffect"></ToggleSwitch>
                     </div>
 
                     <Tooltip position="left">
                         <div class="mode-description">
-                            启用后，显示/隐藏角色时会使用点阵透明度效果
-                            <p>否则使用简单的淡入淡出效果</p>
+                            {{ t('actionCharacter.stippleEffectDesc') }}
+                            <p>{{ t('actionCharacter.stippleEffectFallback') }}</p>
                         </div>
                     </Tooltip>
                 </div>
@@ -158,18 +158,18 @@ transformGizmo.visible = false; // 默认隐藏
 const selectedCharacterIndex = ref(0);
 const characterOptions = computed(() => {
     return action.maxCharacter.map((character, index) => ({
-        label: t(character.character.characterName) || `角色 ${index + 1}`,
+        label: character.character.characterName || `${t('actionCharacter.roleFallback')} ${index + 1}`,
         value: index
     }));
 });
 
 // 操作模式相关
 const selectedOperationMode = ref(0);
-const operationModeOptions = ref<DropdownOption[]>([
-    { label: "固定 (Fixed)", value: "fixed" },
-    { label: "补间 (Tween)", value: "tween" },
-    { label: "显示 (Show)", value: "show" },
-    { label: "隐藏 (Hide)", value: "hide" }
+const operationModeOptions = computed<DropdownOption[]>(() => [
+    { label: t('actionCharacter.operationModes.fixed'), value: "fixed" },
+    { label: t('actionCharacter.operationModes.tween'), value: "tween" },
+    { label: t('actionCharacter.operationModes.show'), value: "show" },
+    { label: t('actionCharacter.operationModes.hide'), value: "hide" }
 ]);
 
 // 缓动相关
@@ -203,12 +203,16 @@ const points = ref<ControlPoint[]>([]);
 // 时间设置
 const timeDuration = ref<InputOption[]>([
     {
-        label: '持续时间(ms)',
+        label: t('actionCharacter.durationMs'),
         value: 1000,
         type: 'number',
         disabled: false
     },
 ]);
+
+watchEffect(() => {
+    timeDuration.value[0].label = t('actionCharacter.durationMs');
+});
 
 
 // 自定义缓动曲线回调函数

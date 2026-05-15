@@ -1,5 +1,134 @@
 {
-    "update": {
+  "app": {
+    "versionPrefix": "ver"
+  },
+  "common": {
+    "back": "返回",
+    "close": "关闭",
+    "cancel": "取消",
+    "delete": "删除",
+    "save": "保存",
+    "create": "创建",
+    "next": "下一步",
+    "previous": "上一步",
+    "done": "完成",
+    "restoreCurrent": "恢复当前"
+  },
+  "language": {
+    "menu": "语言(L)",
+    "zhCN": "简体中文",
+    "enUS": "English",
+    "jaJP": "日本語",
+    "koKR": "한국어"
+  },
+  "menu": {
+    "project": "项目(P)",
+    "edit": "编辑(E)",
+    "help": "帮助(H)",
+    "saveProject": "保存项目",
+    "openProject": "打开项目",
+    "closeProject": "关闭项目",
+    "openProjectFolder": "打开项目文件夹",
+    "clearCache": "清除缓存",
+    "undo": "撤销",
+    "redo": "重做",
+    "cut": "剪切",
+    "copy": "复制",
+    "paste": "粘贴",
+    "find": "查找",
+    "replace": "替换",
+    "openResourceFolder": "打开资源文件夹",
+    "importResource": "导入资源",
+    "viewHelp": "查看帮助",
+    "onlineDocs": "在线文档",
+    "faq": "常见问题",
+    "watermarkSettings": "水印设置",
+    "updateResources": "更新资源",
+    "about": "关于我们",
+    "selectProjectFile": "选择项目文件",
+    "projectFileFilterName": "Doro项目文件",
+    "messages": {
+      "currentProjectNotFound": "未找到当前项目信息",
+      "readProjectFailed": "读取项目文件失败",
+      "projectSaved": "项目保存成功！",
+      "projectOpened": "[{projectName}]项目已打开",
+      "projectSaveFailed": "保存项目失败，请重试",
+      "projectClosed": "项目已关闭",
+      "projectCloseFailed": "关闭项目失败，请重试",
+      "projectOpenFailed": "打开项目失败，请检查文件格式是否正确",
+      "projectFolderOpenFailed": "打开项目文件夹失败，请检查项目是否存在",
+      "resourceFolderOpenFailed": "打开资源文件夹失败，请检查资源目录是否存在",
+      "updateResourcesStarted": "已启动资源更新，详细日志请在弹出的控制台窗口查看。",
+      "updateResourcesFailed": "执行资源更新时发生错误: {error}"
+    }
+  },
+  "welcome": {
+    "title": "🎉 欢迎使用 Doro Novel",
+    "subtitle": "开始你的视觉小说创作之旅！",
+    "createProject": "🎬 创建全新项目",
+    "openProject": "📂 打开已有项目",
+    "viewDocs": "📖 查看官方文档",
+    "createTitle": "🎫 创建新项目",
+    "createDescription": "请输入一个项目名称",
+    "projectName": "项目名称",
+    "projectNamePlaceholder": "输入项目名称",
+    "pathTitle": "📂 选择项目路径",
+    "pathDescription": "选择项目保存路径",
+    "projectPath": "项目路径",
+    "projectPathPlaceholder": "选择项目路径",
+    "confirmTitle": "确认信息",
+    "confirmDescription": "请确认项目信息",
+    "notFilled": "未填写",
+    "messages": {
+      "incompleteInfo": "请填写完整的项目信息",
+      "saveFailed": "项目保存失败，请重试"
+    }
+  },
+  "about": {
+    "title": "关于我们",
+    "description": "🎨 一个基于 Tauri 的可视化小说编辑器，专为创建 Nikke 风格的交互式视觉小说而设计，支持可视化编辑、剧情分支、多语言本地化和实时预览。",
+    "authorRole": "项目作者 & 开发者",
+    "authorDescription": "致力于创建优秀的开源工具，让创作变得更加简单和有趣。",
+    "emailLabel": "邮箱：",
+    "linksTitle": "相关链接",
+    "githubTitle": "GitHub 仓库",
+    "githubDescription": "查看源代码和贡献",
+    "bilibiliTitle": "Bilibili 空间",
+    "bilibiliDescription": "关注最新动态",
+    "blablalinkDescription": "个人主页",
+    "qqTitle": "QQ 交流群",
+    "qqDescription": "加入社区讨论",
+    "techTitle": "技术栈",
+    "acknowledgementsTitle": "特别致谢",
+    "acknowledgementsNikkePrefix": "感谢 ",
+    "acknowledgementsNikkeSuffix": " 团队维护的开源资源仓库，为社区提供了完整的角色资源数据。",
+    "acknowledgementsHaderinPrefix": "感谢 ",
+    "acknowledgementsHaderinSuffix": " 对项目的支持与贡献。"
+  },
+  "watermark": {
+    "title": "水印设置",
+    "enabled": "启用水印",
+    "text": "水印文本",
+    "textPlaceholder": "请输入水印内容",
+    "fontSize": "字体大小(px)",
+    "color": "颜色",
+    "colorPlaceholder": "请输入颜色",
+    "opacity": "透明度",
+    "angle": "倾斜角度(°)",
+    "placement": "显示位置",
+    "spacingX": "水平间距(px)",
+    "spacingY": "垂直间距(px)",
+    "offsetX": "水平偏移(px)",
+    "offsetY": "垂直偏移(px)",
+    "placements": {
+      "tiled": "平铺（全屏）",
+      "topLeft": "左上角",
+      "topRight": "右上角",
+      "bottomLeft": "左下角",
+      "bottomRight": "右下角"
+    }
+  },
+  "update": {
     "title": "发现新版本",
     "newVersion": "新版本",
     "releaseDate": "发布日期",
@@ -11,13 +140,434 @@
     "restartLater": "稍后重启",
     "checkingUpdate": "检查更新中...",
     "noUpdate": "已是最新版本",
+    "noAvailableUpdate": "没有可用的更新",
     "updateAvailable": "发现新版本 {version}",
     "downloadComplete": "下载完成",
+    "downloadCompleted": "下载完成",
     "installComplete": "安装完成",
     "updateError": "更新失败",
     "networkError": "网络连接失败",
     "downloadError": "下载失败",
-    "installError": "安装失败"
+    "installError": "安装失败",
+    "readyToInstall": "更新包已准备就绪",
+    "installPrompt": "是否现在安装并重启应用？",
+    "cancel": "取消",
+    "installLater": "稍后安装",
+    "installAndRestart": "安装并重启",
+    "justChecked": "刚刚检查",
+    "minutesAgo": "{count} 分钟前检查",
+    "hoursAgo": "{count} 小时前检查"
+  },
+  "leftBar": {
+    "characterStory": "角色 & 剧情",
+    "image": "图片",
+    "video": "视频",
+    "sound": "音频",
+    "package": "包体",
+    "timeline": "Time Line",
+    "audioUnsupported": "当前浏览器不支持音频元素。"
+  },
+  "controlHint": {
+    "moveView": "移动视角",
+    "zoomView": "滚轮缩放"
+  },
+  "slotControl": {
+    "title": "部位控制",
+    "showAll": "全部显示",
+    "hideAll": "全部隐藏"
+  },
+  "sortDialog": {
+    "title": "排序 Action Items",
+    "instructions": "拖拽下方的 ActionItem 来重新排序，",
+    "warning": "注意改变顺序快照可能会失去真实性",
+    "typeLabel": "类型",
+    "unknownType": "未知类型",
+    "saveOrder": "保存排序",
+    "types": {
+      "background": "背景",
+      "bgm": "背景音乐",
+      "audio": "音效",
+      "dialogue": "对话",
+      "scene": "场景初始化",
+      "camera": "摄像机操作",
+      "transition": "过渡效果",
+      "wait": "等待/阻塞",
+      "branchDialogue": "分支对话",
+      "effect": "特效",
+      "character": "操作角色",
+      "cg": "CG画面"
+    }
+  },
+  "dialogueUi": {
+    "title": "⚙️ 对话排版设置",
+    "followScene": "跟随场景",
+    "forceMode": "强制设置",
+    "forceOpen": "强制设置",
+    "noDialogueDetected": "未检测到对话",
+    "forceModeSubtitle": "强制设置 {mode}，未出现时也会先保存配置",
+    "sceneModeSubtitle": "当前场景：{mode}，修改会实时作用到画面",
+    "emptySubtitle": "当前场景没有可识别的对话元素，可切到强制设置",
+    "emptyStatusTitle": "场景没有对应元素",
+    "missingStatusTitle": "当前场景没有{mode}元素",
+    "activeStatusTitle": "正在调整{mode}",
+    "emptyStatusDesc": "先让场景里出现角色对话、旁白或回答，或者点强制设置直接改并保存。",
+    "missingStatusDesc": "当前画面不会立刻显示这类元素，但配置会立即保存，等它下次出现时直接生效。",
+    "activeStatusDesc": "当前显示的就是对应类型，拖动滑块后会实时刷新这块文本排版。",
+    "modes": {
+      "normal": "角色对话",
+      "voiceover": "旁白",
+      "commander": "回答"
+    },
+    "sections": {
+      "normalFonts": "💬 角色对话",
+      "normalLayout": "📐 名字与正文",
+      "colorBar": "🎨 角色色条",
+      "voiceover": "📢 旁白",
+      "commander": "🗨️ 回答"
+    },
+    "controls": {
+      "nameFontOffset": {
+        "label": "角色名字号",
+        "description": "角色名字体大小偏移"
+      },
+      "contentFontOffset": {
+        "label": "对话正文字号",
+        "description": "角色对话正文大小偏移"
+      },
+      "voiceoverFontOffset": {
+        "label": "旁白字号",
+        "description": "旁白文本大小偏移"
+      },
+      "commanderFontOffset": {
+        "label": "回答字号",
+        "description": "回答按钮文本大小偏移"
+      },
+      "nameContentGapOffset": {
+        "label": "名字与正文间距",
+        "description": "角色名字和正文之间的垂直间距"
+      },
+      "groupYOffset": {
+        "label": "整体垂直偏移",
+        "description": "整组角色名字和正文上下移动"
+      },
+      "nameXOffset": {
+        "label": "名字水平偏移",
+        "description": "单独调整角色名字位置"
+      },
+      "contentXOffset": {
+        "label": "正文水平偏移",
+        "description": "单独调整角色对话正文位置"
+      },
+      "colorBarHeightOffset": {
+        "label": "色条高度",
+        "description": "角色色条高度补偿"
+      },
+      "colorBarWidthOffset": {
+        "label": "色条宽度",
+        "description": "角色色条宽度补偿"
+      },
+      "colorBarXOffset": {
+        "label": "色条水平偏移",
+        "description": "角色色条左右移动"
+      },
+      "colorBarYOffset": {
+        "label": "色条垂直偏移",
+        "description": "角色色条上下移动"
+      }
+    },
+    "metrics": {
+      "name": "名字 {value}px",
+      "content": "正文 {value}px",
+      "gap": "间距 {value}px",
+      "colorBarHeight": "色条高 {value}px",
+      "voiceover": "旁白 {value}px",
+      "commander": "回答 {value}px",
+      "lineHeight": "行高 {value}px"
+    }
+  },
+  "projectView": {
+    "tabs": {
+      "canvas": "Canvas",
+      "preview": "Preview",
+      "script": "Script"
+    },
+    "unsupportedPreview": "不支持该文件的预览",
+    "selectAnimation": "选择动画:",
+    "selectSkin": "选择皮肤:",
+    "characterType": "角色类型:",
+    "characterTypes": {
+      "default": "Default",
+      "aim": "Aim",
+      "cover": "Cover"
+    },
+    "mixPresets": {
+      "default": "默认混合",
+      "fast": "快速混合",
+      "slow": "慢速混合",
+      "custom": "自定义混合"
+    },
+    "shaderEditorTitle": "Shader 特效编辑器",
+    "scriptPlaceholder": "在这里编写剧情脚本...",
+    "editing": "正在编辑"
+  },
+  "actionCommon": {
+    "waitExecution": "阻塞执行"
+  },
+  "actionItemTool": {
+    "preview": "预览",
+    "delete": "删除",
+    "expand": "展开",
+    "collapse": "折叠"
+  },
+  "inputActionType": {
+    "searchPlaceholder": "请选择添加的操作",
+    "searchPlaceholderWithFile": "你想对{fileName}的操作是？",
+    "characterManager": "角色管理器",
+    "sceneCharacterSelector": "场景角色选择器",
+    "imageManager": "图片管理器",
+    "scale": "缩放",
+    "noCharacterResources": "找不到已加载角色资源，请添加角色资源",
+    "noSceneCharacters": "场景中没有角色，请先添加角色到场景",
+    "noImageResources": "找不到已加载图片资源，请添加图片资源",
+    "sections": {
+      "init": "初始化",
+      "common": "常用",
+      "advanced": "高级",
+      "template": "模板"
+    },
+    "items": {
+      "scene": { "label": "初始化 场景", "desc": "重置场景状态" },
+      "character": { "label": "操作 角色", "desc": "移动/缩放/动作/表情" },
+      "camera": { "label": "操作 摄像机", "desc": "调整摄像机视角" },
+      "dialogue": { "label": "添加 对话", "desc": "添加角色台词" },
+      "cg": { "label": "添加/删除 CG", "desc": "插入或移除CG画面" },
+      "audio": { "label": "添加 音效", "desc": "播放特定音效" },
+      "bgm": { "label": "设置/取消 背景音乐", "desc": "更改或关闭BGM" },
+      "background": { "label": "设置/取消 背景图片", "desc": "设置或移除背景" },
+      "characterToggle": { "label": "添加/删除 角色[x]", "desc": "加入或移除角色" },
+      "wait": { "label": "添加 阻塞", "desc": "阻塞程序执行指定时间" },
+      "transition": { "label": "设置 过渡", "desc": "画面或场景渐变效果" },
+      "effect": { "label": "添加 特效", "desc": "在场景中添加特效" },
+      "crt": { "label": "添加/删除 CRT效果[x]", "desc": "模拟老式屏幕效果" },
+      "extra": { "label": "添加 巴拉巴拉[x]", "desc": "额外的自定义效果" },
+      "consultTemplate": { "label": "咨询模板[x]", "desc": "预设的咨询对话模板" },
+      "mainlineTemplate": { "label": "主线模板[x]", "desc": "主线剧情模板" }
+    }
+  },
+  "actionInitScene": {
+    "head": "🎬 场景初始化",
+    "fadeIn": "开屏过渡",
+    "initialCameraPosition": "摄像机的初始位置",
+    "setBackground": "设置背景",
+    "changeBackground": "切换背景",
+    "setInitialCharacterPosition": "设置角色初始位置",
+    "positionTooltipPrefix": "场景刚开始的",
+    "positionTooltipHighlight": "角色站位",
+    "shiftMoveHintPrefix": "按住",
+    "shiftMoveHintSuffix": "键水平移动",
+    "ctrlMoveHintPrefix": "按住",
+    "ctrlMoveHintSuffix": "键垂直移动",
+    "dragPositionHint": "拖拽调整位置 (Shift: 水平, Ctrl: 垂直)",
+    "animation": "动画：",
+    "initVisible": "是否初始化显示：",
+    "addCharacterToScene": "添加角色到场景",
+    "parallaxFactor": "视差因子"
+  },
+  "actionCharacter": {
+    "head": "👤 操作角色",
+    "selectCharacter": "选择角色",
+    "selectCharacterDesc": "选择场景中已存在的角色进行操作",
+    "warningTitle": "注意：",
+    "warningPrefix": "切换角色将会",
+    "warningLoseState": "失去当前角色的目标状态",
+    "warningClearPrefix": "切换角色后，当前角色的",
+    "warningClearHighlight": "目标状态将被清空",
+    "warningResetPrefix": "当你切回该角色时，系统会自动",
+    "warningResetHighlight": "重置为角色在场景中的原位置",
+    "operationArea": "角色操作",
+    "operationAreaDesc": "设置角色的目标状态和操作模式",
+    "operationMode": "操作模式",
+    "targetState": "目标状态",
+    "easeCurve": "缓动曲线",
+    "easeCurveDesc": "指定参数随时间的变化率。",
+    "useStippleEffect": "使用点阵剔除效果",
+    "stippleEffectDesc": "启用后，显示/隐藏角色时会使用点阵透明度效果",
+    "stippleEffectFallback": "否则使用简单的淡入淡出效果",
+    "roleFallback": "角色",
+    "durationMs": "持续时间(ms)",
+    "operationModes": {
+      "fixed": "固定 (Fixed)",
+      "tween": "补间 (Tween)",
+      "show": "显示 (Show)",
+      "hide": "隐藏 (Hide)"
+    }
+  },
+  "actionDialogue": {
+    "head": "💬 设置对话",
+    "hideUiAfterDialogue": "对话结束后隐藏UI",
+    "hideDelayMs": "延迟消失时间(ms)",
+    "hideDelayTooltipPrefix": "可以指定对话UI",
+    "hideDelayTooltipHighlight": "延迟消失",
+    "hideDelayTooltipSuffix": "的时间",
+    "dragSort": "拖拽排序",
+    "editAlias": "点击设置别名",
+    "advancedMode": "高级模式",
+    "delete": "删除",
+    "bindCharacterTip": "点击头像绑定角色",
+    "branchCondition": "分支条件：",
+    "branchConditionPlaceholder": "A 或 A,B&C 或 (A,B)&C",
+    "branchConditionTooltipPrefix": "设置此对话需要的",
+    "branchConditionTooltipHighlight": "分支标签",
+    "branchFormats": {
+      "title": "支持多种格式：",
+      "single": "单个标签",
+      "or": "任意一个标签（OR逻辑）",
+      "and": "所有标签（AND逻辑）",
+      "mixed": "混合逻辑（A 或者 B且C）",
+      "priority": "括号优先级（(A或B) 且 C）",
+      "visibleRule": "只有满足条件的玩家才能看到此对话"
+    },
+    "textPlaceholder": "请输入文本……",
+    "cameraProxy": "摄像机代理：",
+    "branchTag": "分支标签：",
+    "branchTagPlaceholder": "输入分支标签 (如: A, B)",
+    "branchTagTooltipPrefix": "为指挥官的每个选项设置",
+    "branchTagTooltipHighlight": "分支标签",
+    "branchTagTooltipSuffixPrefix": "根据选择的标签来",
+    "branchTagTooltipSuffixHighlight": "显示不同内容",
+    "cameraStand": "机位选择：",
+    "enableMove": "启用移动：",
+    "easeFunction": "缓动函数：",
+    "duration": "动画时长：",
+    "animationName": "选择名称：",
+    "animationLoop": "动画循环：",
+    "cameraOffsetX": "机位偏移X：",
+    "cameraOffsetY": "机位偏移Y：",
+    "preselectCharacter": "预选角色",
+    "clearPreselectedCharacter": "清除预选角色",
+    "addNew": "新增",
+    "append": "追加",
+    "selectDialogueType": "选择对话类型",
+    "quickTypes": {
+      "normal": "普通",
+      "voiceover": "旁白",
+      "commander": "自己"
+    },
+    "cameraStands": {
+      "large": "大(全景镜头)",
+      "medium": "中(半身镜头)",
+      "small": "小(特写镜头)"
+    },
+    "types": {
+      "normal": {
+        "label": "普通对话",
+        "description": "角色之间的标准对话"
+      },
+      "voiceover": {
+        "label": "旁白",
+        "description": "叙述性文本，没有特定角色"
+      },
+      "commander": {
+        "label": "指挥官回答",
+        "description": "玩家角色的对话内容"
+      }
+    },
+    "systemSpeakers": {
+      "selectCharacter": "请选择角色",
+      "voiceover": "旁白",
+      "commander": "指挥官"
+    },
+    "messages": {
+      "preselectedCharacter": "已预选角色：{character}",
+      "clearedPreselectedCharacter": "已清除预选角色",
+      "selectCharacterFirst": "请先选择角色",
+      "deletedDialogue": "已删除对话",
+      "movedUp": "已上移对话",
+      "movedDown": "已下移对话",
+      "orderUpdated": "对话顺序已更新",
+      "addDialogueFirst": "请先添加对话"
+    }
+  },
+  "timeLine": {
+    "currentCanvasMode": "当前画布模式：{mode}",
+    "play": "播放",
+    "realTimePreview": "实时预览",
+    "realTimePreviewHint": "即时内容无法预览",
+    "modes": {
+      "scene": "场景",
+      "preview": "预览"
+    },
+    "messages": {
+      "alreadyExists": "{name}：已存在",
+      "preloaded": "预加载：{name}",
+      "cannotProcess": "无法处理：{type}"
+    }
+  },
+  "shaderEditor": {
+    "title": "Shader 特效编辑器【测试版本做着玩的】",
+    "apply": "应用效果",
+    "reset": "重置",
+    "loadPreset": "加载预设",
+    "selectPreset": "选择预设效果",
+    "fragmentShader": "Fragment Shader:",
+    "fragmentShaderPlaceholder": "输入片段着色器代码...",
+    "uniforms": "Uniform 参数",
+    "addUniform": "+ 添加参数",
+    "uniformNamePlaceholder": "参数名",
+    "realTimePreview": "实时预览",
+    "enableAnimation": "启用动画",
+    "dissolveAnimationEnabled": "溶解动画已启用",
+    "timeAnimationEnabled": "时间动画已启用"
+    ,
+    "presets": {
+      "glow": "发光效果",
+      "wave": "波浪扭曲",
+      "colorShift": "颜色偏移",
+      "dissolve": "溶解效果"
+    }
+  },
+  "actionBgm": {
+    "head": "🔊 背景音乐",
+    "operationMode": "音频操作模式：",
+    "selectAudioFile": "选择音频文件",
+    "volume": "音量设置",
+    "loopPlayback": "循环播放",
+    "fadeIn": "淡入效果",
+    "fadeOut": "淡出效果",
+    "audioEffects": "音频效果",
+    "telephoneEffect": "电话效果",
+    "reverbEffect": "混响效果",
+    "equalizer": "均衡器",
+    "stopCurrentBgm": "停止当前播放的背景音乐",
+    "stopWithFadeOut": "淡出停止",
+    "noContent": "无内容",
+    "previewControls": "预览控制",
+    "clearAllEffects": "清除所有音效",
+    "noAvailableAudioFiles": "无可用音频文件",
+    "operationModes": {
+      "play": "播放音频 (Play)",
+      "stop": "停止音频 (Stop)"
+    },
+    "inputs": {
+      "volume": "音量 (0-1)",
+      "fadeInDuration": "淡入时长 (秒)",
+      "fadeOutDuration": "淡出时长 (秒)",
+      "stopFadeOutDuration": "停止淡出时长 (秒)",
+      "stereoSeparation": "立体声分离 (-1到1)",
+      "distortion": "失真效果 (0到1)",
+      "reverbTime": "混响时间 (秒)",
+      "reverbDecay": "衰减强度"
+    }
+  },
+  "actionSfx": {
+    "head": "🎶 音效播放",
+    "selectAudioFile": "选择音效文件",
+    "volume": "音量设置",
+    "previewControls": "预览控制",
+    "noAvailableAudioFiles": "无可用音效文件",
+    "inputs": {
+      "volume": "音量 (0-1)"
+    }
   },
   "777": "777",
   "absolute": "absolute",

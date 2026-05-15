@@ -1,4 +1,573 @@
 {
+  "app": {
+    "versionPrefix": "ver"
+  },
+  "common": {
+    "back": "뒤로",
+    "close": "닫기",
+    "cancel": "취소",
+    "delete": "삭제",
+    "save": "저장",
+    "create": "생성",
+    "next": "다음",
+    "previous": "이전",
+    "done": "완료",
+    "restoreCurrent": "현재값 복원"
+  },
+  "language": {
+    "menu": "언어(L)",
+    "zhCN": "简体中文",
+    "enUS": "English",
+    "jaJP": "日本語",
+    "koKR": "한국어"
+  },
+  "menu": {
+    "project": "프로젝트(P)",
+    "edit": "편집(E)",
+    "help": "도움말(H)",
+    "saveProject": "프로젝트 저장",
+    "openProject": "프로젝트 열기",
+    "closeProject": "프로젝트 닫기",
+    "openProjectFolder": "프로젝트 폴더 열기",
+    "clearCache": "캐시 지우기",
+    "undo": "실행 취소",
+    "redo": "다시 실행",
+    "cut": "잘라내기",
+    "copy": "복사",
+    "paste": "붙여넣기",
+    "find": "찾기",
+    "replace": "바꾸기",
+    "openResourceFolder": "리소스 폴더 열기",
+    "importResource": "리소스 가져오기",
+    "viewHelp": "도움말 보기",
+    "onlineDocs": "온라인 문서",
+    "faq": "자주 묻는 질문",
+    "watermarkSettings": "워터마크 설정",
+    "updateResources": "리소스 업데이트",
+    "about": "정보",
+    "selectProjectFile": "프로젝트 파일 선택",
+    "projectFileFilterName": "Doro 프로젝트 파일",
+    "messages": {
+      "currentProjectNotFound": "현재 프로젝트 정보를 찾을 수 없습니다",
+      "readProjectFailed": "프로젝트 파일을 읽지 못했습니다",
+      "projectSaved": "프로젝트가 저장되었습니다!",
+      "projectOpened": "[{projectName}] 프로젝트를 열었습니다",
+      "projectSaveFailed": "프로젝트 저장에 실패했습니다. 다시 시도해 주세요",
+      "projectClosed": "프로젝트를 닫았습니다",
+      "projectCloseFailed": "프로젝트를 닫지 못했습니다. 다시 시도해 주세요",
+      "projectOpenFailed": "프로젝트를 열지 못했습니다. 파일 형식이 올바른지 확인해 주세요",
+      "projectFolderOpenFailed": "프로젝트 폴더를 열지 못했습니다. 프로젝트가 존재하는지 확인해 주세요",
+      "resourceFolderOpenFailed": "리소스 폴더를 열지 못했습니다. 리소스 디렉터리가 존재하는지 확인해 주세요",
+      "updateResourcesStarted": "리소스 업데이트를 시작했습니다. 자세한 로그는 팝업된 콘솔 창에서 확인하세요.",
+      "updateResourcesFailed": "리소스 업데이트 중 오류가 발생했습니다: {error}"
+    }
+  },
+  "welcome": {
+    "title": "🎉 Doro Novel에 오신 것을 환영합니다",
+    "subtitle": "비주얼 노벨 제작 여정을 시작해 보세요!",
+    "createProject": "🎬 새 프로젝트 만들기",
+    "openProject": "📂 기존 프로젝트 열기",
+    "viewDocs": "📖 공식 문서 보기",
+    "createTitle": "🎫 새 프로젝트 만들기",
+    "createDescription": "프로젝트 이름을 입력해 주세요",
+    "projectName": "프로젝트 이름",
+    "projectNamePlaceholder": "프로젝트 이름 입력",
+    "pathTitle": "📂 프로젝트 경로 선택",
+    "pathDescription": "프로젝트 저장 경로를 선택하세요",
+    "projectPath": "프로젝트 경로",
+    "projectPathPlaceholder": "프로젝트 경로 선택",
+    "confirmTitle": "정보 확인",
+    "confirmDescription": "프로젝트 정보를 확인해 주세요",
+    "notFilled": "미입력",
+    "messages": {
+      "incompleteInfo": "프로젝트 정보를 모두 입력해 주세요",
+      "saveFailed": "프로젝트 저장에 실패했습니다. 다시 시도해 주세요"
+    }
+  },
+  "about": {
+    "title": "정보",
+    "description": "🎨 Tauri 기반의 비주얼 노벨 편집기로, Nikke 스타일의 인터랙티브 비주얼 노벨 제작을 위해 설계되었습니다. 비주얼 편집, 스토리 분기, 다국어 현지화, 실시간 미리보기를 지원합니다.",
+    "authorRole": "프로젝트 작성자 & 개발자",
+    "authorDescription": "창작을 더 쉽고 재미있게 만드는 훌륭한 오픈소스 도구를 만드는 데 집중하고 있습니다.",
+    "emailLabel": "이메일: ",
+    "linksTitle": "관련 링크",
+    "githubTitle": "GitHub 저장소",
+    "githubDescription": "소스 코드 및 기여 보기",
+    "bilibiliTitle": "Bilibili 공간",
+    "bilibiliDescription": "최신 소식 팔로우",
+    "blablalinkDescription": "개인 홈페이지",
+    "qqTitle": "QQ 그룹",
+    "qqDescription": "커뮤니티 토론 참여",
+    "techTitle": "기술 스택",
+    "acknowledgementsTitle": "특별 감사",
+    "acknowledgementsNikkePrefix": "",
+    "acknowledgementsNikkeSuffix": " 팀이 커뮤니티를 위해 완전한 캐릭터 리소스 데이터를 포함한 오픈소스 저장소를 유지해 준 것에 감사합니다.",
+    "acknowledgementsHaderinPrefix": "",
+    "acknowledgementsHaderinSuffix": " 님의 프로젝트 지원과 기여에 감사합니다."
+  },
+  "watermark": {
+    "title": "워터마크 설정",
+    "enabled": "워터마크 사용",
+    "text": "워터마크 텍스트",
+    "textPlaceholder": "워터마크 내용을 입력하세요",
+    "fontSize": "글자 크기(px)",
+    "color": "색상",
+    "colorPlaceholder": "색상을 입력하세요",
+    "opacity": "투명도",
+    "angle": "기울기(°)",
+    "placement": "표시 위치",
+    "spacingX": "가로 간격(px)",
+    "spacingY": "세로 간격(px)",
+    "offsetX": "가로 오프셋(px)",
+    "offsetY": "세로 오프셋(px)",
+    "placements": {
+      "tiled": "타일(전체 화면)",
+      "topLeft": "왼쪽 위",
+      "topRight": "오른쪽 위",
+      "bottomLeft": "왼쪽 아래",
+      "bottomRight": "오른쪽 아래"
+    }
+  },
+  "update": {
+    "title": "새 버전이 발견되었습니다",
+    "newVersion": "새 버전",
+    "releaseDate": "릴리스 날짜",
+    "releaseNotes": "업데이트 내용",
+    "downloading": "다운로드 중",
+    "updateNow": "지금 업데이트",
+    "later": "나중에 알림",
+    "restartNow": "지금 다시 시작",
+    "restartLater": "나중에 다시 시작",
+    "checkingUpdate": "업데이트 확인 중...",
+    "noUpdate": "이미 최신 버전입니다",
+    "noAvailableUpdate": "사용 가능한 업데이트가 없습니다",
+    "updateAvailable": "새 버전 {version} 이 발견되었습니다",
+    "downloadComplete": "다운로드 완료",
+    "downloadCompleted": "다운로드 완료",
+    "installComplete": "설치 완료",
+    "updateError": "업데이트 실패",
+    "networkError": "네트워크 연결 실패",
+    "downloadError": "다운로드 실패",
+    "installError": "설치 실패",
+    "readyToInstall": "업데이트 패키지가 설치 준비되었습니다",
+    "installPrompt": "지금 설치하고 앱을 다시 시작할까요?",
+    "cancel": "취소",
+    "installLater": "나중에 설치",
+    "installAndRestart": "설치 후 다시 시작",
+    "justChecked": "방금 확인함",
+    "minutesAgo": "{count}분 전에 확인",
+    "hoursAgo": "{count}시간 전에 확인"
+  },
+  "leftBar": {
+    "characterStory": "캐릭터 & 스토리",
+    "image": "이미지",
+    "video": "비디오",
+    "sound": "오디오",
+    "package": "패키지",
+    "timeline": "Time Line",
+    "audioUnsupported": "브라우저가 audio 요소를 지원하지 않습니다."
+  },
+  "controlHint": {
+    "moveView": "시점 이동",
+    "zoomView": "휠로 확대/축소"
+  },
+  "slotControl": {
+    "title": "부위 제어",
+    "showAll": "모두 표시",
+    "hideAll": "모두 숨기기"
+  },
+  "sortDialog": {
+    "title": "Action Items 정렬",
+    "instructions": "아래의 ActionItem을 드래그하여 순서를 바꿀 수 있습니다. ",
+    "warning": "순서를 변경하면 스냅샷의 재현성이 떨어질 수 있습니다",
+    "typeLabel": "유형",
+    "unknownType": "알 수 없는 유형",
+    "saveOrder": "정렬 저장",
+    "types": {
+      "background": "배경",
+      "bgm": "배경 음악",
+      "audio": "효과음",
+      "dialogue": "대화",
+      "scene": "장면 초기화",
+      "camera": "카메라 조작",
+      "transition": "전환 효과",
+      "wait": "대기/차단",
+      "branchDialogue": "분기 대화",
+      "effect": "효과",
+      "character": "캐릭터 조작",
+      "cg": "CG 화면"
+    }
+  },
+  "dialogueUi": {
+    "title": "⚙️ 대화 레이아웃 설정",
+    "followScene": "장면 따라가기",
+    "forceMode": "강제 설정",
+    "forceOpen": "강제 설정",
+    "noDialogueDetected": "대화가 감지되지 않음",
+    "forceModeSubtitle": "{mode} 를 강제로 설정합니다. 아직 보이지 않아도 설정은 먼저 저장됩니다",
+    "sceneModeSubtitle": "현재 장면: {mode}. 변경 사항이 즉시 화면에 반영됩니다",
+    "emptySubtitle": "현재 장면에 인식 가능한 대화 요소가 없습니다. 강제 설정으로 전환할 수 있습니다",
+    "emptyStatusTitle": "장면에 대응 요소가 없습니다",
+    "missingStatusTitle": "현재 장면에 {mode} 요소가 없습니다",
+    "activeStatusTitle": "{mode} 조정 중",
+    "emptyStatusDesc": "장면에 캐릭터 대화, 내레이션 또는 답변을 먼저 표시하거나, 강제 설정으로 바로 저장하세요.",
+    "missingStatusDesc": "현재 화면에는 이 유형이 보이지 않지만 설정은 즉시 저장되며 다음에 나타날 때 적용됩니다.",
+    "activeStatusDesc": "현재 표시 중인 요소가 이 유형입니다. 슬라이더를 움직이면 실시간으로 레이아웃이 갱신됩니다.",
+    "modes": {
+      "normal": "캐릭터 대화",
+      "voiceover": "내레이션",
+      "commander": "답변"
+    },
+    "sections": {
+      "normalFonts": "💬 캐릭터 대화",
+      "normalLayout": "📐 이름과 본문",
+      "colorBar": "🎨 캐릭터 색상 바",
+      "voiceover": "📢 내레이션",
+      "commander": "🗨️ 답변"
+    },
+    "controls": {
+      "nameFontOffset": {
+        "label": "이름 글꼴",
+        "description": "캐릭터 이름 글꼴 크기 오프셋"
+      },
+      "contentFontOffset": {
+        "label": "본문 글꼴",
+        "description": "대화 본문 글꼴 크기 오프셋"
+      },
+      "voiceoverFontOffset": {
+        "label": "내레이션 글꼴",
+        "description": "내레이션 글꼴 크기 오프셋"
+      },
+      "commanderFontOffset": {
+        "label": "답변 글꼴",
+        "description": "답변 버튼 글꼴 크기 오프셋"
+      },
+      "nameContentGapOffset": {
+        "label": "이름/본문 간격",
+        "description": "캐릭터 이름과 본문 사이의 세로 간격"
+      },
+      "groupYOffset": {
+        "label": "전체 세로 오프셋",
+        "description": "이름과 본문 그룹 전체를 위아래로 이동"
+      },
+      "nameXOffset": {
+        "label": "이름 가로 오프셋",
+        "description": "캐릭터 이름 위치를 개별 조정"
+      },
+      "contentXOffset": {
+        "label": "본문 가로 오프셋",
+        "description": "대화 본문 위치를 개별 조정"
+      },
+      "colorBarHeightOffset": {
+        "label": "색상 바 높이",
+        "description": "캐릭터 색상 바 높이 보정"
+      },
+      "colorBarWidthOffset": {
+        "label": "색상 바 너비",
+        "description": "캐릭터 색상 바 너비 보정"
+      },
+      "colorBarXOffset": {
+        "label": "색상 바 가로 오프셋",
+        "description": "캐릭터 색상 바를 좌우로 이동"
+      },
+      "colorBarYOffset": {
+        "label": "색상 바 세로 오프셋",
+        "description": "캐릭터 색상 바를 상하로 이동"
+      }
+    },
+    "metrics": {
+      "name": "이름 {value}px",
+      "content": "본문 {value}px",
+      "gap": "간격 {value}px",
+      "colorBarHeight": "바 높이 {value}px",
+      "voiceover": "내레이션 {value}px",
+      "commander": "답변 {value}px",
+      "lineHeight": "줄 높이 {value}px"
+    }
+  },
+  "projectView": {
+    "tabs": {
+      "canvas": "Canvas",
+      "preview": "Preview",
+      "script": "Script"
+    },
+    "unsupportedPreview": "이 파일은 미리보기를 지원하지 않습니다",
+    "selectAnimation": "애니메이션:",
+    "selectSkin": "스킨:",
+    "characterType": "캐릭터 타입:",
+    "characterTypes": {
+      "default": "Default",
+      "aim": "Aim",
+      "cover": "Cover"
+    },
+    "mixPresets": {
+      "default": "기본 믹스",
+      "fast": "빠른 믹스",
+      "slow": "느린 믹스",
+      "custom": "사용자 정의 믹스"
+    },
+    "shaderEditorTitle": "Shader 효과 편집기",
+    "scriptPlaceholder": "여기에 스토리 스크립트를 작성하세요...",
+    "editing": "편집 중"
+  },
+  "actionCommon": {
+    "waitExecution": "실행 차단"
+  },
+  "actionItemTool": {
+    "preview": "미리보기",
+    "delete": "삭제",
+    "expand": "펼치기",
+    "collapse": "접기"
+  },
+  "inputActionType": {
+    "searchPlaceholder": "추가할 작업을 선택하세요",
+    "searchPlaceholderWithFile": "{fileName}에 어떤 작업을 하시겠습니까?",
+    "characterManager": "캐릭터 관리자",
+    "sceneCharacterSelector": "장면 캐릭터 선택기",
+    "imageManager": "이미지 관리자",
+    "scale": "크기",
+    "noCharacterResources": "로드된 캐릭터 리소스를 찾을 수 없습니다. 먼저 추가하세요",
+    "noSceneCharacters": "장면에 캐릭터가 없습니다. 먼저 추가하세요",
+    "noImageResources": "로드된 이미지 리소스를 찾을 수 없습니다. 먼저 추가하세요",
+    "sections": {
+      "init": "초기화",
+      "common": "일반",
+      "advanced": "고급",
+      "template": "템플릿"
+    },
+    "items": {
+      "scene": { "label": "장면 초기화", "desc": "장면 상태를 초기화" },
+      "character": { "label": "캐릭터 조작", "desc": "이동/크기/동작/표정" },
+      "camera": { "label": "카메라 조작", "desc": "카메라 시점을 조정" },
+      "dialogue": { "label": "대화 추가", "desc": "캐릭터 대사를 추가" },
+      "cg": { "label": "CG 추가/삭제", "desc": "CG 화면을 삽입 또는 제거" },
+      "audio": { "label": "효과음 추가", "desc": "효과음을 재생" },
+      "bgm": { "label": "배경음 설정/해제", "desc": "BGM 변경 또는 정지" },
+      "background": { "label": "배경 설정/해제", "desc": "배경을 설정 또는 제거" },
+      "characterToggle": { "label": "캐릭터 추가/삭제[x]", "desc": "캐릭터를 추가 또는 제거" },
+      "wait": { "label": "대기 추가", "desc": "지정 시간 동안 실행을 차단" },
+      "transition": { "label": "전환 설정", "desc": "화면 또는 장면 전환 효과" },
+      "effect": { "label": "효과 추가", "desc": "장면에 특수 효과를 추가" },
+      "crt": { "label": "CRT 추가/삭제[x]", "desc": "구식 화면 효과를 시뮬레이션" },
+      "extra": { "label": "기타 추가[x]", "desc": "추가 사용자 정의 효과" },
+      "consultTemplate": { "label": "상담 템플릿[x]", "desc": "상담 대화용 프리셋 템플릿" },
+      "mainlineTemplate": { "label": "메인라인 템플릿[x]", "desc": "메인 스토리 템플릿" }
+    }
+  },
+  "actionInitScene": {
+    "head": "🎬 장면 초기화",
+    "fadeIn": "오프닝 전환",
+    "initialCameraPosition": "카메라 초기 위치",
+    "setBackground": "배경 설정",
+    "changeBackground": "배경 변경",
+    "setInitialCharacterPosition": "캐릭터 초기 위치 설정",
+    "positionTooltipPrefix": "장면 시작 시",
+    "positionTooltipHighlight": "캐릭터 배치",
+    "shiftMoveHintPrefix": "",
+    "shiftMoveHintSuffix": "키로 수평 이동",
+    "ctrlMoveHintPrefix": "",
+    "ctrlMoveHintSuffix": "키로 수직 이동",
+    "dragPositionHint": "드래그로 위치 조정 (Shift: 수평, Ctrl: 수직)",
+    "animation": "애니메이션:",
+    "initVisible": "초기 표시:",
+    "addCharacterToScene": "장면에 캐릭터 추가",
+    "parallaxFactor": "시차 계수"
+  },
+  "actionCharacter": {
+    "head": "👤 캐릭터 조작",
+    "selectCharacter": "캐릭터 선택",
+    "selectCharacterDesc": "장면에 이미 있는 캐릭터를 선택해 조작합니다",
+    "warningTitle": "주의:",
+    "warningPrefix": "캐릭터를 전환하면",
+    "warningLoseState": "현재 목표 상태를 잃게 됩니다",
+    "warningClearPrefix": "전환 후 현재 캐릭터의",
+    "warningClearHighlight": "목표 상태가 초기화됩니다",
+    "warningResetPrefix": "다시 해당 캐릭터로 돌아오면 시스템이 자동으로",
+    "warningResetHighlight": "장면 내 원래 위치로 되돌립니다",
+    "operationArea": "캐릭터 조작",
+    "operationAreaDesc": "캐릭터의 목표 상태와 조작 모드를 설정합니다",
+    "operationMode": "조작 모드",
+    "targetState": "목표 상태",
+    "easeCurve": "이징 곡선",
+    "easeCurveDesc": "시간에 따른 값 변화율을 지정합니다.",
+    "useStippleEffect": "점묘 제거 효과 사용",
+    "stippleEffectDesc": "활성화 시 표시/숨기기에 점묘 투명 효과를 사용합니다",
+    "stippleEffectFallback": "그렇지 않으면 단순 페이드 효과를 사용합니다",
+    "roleFallback": "캐릭터",
+    "durationMs": "지속 시간(ms)",
+    "operationModes": {
+      "fixed": "고정",
+      "tween": "트윈",
+      "show": "표시",
+      "hide": "숨기기"
+    }
+  },
+  "actionDialogue": {
+    "head": "💬 대화 설정",
+    "hideUiAfterDialogue": "대화 종료 후 UI 숨기기",
+    "hideDelayMs": "지연 숨김 시간(ms)",
+    "hideDelayTooltipPrefix": "대화 UI의",
+    "hideDelayTooltipHighlight": "지연 숨김",
+    "hideDelayTooltipSuffix": "시간을 지정할 수 있습니다",
+    "dragSort": "드래그 정렬",
+    "editAlias": "클릭하여 별칭 설정",
+    "advancedMode": "고급 모드",
+    "delete": "삭제",
+    "bindCharacterTip": "아바타를 클릭해 캐릭터를 바인딩",
+    "branchCondition": "분기 조건:",
+    "branchConditionPlaceholder": "A 또는 A,B&C 또는 (A,B)&C",
+    "branchConditionTooltipPrefix": "이 대화에 필요한",
+    "branchConditionTooltipHighlight": "분기 태그",
+    "branchFormats": {
+      "title": "지원 형식:",
+      "single": "단일 태그",
+      "or": "아무 태그 하나 (OR)",
+      "and": "모든 태그 (AND)",
+      "mixed": "혼합 논리 (A 또는 B 그리고 C)",
+      "priority": "괄호 우선순위 ((A 또는 B) 그리고 C)",
+      "visibleRule": "조건을 만족한 플레이어만 이 대화를 볼 수 있습니다"
+    },
+    "textPlaceholder": "텍스트를 입력하세요……",
+    "cameraProxy": "카메라 프록시:",
+    "branchTag": "분기 태그:",
+    "branchTagPlaceholder": "분기 태그 입력 (예: A, B)",
+    "branchTagTooltipPrefix": "각 선택지에",
+    "branchTagTooltipHighlight": "분기 태그",
+    "branchTagTooltipSuffixPrefix": "를 설정하여 선택한 태그에 따라",
+    "branchTagTooltipSuffixHighlight": "다른 내용을 표시",
+    "cameraStand": "카메라 구도:",
+    "enableMove": "이동 활성화:",
+    "easeFunction": "이징 함수:",
+    "duration": "애니메이션 시간:",
+    "animationName": "애니메이션 이름:",
+    "animationLoop": "애니메이션 반복:",
+    "cameraOffsetX": "카메라 오프셋 X:",
+    "cameraOffsetY": "카메라 오프셋 Y:",
+    "preselectCharacter": "캐릭터 미리 선택",
+    "clearPreselectedCharacter": "미리 선택한 캐릭터 지우기",
+    "addNew": "추가",
+    "append": "이어쓰기",
+    "selectDialogueType": "대화 유형 선택",
+    "quickTypes": {
+      "normal": "일반",
+      "voiceover": "내레이션",
+      "commander": "자신"
+    },
+    "cameraStands": {
+      "large": "대(전신 샷)",
+      "medium": "중(반신 샷)",
+      "small": "소(클로즈업)"
+    },
+    "types": {
+      "normal": {
+        "label": "일반 대화",
+        "description": "캐릭터 간의 표준 대화"
+      },
+      "voiceover": {
+        "label": "내레이션",
+        "description": "특정 화자가 없는 서술 텍스트"
+      },
+      "commander": {
+        "label": "지휘관 답변",
+        "description": "플레이어 캐릭터의 대화 내용"
+      }
+    },
+    "systemSpeakers": {
+      "selectCharacter": "캐릭터 선택",
+      "voiceover": "내레이션",
+      "commander": "지휘관"
+    },
+    "messages": {
+      "preselectedCharacter": "미리 선택한 캐릭터: {character}",
+      "clearedPreselectedCharacter": "미리 선택한 캐릭터를 지웠습니다",
+      "selectCharacterFirst": "먼저 캐릭터를 선택하세요",
+      "deletedDialogue": "대화를 삭제했습니다",
+      "movedUp": "대화를 위로 이동했습니다",
+      "movedDown": "대화를 아래로 이동했습니다",
+      "orderUpdated": "대화 순서를 업데이트했습니다",
+      "addDialogueFirst": "먼저 대화를 추가하세요"
+    }
+  },
+  "timeLine": {
+    "currentCanvasMode": "현재 캔버스 모드: {mode}",
+    "play": "재생",
+    "realTimePreview": "실시간 미리보기",
+    "realTimePreviewHint": "즉시 콘텐츠는 미리볼 수 없습니다",
+    "modes": {
+      "scene": "장면",
+      "preview": "미리보기"
+    },
+    "messages": {
+      "alreadyExists": "{name}: 이미 존재합니다",
+      "preloaded": "미리 로드됨: {name}",
+      "cannotProcess": "처리할 수 없음: {type}"
+    }
+  },
+  "shaderEditor": {
+    "title": "Shader 효과 편집기 [시험용 버전]",
+    "apply": "효과 적용",
+    "reset": "초기화",
+    "loadPreset": "프리셋 불러오기",
+    "selectPreset": "프리셋 효과 선택",
+    "fragmentShader": "Fragment Shader:",
+    "fragmentShaderPlaceholder": "프래그먼트 셰이더 코드를 입력하세요...",
+    "uniforms": "Uniform 매개변수",
+    "addUniform": "+ 매개변수 추가",
+    "uniformNamePlaceholder": "매개변수 이름",
+    "realTimePreview": "실시간 미리보기",
+    "enableAnimation": "애니메이션 활성화",
+    "dissolveAnimationEnabled": "디졸브 애니메이션이 활성화됨",
+    "timeAnimationEnabled": "시간 애니메이션이 활성화됨",
+    "presets": {
+      "glow": "발광 효과",
+      "wave": "물결 왜곡",
+      "colorShift": "색상 이동",
+      "dissolve": "디졸브 효과"
+    }
+  },
+  "actionBgm": {
+    "head": "🔊 배경 음악",
+    "operationMode": "오디오 동작 모드:",
+    "selectAudioFile": "오디오 파일 선택",
+    "volume": "볼륨 설정",
+    "loopPlayback": "반복 재생",
+    "fadeIn": "페이드 인",
+    "fadeOut": "페이드 아웃",
+    "audioEffects": "오디오 효과",
+    "telephoneEffect": "전화 효과",
+    "reverbEffect": "리버브 효과",
+    "equalizer": "이퀄라이저",
+    "stopCurrentBgm": "현재 재생 중인 배경 음악 중지",
+    "stopWithFadeOut": "페이드 아웃 후 중지",
+    "noContent": "내용 없음",
+    "previewControls": "미리보기 제어",
+    "clearAllEffects": "모든 효과 지우기",
+    "noAvailableAudioFiles": "사용 가능한 오디오 파일이 없습니다",
+    "operationModes": {
+      "play": "오디오 재생 (Play)",
+      "stop": "오디오 중지 (Stop)"
+    },
+    "inputs": {
+      "volume": "볼륨 (0-1)",
+      "fadeInDuration": "페이드 인 시간 (초)",
+      "fadeOutDuration": "페이드 아웃 시간 (초)",
+      "stopFadeOutDuration": "중지 페이드 아웃 시간 (초)",
+      "stereoSeparation": "스테레오 분리 (-1~1)",
+      "distortion": "왜곡 효과 (0~1)",
+      "reverbTime": "리버브 시간 (초)",
+      "reverbDecay": "감쇠 강도"
+    }
+  },
+  "actionSfx": {
+    "head": "🎶 효과음 재생",
+    "selectAudioFile": "효과음 파일 선택",
+    "volume": "볼륨 설정",
+    "previewControls": "미리보기 제어",
+    "noAvailableAudioFiles": "사용 가능한 효과음 파일이 없습니다",
+    "inputs": {
+      "volume": "볼륨 (0-1)"
+    }
+  },
   "777": "777",
   "absolute": "absolute",
   "acpufreeze": "acpufreeze",

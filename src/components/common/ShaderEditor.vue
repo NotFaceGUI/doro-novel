@@ -1,16 +1,16 @@
 <template>
   <div class="shader-editor">
     <div class="shader-editor-header">
-      <h3>Shader 特效编辑器【测试版本做着玩的】</h3>
+      <h3>{{ t('shaderEditor.title') }}</h3>
       <div class="shader-controls">
         <button @click="applyShader" class="btn btn-primary">
-          应用效果
+          {{ t('shaderEditor.apply') }}
         </button>
         <button @click="resetShader" class="btn btn-secondary">
-          重置
+          {{ t('shaderEditor.reset') }}
         </button>
         <button @click="loadPreset" class="btn btn-secondary">
-          加载预设
+          {{ t('shaderEditor.loadPreset') }}
         </button>
       </div>
     </div>
@@ -19,24 +19,24 @@
       <!-- 预设选择 -->
       <div class="preset-section">
         <select v-model="selectedPreset" @change="onPresetChange" class="preset-select">
-          <option value="">选择预设效果</option>
+          <option value="">{{ t('shaderEditor.selectPreset') }}</option>
           <option
             v-for="preset in shaderPresets"
             :key="preset.name"
             :value="preset.name"
           >
-            {{ preset.label }}
+            {{ getPresetLabel(preset.name) }}
           </option>
         </select>
       </div>
 
       <!-- Shader代码编辑器 -->
       <div class="code-editor">
-        <div class="editor-label">Fragment Shader:</div>
+        <div class="editor-label">{{ t('shaderEditor.fragmentShader') }}</div>
         <textarea
           v-model="fragmentShader"
           class="shader-textarea"
-          placeholder="输入片段着色器代码..."
+          :placeholder="t('shaderEditor.fragmentShaderPlaceholder')"
           rows="15"
         ></textarea>
       </div>
@@ -44,9 +44,9 @@
       <!-- Uniform参数控制 -->
       <div class="uniforms-section">
         <div class="uniforms-header">
-          <span>Uniform 参数</span>
+          <span>{{ t('shaderEditor.uniforms') }}</span>
           <button @click="addUniform" class="btn btn-small">
-            + 添加参数
+            {{ t('shaderEditor.addUniform') }}
           </button>
         </div>
         
@@ -59,7 +59,7 @@
             <div class="uniform-controls">
               <input
                 v-model="uniform.name"
-                placeholder="参数名"
+                :placeholder="t('shaderEditor.uniformNamePlaceholder')"
                 class="uniform-name-input"
               />
               <select
@@ -157,7 +157,7 @@
                 @click="removeUniform(index)"
                 class="btn btn-danger btn-small"
               >
-                删除
+                {{ t('common.delete') }}
               </button>
             </div>
           </div>
@@ -168,13 +168,13 @@
       <div class="preview-controls">
         <label class="checkbox-label">
           <input type="checkbox" v-model="realTimePreview" />
-          实时预览
+          {{ t('shaderEditor.realTimePreview') }}
         </label>
         <label class="checkbox-label">
           <input type="checkbox" v-model="enableAnimation" />
-          启用动画
+          {{ t('shaderEditor.enableAnimation') }}
           <span class="animation-hint" v-if="enableAnimation">
-            {{ selectedPreset === 'dissolve' ? '溶解动画已启用' : '时间动画已启用' }}
+            {{ selectedPreset === 'dissolve' ? t('shaderEditor.dissolveAnimationEnabled') : t('shaderEditor.timeAnimationEnabled') }}
           </span>
         </label>
       </div>
@@ -184,6 +184,7 @@
 
 <script setup lang="ts">
 import { ref, watch, onMounted } from 'vue'
+import { useI18n } from 'vue-i18n'
 
 // 定义组件的props和emits
 interface ShaderUniform {
@@ -196,7 +197,6 @@ interface ShaderUniform {
 
 interface ShaderPreset {
   name: string
-  label: string
   fragmentShader: string
   uniforms: ShaderUniform[]
 }
@@ -205,6 +205,8 @@ const emit = defineEmits<{
   applyShader: [shaderData: { name: string; fragmentShader: string; uniforms: Record<string, any> }]
   resetShader: []
 }>()
+
+const { t } = useI18n()
 
 // 响应式数据
 const selectedPreset = ref<string>('')
@@ -217,7 +219,6 @@ const enableAnimation = ref<boolean>(false)
 const shaderPresets = ref<ShaderPreset[]>([
   {
     name: 'glow',
-    label: '发光效果',
     fragmentShader: `precision mediump float;
 varying vec2 vTextureCoord;
 uniform sampler2D uSampler;
@@ -245,7 +246,6 @@ void main() {
   },
   {
     name: 'wave',
-    label: '波浪扭曲',
     fragmentShader: `precision mediump float;
 varying vec2 vTextureCoord;
 uniform sampler2D uSampler;
@@ -271,7 +271,6 @@ void main() {
   },
   {
     name: 'colorShift',
-    label: '颜色偏移',
     fragmentShader: `precision mediump float;
 varying vec2 vTextureCoord;
 uniform sampler2D uSampler;
@@ -313,7 +312,6 @@ void main() {
   },
   {
     name: 'dissolve',
-    label: '溶解效果',
     fragmentShader: `precision mediump float;
 varying vec2 vTextureCoord;
 uniform sampler2D uSampler;
@@ -390,6 +388,10 @@ const addUniform = () => {
     min: 0,
     max: 1
   })
+}
+
+const getPresetLabel = (presetName: string) => {
+  return t(`shaderEditor.presets.${presetName}`)
 }
 
 const removeUniform = (index: number) => {

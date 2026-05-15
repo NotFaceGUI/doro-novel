@@ -3,13 +3,13 @@
         <div class="sort-dialog-overlay" @click="handleClose">
             <div class="sort-dialog" @click.stop>
                 <div class="sort-dialog-header">
-                    <h3>排序 Action Items</h3>
+                    <h3>{{ t('sortDialog.title') }}</h3>
                     <button class="close-btn" @click="handleClose">×</button>
                 </div>
 
                 <div class="sort-dialog-content">
                     <div class="sort-instructions">
-                        拖拽下方的 ActionItem 来重新排序, <span style="color: brown;">注意改变顺序快照可能会失去真实性</span>
+                        {{ t('sortDialog.instructions') }}<span style="color: brown;">{{ t('sortDialog.warning') }}</span>
                     </div>
 
 
@@ -20,7 +20,7 @@
                                 <div class="drag-handle">⋮⋮</div>
                                 <div class="item-info">
                                     <div class="item-id">ID: {{ item.id }}</div>
-                                    <div class="item-type">类型: {{ getTypeDisplayName(item.type) }}</div>
+                                    <div class="item-type">{{ t('sortDialog.typeLabel') }}: {{ getTypeDisplayName(item.type) }}</div>
                                 </div>
                                 <div class="item-index">{{ index + 1 }}</div>
                             </div>
@@ -28,8 +28,8 @@
                     </div>
 
                     <div class="sort-dialog-footer">
-                        <button class="cancel-btn" @click="handleClose">取消</button>
-                        <button class="save-btn" @click="handleSave">保存排序</button>
+                        <button class="cancel-btn" @click="handleClose">{{ t('common.cancel') }}</button>
+                        <button class="save-btn" @click="handleSave">{{ t('sortDialog.saveOrder') }}</button>
                     </div>
                 </div>
             </div>
@@ -39,11 +39,13 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
+import { useI18n } from 'vue-i18n';
 import {
     VueDraggable,
     type UseDraggableReturn
 } from 'vue-draggable-plus';
 import { ActionItems, ASIType } from '../../types/app';
+const { t } = useI18n();
 
 const props = defineProps<{
     items: ActionItems[]
@@ -88,20 +90,20 @@ const el = ref<UseDraggableReturn>();
 // 类型显示名称映射
 const getTypeDisplayName = (type: ASIType): string => {
     const typeMap: Record<ASIType, string> = {
-        [ASIType.BACKGROUND]: '背景',
-        [ASIType.BGM]: '背景音乐',
-        [ASIType.AUDIO]: '音效',
-        [ASIType.DIALOGUE]: '对话',
-        [ASIType.SCENE]: '场景初始化',
-        [ASIType.OPERATINGCAMERA]: '摄像机操作',
-        [ASIType.TRANSITION]: '过渡效果',
-        [ASIType.WAIT]: '等待/阻塞',
-        [ASIType.CHECKDIALOGUE]: '分支对话',
-        [ASIType.EFFECT]: '特效',
-        [ASIType.CHARACTER]: '操作角色',
-        [ASIType.CG]: 'CG画面'
+        [ASIType.BACKGROUND]: t('sortDialog.types.background'),
+        [ASIType.BGM]: t('sortDialog.types.bgm'),
+        [ASIType.AUDIO]: t('sortDialog.types.audio'),
+        [ASIType.DIALOGUE]: t('sortDialog.types.dialogue'),
+        [ASIType.SCENE]: t('sortDialog.types.scene'),
+        [ASIType.OPERATINGCAMERA]: t('sortDialog.types.camera'),
+        [ASIType.TRANSITION]: t('sortDialog.types.transition'),
+        [ASIType.WAIT]: t('sortDialog.types.wait'),
+        [ASIType.CHECKDIALOGUE]: t('sortDialog.types.branchDialogue'),
+        [ASIType.EFFECT]: t('sortDialog.types.effect'),
+        [ASIType.CHARACTER]: t('sortDialog.types.character'),
+        [ASIType.CG]: t('sortDialog.types.cg')
     };
-    return typeMap[type] || '未知类型';
+    return typeMap[type] || t('sortDialog.unknownType');
 };
 
 

@@ -3,11 +3,11 @@
         <div id="typeAction" class="type-action">
             <RenderType v-if="fileName != ''" :type="type"></RenderType>
             <input v-show="mode === 'res'" ref="search" type="text" id="search-action"
-                :placeholder="fileName == '' ? '请选择添加的操作' : `你想对${fileName}的操作是？`" autocomplete="off" autocorrect="off"
+                :placeholder="fileName == '' ? t('inputActionType.searchPlaceholder') : t('inputActionType.searchPlaceholderWithFile', { fileName })" autocomplete="off" autocorrect="off"
                 autocapitalize="off">
             <div class="type-selection" v-if="mode === 'res'">
-                <div class="type-action-content" v-for="option in options" :key="option.value">
-                    <div v-if="option.value === '分隔符'"
+                <div class="type-action-content" v-for="(option, index) in options" :key="`${option.value}-${option.label}-${index}`">
+                    <div v-if="option.value === DIVIDER_VALUE"
                         style="height: 30px;width: 100%;padding: 5px 0;margin-bottom: 10px;border-bottom: 1px dashed var(--placeholder-color);font-size: 14px;">
                         {{ option.label }}
                     </div>
@@ -20,43 +20,43 @@
                 </div>
             </div>
             <div class="type-selection" v-if="mode === 'character'">
-                <div class="type-selection-title">😍 角色管理器</div>
+                <div class="type-selection-title">😍 {{ t('inputActionType.characterManager') }}</div>
                 <template v-if="slelectOptions.length > 0">
                     <div class="type-action-content" v-for="option in slelectOptions" :key="option.path">
                         <div class="type-action-item" @click="selectCharacterType(option)">
-                            {{ t(option.name) }}
+                            {{ option.name }}
                         </div>
                     </div>
                 </template>
                 <template v-else>
                     <div style="color: #ccc; text-shadow: 0 0 10px var(--error-color); text-align: center; opacity: 1;">
-                        ❓ 找不到已加载角色资源，请添加角色资源 ❓
+                        ❓ {{ t('inputActionType.noCharacterResources') }} ❓
                     </div>
                 </template>
             </div>
 
             <div class="type-selection" v-if="mode === 'sceneCharacter'">
-                <div class="type-selection-title">🎭 场景角色选择器</div>
+                <div class="type-selection-title">🎭 {{ t('inputActionType.sceneCharacterSelector') }}</div>
                 <template v-if="sceneCharacterOptions.length > 0">
                     <div class="type-action-content" v-for="(character, index) in sceneCharacterOptions" :key="index">
                         <div class="type-action-item" @click="selectSceneCharacterType(character)">
                             <div class="scene-character-info">
-                                <span class="character-name">{{ t(character.character.characterName) }}</span>
+                                <span class="character-name">{{ character.character.characterName }}</span>
                                 <span class="character-position">({{ character.x }}, {{ character.y }})</span>
-                                <span class="character-scale">缩放: {{ character.scale }}</span>
+                                <span class="character-scale">{{ t('inputActionType.scale') }}: {{ character.scale }}</span>
                             </div>
                         </div>
                     </div>
                 </template>
                 <template v-else>
                     <div style="color: #ccc; text-shadow: 0 0 10px var(--error-color); text-align: center; opacity: 1;">
-                        ❓ 场景中没有角色，请先添加角色到场景 ❓
+                        ❓ {{ t('inputActionType.noSceneCharacters') }} ❓
                     </div>
                 </template>
             </div>
 
             <div class="type-selection" v-if="mode === 'Image'">
-                <div class="type-selection-title">😍 图片管理器</div>
+                <div class="type-selection-title">😍 {{ t('inputActionType.imageManager') }}</div>
                 <template v-if="slelectOptions.length > 0">
                     <div class="type-action-content" v-for="option in slelectOptions" :key="option.path">
                         <div class="type-action-item type-image-content" @click="selectResType(option)">
@@ -67,7 +67,7 @@
                 </template>
                 <template v-else>
                     <div style="color: #ccc; text-shadow: 0 0 10px var(--error-color); text-align: center; opacity: 1;">
-                        ❓ 找不到已加载图片资源，请添加图片资源 ❓
+                        ❓ {{ t('inputActionType.noImageResources') }} ❓
                     </div>
                 </template>
             </div>
@@ -99,29 +99,31 @@ const props = defineProps<{
 
 const emit = defineEmits(["select", 'selectCharacter', 'close']);
 
-const options = [
-    { value: "分隔符", label: "初始化" },
-    { value: ASIType.SCENE, label: "初始化 场景", icon: '🎬', desc: "重置场景状态" },
-    { value: "分隔符", label: "常用" },
-    { value: ASIType.CHARACTER, label: "操作 角色", icon: '👯', desc: "移动/缩放/动作/表情" },
-    { value: ASIType.OPERATINGCAMERA, label: "操作 摄像机", icon: '🎥', desc: "调整摄像机视角" },
-    { value: ASIType.DIALOGUE, label: "添加 对话", icon: '💬', desc: "添加角色台词" },
+const DIVIDER_VALUE = "divider";
+
+const options = computed(() => [
+    { value: DIVIDER_VALUE, label: t('inputActionType.sections.init') },
+    { value: ASIType.SCENE, label: t('inputActionType.items.scene.label'), icon: '🎬', desc: t('inputActionType.items.scene.desc') },
+    { value: DIVIDER_VALUE, label: t('inputActionType.sections.common') },
+    { value: ASIType.CHARACTER, label: t('inputActionType.items.character.label'), icon: '👯', desc: t('inputActionType.items.character.desc') },
+    { value: ASIType.OPERATINGCAMERA, label: t('inputActionType.items.camera.label'), icon: '🎥', desc: t('inputActionType.items.camera.desc') },
+    { value: ASIType.DIALOGUE, label: t('inputActionType.items.dialogue.label'), icon: '💬', desc: t('inputActionType.items.dialogue.desc') },
     // { value: ASIType.BACKGROUND, label: "添加 分支对话[x]", icon: '💬', desc: "创建多条分支对话" },
-    { value: ASIType.CG, label: "添加/删除 CG", icon: '📷', desc: "插入或移除CG画面" },
-    { value: ASIType.AUDIO, label: "添加 音效", icon: '🎶', desc: "播放特定音效" },
-    { value: ASIType.BGM, label: "设置/取消 背景音乐", icon: '🎶', desc: "更改或关闭BGM" },
-    { value: ASIType.BACKGROUND, label: "设置/取消 背景图片", icon: '🎨', desc: "设置或移除背景" },
-    { value: ASIType.BACKGROUND, label: "添加/删除 角色[x]", icon: '😍', desc: "加入或移除角色" },
-    { value: ASIType.WAIT, label: "添加 阻塞", icon: '⏱️', desc: "阻塞程序执行指定时间" },
-    { value: "分隔符", label: "高级" },
-    { value: ASIType.TRANSITION, label: "设置 过渡", icon: '⏩', desc: "画面或场景渐变效果" },
-    { value: ASIType.EFFECT, label: "添加 特效", icon: '✨', desc: "在场景中添加特效" },
-    { value: ASIType.BGM, label: "添加/删除 CRT效果[x]", icon: '🎫', desc: "模拟老式屏幕效果" },
-    { value: ASIType.BGM, label: "添加 巴拉巴拉[x]", icon: '🙂', desc: "额外的自定义效果" },
-    { value: "分隔符", label: "模板" },
-    { value: ASIType.BGM, label: "咨询模板[x]", icon: '📃', desc: "预设的咨询对话模板" },
-    { value: ASIType.BGM, label: "主线模板[x]", icon: '😋', desc: "主线剧情模板" },
-];
+    { value: ASIType.CG, label: t('inputActionType.items.cg.label'), icon: '📷', desc: t('inputActionType.items.cg.desc') },
+    { value: ASIType.AUDIO, label: t('inputActionType.items.audio.label'), icon: '🎶', desc: t('inputActionType.items.audio.desc') },
+    { value: ASIType.BGM, label: t('inputActionType.items.bgm.label'), icon: '🎶', desc: t('inputActionType.items.bgm.desc') },
+    { value: ASIType.BACKGROUND, label: t('inputActionType.items.background.label'), icon: '🎨', desc: t('inputActionType.items.background.desc') },
+    { value: ASIType.BACKGROUND, label: t('inputActionType.items.characterToggle.label'), icon: '😍', desc: t('inputActionType.items.characterToggle.desc') },
+    { value: ASIType.WAIT, label: t('inputActionType.items.wait.label'), icon: '⏱️', desc: t('inputActionType.items.wait.desc') },
+    { value: DIVIDER_VALUE, label: t('inputActionType.sections.advanced') },
+    { value: ASIType.TRANSITION, label: t('inputActionType.items.transition.label'), icon: '⏩', desc: t('inputActionType.items.transition.desc') },
+    { value: ASIType.EFFECT, label: t('inputActionType.items.effect.label'), icon: '✨', desc: t('inputActionType.items.effect.desc') },
+    { value: ASIType.BGM, label: t('inputActionType.items.crt.label'), icon: '🎫', desc: t('inputActionType.items.crt.desc') },
+    { value: ASIType.BGM, label: t('inputActionType.items.extra.label'), icon: '🙂', desc: t('inputActionType.items.extra.desc') },
+    { value: DIVIDER_VALUE, label: t('inputActionType.sections.template') },
+    { value: ASIType.BGM, label: t('inputActionType.items.consultTemplate.label'), icon: '📃', desc: t('inputActionType.items.consultTemplate.desc') },
+    { value: ASIType.BGM, label: t('inputActionType.items.mainlineTemplate.label'), icon: '😋', desc: t('inputActionType.items.mainlineTemplate.desc') },
+]);
 
 const slelectOptions = computed(() => {
     const loadRes = actionStore.loadResMap;

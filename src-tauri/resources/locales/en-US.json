@@ -1,4 +1,573 @@
 {
+  "app": {
+    "versionPrefix": "ver"
+  },
+  "common": {
+    "back": "Back",
+    "close": "Close",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "save": "Save",
+    "create": "Create",
+    "next": "Next",
+    "previous": "Previous",
+    "done": "Done",
+    "restoreCurrent": "Restore Current"
+  },
+  "language": {
+    "menu": "Language (L)",
+    "zhCN": "简体中文",
+    "enUS": "English",
+    "jaJP": "日本語",
+    "koKR": "한국어"
+  },
+  "menu": {
+    "project": "Project (P)",
+    "edit": "Edit (E)",
+    "help": "Help (H)",
+    "saveProject": "Save Project",
+    "openProject": "Open Project",
+    "closeProject": "Close Project",
+    "openProjectFolder": "Open Project Folder",
+    "clearCache": "Clear Cache",
+    "undo": "Undo",
+    "redo": "Redo",
+    "cut": "Cut",
+    "copy": "Copy",
+    "paste": "Paste",
+    "find": "Find",
+    "replace": "Replace",
+    "openResourceFolder": "Open Resource Folder",
+    "importResource": "Import Resource",
+    "viewHelp": "View Help",
+    "onlineDocs": "Online Docs",
+    "faq": "FAQ",
+    "watermarkSettings": "Watermark Settings",
+    "updateResources": "Update Resources",
+    "about": "About",
+    "selectProjectFile": "Select Project File",
+    "projectFileFilterName": "Doro Project File",
+    "messages": {
+      "currentProjectNotFound": "Current project information was not found",
+      "readProjectFailed": "Failed to read project file",
+      "projectSaved": "Project saved successfully!",
+      "projectOpened": "[{projectName}] project opened",
+      "projectSaveFailed": "Failed to save project, please try again",
+      "projectClosed": "Project closed",
+      "projectCloseFailed": "Failed to close project, please try again",
+      "projectOpenFailed": "Failed to open project, please check whether the file format is correct",
+      "projectFolderOpenFailed": "Failed to open project folder, please check whether the project exists",
+      "resourceFolderOpenFailed": "Failed to open resource folder, please check whether the resource directory exists",
+      "updateResourcesStarted": "Resource update started. Please check the popped console window for detailed logs.",
+      "updateResourcesFailed": "An error occurred while updating resources: {error}"
+    }
+  },
+  "welcome": {
+    "title": "🎉 Welcome to Doro Novel",
+    "subtitle": "Start your visual novel creation journey!",
+    "createProject": "🎬 Create New Project",
+    "openProject": "📂 Open Existing Project",
+    "viewDocs": "📖 View Official Docs",
+    "createTitle": "🎫 Create New Project",
+    "createDescription": "Please enter a project name",
+    "projectName": "Project Name",
+    "projectNamePlaceholder": "Enter project name",
+    "pathTitle": "📂 Select Project Path",
+    "pathDescription": "Choose where to save the project",
+    "projectPath": "Project Path",
+    "projectPathPlaceholder": "Select project path",
+    "confirmTitle": "Confirm Information",
+    "confirmDescription": "Please confirm the project information",
+    "notFilled": "Not filled",
+    "messages": {
+      "incompleteInfo": "Please complete the project information",
+      "saveFailed": "Failed to save project, please try again"
+    }
+  },
+  "about": {
+    "title": "About",
+    "description": "🎨 A Tauri-based visual novel editor designed for creating Nikke-style interactive visual novels, with visual editing, story branching, localization, and real-time preview.",
+    "authorRole": "Project Author & Developer",
+    "authorDescription": "Committed to building great open-source tools that make creation simpler and more fun.",
+    "emailLabel": "Email: ",
+    "linksTitle": "Links",
+    "githubTitle": "GitHub Repository",
+    "githubDescription": "View source code and contribute",
+    "bilibiliTitle": "Bilibili Space",
+    "bilibiliDescription": "Follow the latest updates",
+    "blablalinkDescription": "Personal homepage",
+    "qqTitle": "QQ Group",
+    "qqDescription": "Join the community discussion",
+    "techTitle": "Tech Stack",
+    "acknowledgementsTitle": "Special Thanks",
+    "acknowledgementsNikkePrefix": "Thanks to the ",
+    "acknowledgementsNikkeSuffix": " team for maintaining an open-source resource repository with complete character data for the community.",
+    "acknowledgementsHaderinPrefix": "Thanks to ",
+    "acknowledgementsHaderinSuffix": " for supporting and contributing to the project."
+  },
+  "watermark": {
+    "title": "Watermark Settings",
+    "enabled": "Enable Watermark",
+    "text": "Watermark Text",
+    "textPlaceholder": "Enter watermark text",
+    "fontSize": "Font Size (px)",
+    "color": "Color",
+    "colorPlaceholder": "Enter color",
+    "opacity": "Opacity",
+    "angle": "Tilt Angle (°)",
+    "placement": "Placement",
+    "spacingX": "Horizontal Spacing (px)",
+    "spacingY": "Vertical Spacing (px)",
+    "offsetX": "Horizontal Offset (px)",
+    "offsetY": "Vertical Offset (px)",
+    "placements": {
+      "tiled": "Tiled (Fullscreen)",
+      "topLeft": "Top Left",
+      "topRight": "Top Right",
+      "bottomLeft": "Bottom Left",
+      "bottomRight": "Bottom Right"
+    }
+  },
+  "update": {
+    "title": "New Version Found",
+    "newVersion": "New Version",
+    "releaseDate": "Release Date",
+    "releaseNotes": "Release Notes",
+    "downloading": "Downloading",
+    "updateNow": "Update Now",
+    "later": "Later",
+    "restartNow": "Restart Now",
+    "restartLater": "Restart Later",
+    "checkingUpdate": "Checking for updates...",
+    "noUpdate": "Already up to date",
+    "noAvailableUpdate": "No update available",
+    "updateAvailable": "New version {version} found",
+    "downloadComplete": "Download Complete",
+    "downloadCompleted": "Download Complete",
+    "installComplete": "Install Complete",
+    "updateError": "Update Failed",
+    "networkError": "Network connection failed",
+    "downloadError": "Download failed",
+    "installError": "Install failed",
+    "readyToInstall": "The update package is ready to install",
+    "installPrompt": "Install now and restart the app?",
+    "cancel": "Cancel",
+    "installLater": "Install Later",
+    "installAndRestart": "Install and Restart",
+    "justChecked": "Checked just now",
+    "minutesAgo": "Checked {count} minute(s) ago",
+    "hoursAgo": "Checked {count} hour(s) ago"
+  },
+  "leftBar": {
+    "characterStory": "Character & Story",
+    "image": "Image",
+    "video": "Video",
+    "sound": "Sound",
+    "package": "Package",
+    "timeline": "Time Line",
+    "audioUnsupported": "Your browser does not support the audio element."
+  },
+  "controlHint": {
+    "moveView": "Move View",
+    "zoomView": "Scroll to Zoom"
+  },
+  "slotControl": {
+    "title": "Slot Control",
+    "showAll": "Show All",
+    "hideAll": "Hide All"
+  },
+  "sortDialog": {
+    "title": "Sort Action Items",
+    "instructions": "Drag the ActionItems below to reorder them, ",
+    "warning": "note that changing the order may make snapshots less faithful",
+    "typeLabel": "Type",
+    "unknownType": "Unknown Type",
+    "saveOrder": "Save Order",
+    "types": {
+      "background": "Background",
+      "bgm": "Background Music",
+      "audio": "Sound Effect",
+      "dialogue": "Dialogue",
+      "scene": "Scene Init",
+      "camera": "Camera Control",
+      "transition": "Transition",
+      "wait": "Wait/Block",
+      "branchDialogue": "Branch Dialogue",
+      "effect": "Effect",
+      "character": "Character Control",
+      "cg": "CG Scene"
+    }
+  },
+  "dialogueUi": {
+    "title": "⚙️ Dialogue Layout Settings",
+    "followScene": "Follow Scene",
+    "forceMode": "Force Set",
+    "forceOpen": "Force Set",
+    "noDialogueDetected": "No dialogue detected",
+    "forceModeSubtitle": "Force-setting {mode}; the config will still be saved before it appears",
+    "sceneModeSubtitle": "Current scene: {mode}. Changes take effect immediately",
+    "emptySubtitle": "No recognizable dialogue element in the current scene. You can switch to force set",
+    "emptyStatusTitle": "No matching element in scene",
+    "missingStatusTitle": "There is no {mode} element in the current scene",
+    "activeStatusTitle": "Adjusting {mode}",
+    "emptyStatusDesc": "Show a character dialogue, narration, or answer in the scene first, or use force set to save the config directly.",
+    "missingStatusDesc": "This type is not visible in the current scene, but the configuration is saved immediately and will take effect the next time it appears.",
+    "activeStatusDesc": "The current visible element matches this type, and moving the sliders updates the layout in real time.",
+    "modes": {
+      "normal": "Character Dialogue",
+      "voiceover": "Narration",
+      "commander": "Answer"
+    },
+    "sections": {
+      "normalFonts": "💬 Character Dialogue",
+      "normalLayout": "📐 Name & Content",
+      "colorBar": "🎨 Character Color Bar",
+      "voiceover": "📢 Narration",
+      "commander": "🗨️ Answer"
+    },
+    "controls": {
+      "nameFontOffset": {
+        "label": "Name Font",
+        "description": "Offset the character name font size"
+      },
+      "contentFontOffset": {
+        "label": "Content Font",
+        "description": "Offset the character dialogue body font size"
+      },
+      "voiceoverFontOffset": {
+        "label": "Narration Font",
+        "description": "Offset the narration font size"
+      },
+      "commanderFontOffset": {
+        "label": "Answer Font",
+        "description": "Offset the answer button font size"
+      },
+      "nameContentGapOffset": {
+        "label": "Name/Content Gap",
+        "description": "Vertical spacing between character name and body text"
+      },
+      "groupYOffset": {
+        "label": "Group Vertical Offset",
+        "description": "Move the whole name/content group up or down"
+      },
+      "nameXOffset": {
+        "label": "Name Horizontal Offset",
+        "description": "Adjust the character name position independently"
+      },
+      "contentXOffset": {
+        "label": "Content Horizontal Offset",
+        "description": "Adjust the character content position independently"
+      },
+      "colorBarHeightOffset": {
+        "label": "Color Bar Height",
+        "description": "Height compensation for the character color bar"
+      },
+      "colorBarWidthOffset": {
+        "label": "Color Bar Width",
+        "description": "Width compensation for the character color bar"
+      },
+      "colorBarXOffset": {
+        "label": "Color Bar Horizontal Offset",
+        "description": "Move the character color bar left or right"
+      },
+      "colorBarYOffset": {
+        "label": "Color Bar Vertical Offset",
+        "description": "Move the character color bar up or down"
+      }
+    },
+    "metrics": {
+      "name": "Name {value}px",
+      "content": "Content {value}px",
+      "gap": "Gap {value}px",
+      "colorBarHeight": "Bar H {value}px",
+      "voiceover": "Narration {value}px",
+      "commander": "Answer {value}px",
+      "lineHeight": "Line Height {value}px"
+    }
+  },
+  "projectView": {
+    "tabs": {
+      "canvas": "Canvas",
+      "preview": "Preview",
+      "script": "Script"
+    },
+    "unsupportedPreview": "Preview is not supported for this file",
+    "selectAnimation": "Animation:",
+    "selectSkin": "Skin:",
+    "characterType": "Character Type:",
+    "characterTypes": {
+      "default": "Default",
+      "aim": "Aim",
+      "cover": "Cover"
+    },
+    "mixPresets": {
+      "default": "Default Mix",
+      "fast": "Fast Mix",
+      "slow": "Slow Mix",
+      "custom": "Custom Mix"
+    },
+    "shaderEditorTitle": "Shader Effect Editor",
+    "scriptPlaceholder": "Write your story script here...",
+    "editing": "Editing"
+  },
+  "actionCommon": {
+    "waitExecution": "Block Execution"
+  },
+  "actionItemTool": {
+    "preview": "Preview",
+    "delete": "Delete",
+    "expand": "Expand",
+    "collapse": "Collapse"
+  },
+  "inputActionType": {
+    "searchPlaceholder": "Select an action to add",
+    "searchPlaceholderWithFile": "What do you want to do with {fileName}?",
+    "characterManager": "Character Manager",
+    "sceneCharacterSelector": "Scene Character Selector",
+    "imageManager": "Image Manager",
+    "scale": "Scale",
+    "noCharacterResources": "No loaded character resources found. Please add character resources first",
+    "noSceneCharacters": "There are no characters in the scene. Please add characters first",
+    "noImageResources": "No loaded image resources found. Please add image resources first",
+    "sections": {
+      "init": "Initialize",
+      "common": "Common",
+      "advanced": "Advanced",
+      "template": "Template"
+    },
+    "items": {
+      "scene": { "label": "Init Scene", "desc": "Reset scene state" },
+      "character": { "label": "Operate Character", "desc": "Move/scale/action/expression" },
+      "camera": { "label": "Operate Camera", "desc": "Adjust camera view" },
+      "dialogue": { "label": "Add Dialogue", "desc": "Add character lines" },
+      "cg": { "label": "Add/Remove CG", "desc": "Insert or remove CG scene" },
+      "audio": { "label": "Add Sound", "desc": "Play a sound effect" },
+      "bgm": { "label": "Set/Clear BGM", "desc": "Change or stop BGM" },
+      "background": { "label": "Set/Clear Background", "desc": "Set or remove background" },
+      "characterToggle": { "label": "Add/Remove Character[x]", "desc": "Add or remove characters" },
+      "wait": { "label": "Add Wait", "desc": "Block execution for a period" },
+      "transition": { "label": "Set Transition", "desc": "Screen or scene transition effect" },
+      "effect": { "label": "Add Effect", "desc": "Add visual effects to the scene" },
+      "crt": { "label": "Add/Remove CRT[x]", "desc": "Simulate old screen effect" },
+      "extra": { "label": "Add BlahBlah[x]", "desc": "Extra custom effect" },
+      "consultTemplate": { "label": "Consult Template[x]", "desc": "Preset consultation dialogue template" },
+      "mainlineTemplate": { "label": "Mainline Template[x]", "desc": "Main story template" }
+    }
+  },
+  "actionInitScene": {
+    "head": "🎬 Scene Init",
+    "fadeIn": "Opening Transition",
+    "initialCameraPosition": "Initial Camera Position",
+    "setBackground": "Set Background",
+    "changeBackground": "Change Background",
+    "setInitialCharacterPosition": "Set Initial Character Position",
+    "positionTooltipPrefix": "The scene's opening",
+    "positionTooltipHighlight": "character placement",
+    "shiftMoveHintPrefix": "Hold",
+    "shiftMoveHintSuffix": "to move horizontally",
+    "ctrlMoveHintPrefix": "Hold",
+    "ctrlMoveHintSuffix": "to move vertically",
+    "dragPositionHint": "Drag to adjust position (Shift: horizontal, Ctrl: vertical)",
+    "animation": "Animation:",
+    "initVisible": "Visible on init:",
+    "addCharacterToScene": "Add Character To Scene",
+    "parallaxFactor": "Parallax Factor"
+  },
+  "actionCharacter": {
+    "head": "👤 Character Control",
+    "selectCharacter": "Select Character",
+    "selectCharacterDesc": "Select an existing character in the scene to operate on",
+    "warningTitle": "Warning:",
+    "warningPrefix": "Switching characters will",
+    "warningLoseState": "lose the current target state",
+    "warningClearPrefix": "After switching, the current character's",
+    "warningClearHighlight": "target state will be cleared",
+    "warningResetPrefix": "When you switch back, the system will automatically",
+    "warningResetHighlight": "reset to the character's original scene position",
+    "operationArea": "Character Operation",
+    "operationAreaDesc": "Set the character target state and operation mode",
+    "operationMode": "Operation Mode",
+    "targetState": "Target State",
+    "easeCurve": "Easing Curve",
+    "easeCurveDesc": "Specify how parameters change over time.",
+    "useStippleEffect": "Use Stipple Fade",
+    "stippleEffectDesc": "When enabled, show/hide uses a stipple transparency effect",
+    "stippleEffectFallback": "Otherwise a simple fade effect is used",
+    "roleFallback": "Character",
+    "durationMs": "Duration (ms)",
+    "operationModes": {
+      "fixed": "Fixed",
+      "tween": "Tween",
+      "show": "Show",
+      "hide": "Hide"
+    }
+  },
+  "actionDialogue": {
+    "head": "💬 Dialogue Settings",
+    "hideUiAfterDialogue": "Hide UI after dialogue",
+    "hideDelayMs": "Hide delay (ms)",
+    "hideDelayTooltipPrefix": "You can set a",
+    "hideDelayTooltipHighlight": "delayed hide",
+    "hideDelayTooltipSuffix": "time for the dialogue UI",
+    "dragSort": "Drag to sort",
+    "editAlias": "Click to edit alias",
+    "advancedMode": "Advanced Mode",
+    "delete": "Delete",
+    "bindCharacterTip": "Click the avatar to bind a character",
+    "branchCondition": "Branch Condition:",
+    "branchConditionPlaceholder": "A or A,B&C or (A,B)&C",
+    "branchConditionTooltipPrefix": "Set the required",
+    "branchConditionTooltipHighlight": "branch tags",
+    "branchFormats": {
+      "title": "Supported formats:",
+      "single": "Single tag",
+      "or": "Any one tag (OR)",
+      "and": "All tags (AND)",
+      "mixed": "Mixed logic (A or B and C)",
+      "priority": "Parenthesis priority ((A or B) and C)",
+      "visibleRule": "Only players who meet the condition can see this dialogue"
+    },
+    "textPlaceholder": "Enter text...",
+    "cameraProxy": "Camera Proxy:",
+    "branchTag": "Branch Tag:",
+    "branchTagPlaceholder": "Enter branch tags (e.g. A, B)",
+    "branchTagTooltipPrefix": "Set",
+    "branchTagTooltipHighlight": "branch tags",
+    "branchTagTooltipSuffixPrefix": "to",
+    "branchTagTooltipSuffixHighlight": "show different content based on the selection",
+    "cameraStand": "Camera Stand:",
+    "enableMove": "Enable Move:",
+    "easeFunction": "Easing:",
+    "duration": "Duration:",
+    "animationName": "Animation:",
+    "animationLoop": "Loop Animation:",
+    "cameraOffsetX": "Camera Offset X:",
+    "cameraOffsetY": "Camera Offset Y:",
+    "preselectCharacter": "Preselect Character",
+    "clearPreselectedCharacter": "Clear preselected character",
+    "addNew": "New",
+    "append": "Append",
+    "selectDialogueType": "Select Dialogue Type",
+    "quickTypes": {
+      "normal": "Normal",
+      "voiceover": "Narration",
+      "commander": "Self"
+    },
+    "cameraStands": {
+      "large": "Large (Wide Shot)",
+      "medium": "Medium (Half-body Shot)",
+      "small": "Small (Close-up)"
+    },
+    "types": {
+      "normal": {
+        "label": "Normal Dialogue",
+        "description": "Standard dialogue between characters"
+      },
+      "voiceover": {
+        "label": "Narration",
+        "description": "Narrative text without a specific speaker"
+      },
+      "commander": {
+        "label": "Commander Reply",
+        "description": "Dialogue spoken by the player character"
+      }
+    },
+    "systemSpeakers": {
+      "selectCharacter": "Select Character",
+      "voiceover": "Narration",
+      "commander": "Commander"
+    },
+    "messages": {
+      "preselectedCharacter": "Preselected character: {character}",
+      "clearedPreselectedCharacter": "Preselected character cleared",
+      "selectCharacterFirst": "Please select a character first",
+      "deletedDialogue": "Dialogue deleted",
+      "movedUp": "Dialogue moved up",
+      "movedDown": "Dialogue moved down",
+      "orderUpdated": "Dialogue order updated",
+      "addDialogueFirst": "Please add dialogue first"
+    }
+  },
+  "timeLine": {
+    "currentCanvasMode": "Current canvas mode: {mode}",
+    "play": "Play",
+    "realTimePreview": "Real-time Preview",
+    "realTimePreviewHint": "Instant content cannot be previewed",
+    "modes": {
+      "scene": "Scene",
+      "preview": "Preview"
+    },
+    "messages": {
+      "alreadyExists": "{name}: already exists",
+      "preloaded": "Preloaded: {name}",
+      "cannotProcess": "Cannot process: {type}"
+    }
+  },
+  "shaderEditor": {
+    "title": "Shader Effect Editor [Experimental Toy Build]",
+    "apply": "Apply Effect",
+    "reset": "Reset",
+    "loadPreset": "Load Preset",
+    "selectPreset": "Select preset effect",
+    "fragmentShader": "Fragment Shader:",
+    "fragmentShaderPlaceholder": "Enter fragment shader code...",
+    "uniforms": "Uniform Parameters",
+    "addUniform": "+ Add Parameter",
+    "uniformNamePlaceholder": "Parameter name",
+    "realTimePreview": "Real-time Preview",
+    "enableAnimation": "Enable Animation",
+    "dissolveAnimationEnabled": "Dissolve animation enabled",
+    "timeAnimationEnabled": "Time animation enabled",
+    "presets": {
+      "glow": "Glow Effect",
+      "wave": "Wave Distortion",
+      "colorShift": "Color Shift",
+      "dissolve": "Dissolve Effect"
+    }
+  },
+  "actionBgm": {
+    "head": "🔊 Background Music",
+    "operationMode": "Audio operation mode:",
+    "selectAudioFile": "Select audio file",
+    "volume": "Volume",
+    "loopPlayback": "Loop Playback",
+    "fadeIn": "Fade In",
+    "fadeOut": "Fade Out",
+    "audioEffects": "Audio Effects",
+    "telephoneEffect": "Telephone Effect",
+    "reverbEffect": "Reverb Effect",
+    "equalizer": "Equalizer",
+    "stopCurrentBgm": "Stop the currently playing background music",
+    "stopWithFadeOut": "Fade-out Stop",
+    "noContent": "No content",
+    "previewControls": "Preview Controls",
+    "clearAllEffects": "Clear all effects",
+    "noAvailableAudioFiles": "No audio files available",
+    "operationModes": {
+      "play": "Play Audio (Play)",
+      "stop": "Stop Audio (Stop)"
+    },
+    "inputs": {
+      "volume": "Volume (0-1)",
+      "fadeInDuration": "Fade-in Duration (sec)",
+      "fadeOutDuration": "Fade-out Duration (sec)",
+      "stopFadeOutDuration": "Stop Fade-out Duration (sec)",
+      "stereoSeparation": "Stereo Separation (-1 to 1)",
+      "distortion": "Distortion (0 to 1)",
+      "reverbTime": "Reverb Time (sec)",
+      "reverbDecay": "Decay"
+    }
+  },
+  "actionSfx": {
+    "head": "🎶 Sound Effect",
+    "selectAudioFile": "Select sound effect file",
+    "volume": "Volume",
+    "previewControls": "Preview Controls",
+    "noAvailableAudioFiles": "No sound effect files available",
+    "inputs": {
+      "volume": "Volume (0-1)"
+    }
+  },
   "777": "777",
   "absolute": "absolute",
   "acpufreeze": "acpufreeze",

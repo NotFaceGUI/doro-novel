@@ -1,23 +1,23 @@
 <template>
     <div class="action-item-main">
-        <ActionItemHead content="🎬 场景初始化" :is-hover="true" :title="title" :id="id" :is-collapsed="actionItem.isToggle"></ActionItemHead>
+        <ActionItemHead :content="t('actionInitScene.head')" :is-hover="true" :title="title" :id="id" :is-collapsed="actionItem.isToggle"></ActionItemHead>
         <div class="action-item-content" v-show="!actionItem.isToggle">
             <!-- <div class="action-title">
                 阻塞执行
                 <ToggleSwitch v-model="actionItem.wait!"></ToggleSwitch>
             </div> -->
             <div class="action-title">
-                开屏过渡
+                {{ t('actionInitScene.fadeIn') }}
                 <ToggleSwitch v-model="fade"></ToggleSwitch>
             </div>
             <div class="action-title">
-                摄像机的初始位置
-                <span class="re-load" @click="reLoad" title="恢复初始值"> ↻ </span>
+                {{ t('actionInitScene.initialCameraPosition') }}
+                <span class="re-load" @click="reLoad" :title="t('common.restoreCurrent')"> ↻ </span>
             </div>
             <DynamicInputs :onBlur="handleBlur" :onChange="handleChange" v-model="cameraValues"
                 :columns="cameraValues.length" />
             <div class="action-title">
-                设置背景
+                {{ t('actionInitScene.setBackground') }}
             </div>
             <div class="select-background">
                 <img :src="backgroundUrl === '' ? '/img/sprite/CommanderRoom.png' : backgroundUrl" width="50%" alt=""
@@ -26,19 +26,19 @@
                 <div class="background-tool">
                     {{ currentBackground.name }}
                     <div class="tool-edit">
-                        <div @click.stop="selectBackground" title="切换背景">🖌</div>
+                        <div @click.stop="selectBackground" :title="t('actionInitScene.changeBackground')">🖌</div>
                     </div>
                 </div>
             </div>
             <DynamicInputs :onBlur="handleParallaxFactorBlur" :max="1" :min="0" :step="0.01"
                 v-model="backgroundParallaxFactorValues" :columns="backgroundParallaxFactorValues.length" />
             <div class="action-title">
-                设置角色初始位置
+                {{ t('actionInitScene.setInitialCharacterPosition') }}
                 <Tooltip position="left">
                     <div>
-                        场景刚开始的<span style="color: var(--button-bg);">角色站位</span>
-                        <div>按住 <span style="color: var(--button-bg);">Shift</span> 键水平移动</div>
-                        <div>按住 <span style="color: var(--button-bg);">Ctrl</span> 键垂直移动</div>
+                        {{ t('actionInitScene.positionTooltipPrefix') }}<span style="color: var(--button-bg);">{{ t('actionInitScene.positionTooltipHighlight') }}</span>
+                        <div>{{ t('actionInitScene.shiftMoveHintPrefix') }} <span style="color: var(--button-bg);">Shift</span> {{ t('actionInitScene.shiftMoveHintSuffix') }}</div>
+                        <div>{{ t('actionInitScene.ctrlMoveHintPrefix') }} <span style="color: var(--button-bg);">Ctrl</span> {{ t('actionInitScene.ctrlMoveHintSuffix') }}</div>
                     </div>
                 </Tooltip>
             </div>
@@ -53,9 +53,9 @@
                 </CharacterItem> -->
                 <div class="character-item-list" v-for="(item, index) in action.maxCharacter" :key="index">
                     <div class="character-header">
-                        <div class="character-name">{{ t(item.character.characterName) }}</div>
+                        <div class="character-name">{{ item.character.characterName }}</div>
                         <div class="drag-handle" @mousedown="startDrag($event, index)"
-                            title="拖拽调整位置 (Shift: 水平, Ctrl: 垂直)">
+                            :title="t('actionInitScene.dragPositionHint')">
                             <span>⋮⋮</span>
                         </div>
                     </div>
@@ -72,12 +72,12 @@
                                 v-model.number="item.y" @change="updateCharacterPosition(index)" />
                         </div>
                     </div>
-                    动画：
+                    {{ t('actionInitScene.animation') }}
                     <Dropdown v-model="item.selectAnimation" :options="item.animationOption"
                         @update:modelValue="onSelectAnimation(index)" :disabled="false"></Dropdown>
 
                     <div class="character-control char-init">
-                        是否初始化显示：
+                        {{ t('actionInitScene.initVisible') }}
 
                         <ToggleSwitch v-model="item.isInitShow" @update:modelValue="onInitShowChange(index, $event)">
                         </ToggleSwitch>
@@ -96,7 +96,7 @@
 
                 <div class="character-item"
                     style="display: flex;justify-content: center;align-items: center;background-color: transparent;">
-                    <div class="character-add" @click="addCharacter">添加角色到场景</div>
+                    <div class="character-add" @click="addCharacter">{{ t('actionInitScene.addCharacterToScene') }}</div>
                 </div>
 
             </div>
@@ -105,7 +105,7 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref, onUnmounted } from 'vue';
+import { onMounted, ref, onUnmounted, watchEffect } from 'vue';
 import DynamicInputs from '../../common/DynamicInputs.vue';
 import ActionItemHead from './ActionItemHead.vue';
 import CanvasManager from '../../../script/render/canvas-manager';
@@ -186,12 +186,16 @@ useViewportStore()
 
 const backgroundParallaxFactorValues = ref<InputOption[]>([
     {
-        label: '视差因子',
+        label: t('actionInitScene.parallaxFactor'),
         value: 0.9,
         type: 'number',
         disabled: false
     }
 ])
+
+watchEffect(() => {
+    backgroundParallaxFactorValues.value[0].label = t('actionInitScene.parallaxFactor');
+});
 
 const selectBackground = () => {
     selectImageType().then(res => {

@@ -7,7 +7,7 @@
         <div class="key">S</div>
         <div class="key">D</div>
       </div>
-      <span class="hint-text">移动视角</span>
+      <span class="hint-text">{{ t('controlHint.moveView') }}</span>
     </div>
     
     <div class="hint-item">
@@ -24,13 +24,14 @@
           </line>
         </svg>
       </div>
-      <span class="hint-text">滚轮缩放</span>
+      <span class="hint-text">{{ t('controlHint.zoomView') }}</span>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted } from 'vue';
+import { useI18n } from 'vue-i18n';
 
 interface Props {
   autoHide?: boolean;
@@ -41,6 +42,7 @@ const props = withDefaults(defineProps<Props>(), {
   autoHide: true,
   hideDelay: 3000
 });
+const { t } = useI18n();
 
 const visible = ref(true);
 let hideTimer: number | null = null;
