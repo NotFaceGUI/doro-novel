@@ -1,6 +1,6 @@
 [package]
 name = "doro-novel"
-version = "0.4.2"
+version = "0.7.0"
 description = "A visual novel editor designed for creating Nikke-style interactive visual novels"
 authors = ["ghost"]
 edition = "2021"
@@ -28,4 +28,3 @@ tauri-plugin-process = "2"
 
 [target.'cfg(not(any(target_os = "android", target_os = "ios")))'.dependencies]
 tauri-plugin-updater = "2"
-
