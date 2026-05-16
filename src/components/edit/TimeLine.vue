@@ -36,11 +36,12 @@ import showMessage from '../../script/common/massage';
 import { ActionItemtype, CharacterType, DragType, GameMode, dirs } from '../../types/app';
 import Action from './Action.vue';
 import ActionItem from './ActionItem.vue';
-import { ASSET_CHARACTER, ResType } from '../../script/var';
+import { ResType } from '../../script/var';
 import { selectResType } from '../../script/common/search-action';
 import { useActionStore } from '../../stores/action-store';
 import ToggleSwitch from '../common/ToggleSwitch.vue';
 import CanvasManager from '../../script/render/canvas-manager';
+import { getCharacterId, getCharacterResourceKey } from '../../utils/character';
 
 const initAction = ref("Init Load Action")
 
@@ -112,8 +113,9 @@ const handleDrop = async (event: DragEvent) => {
                 await handleSearchAction(event, file.type, char.characterName)
                 result = actionStore.addLoadRes({
                     name: char.characterName,
-                    path: ASSET_CHARACTER + char.path?.name + "/" + char.path?.skel,
-                    type: file.type
+                    path: getCharacterResourceKey(char),
+                    type: file.type,
+                    characterId: getCharacterId(char),
                 })
                 name = char.characterName;
             } else {

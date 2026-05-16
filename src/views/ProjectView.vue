@@ -131,9 +131,104 @@
                 <!-- 插槽控制组件 -->
                 <div>
                     <SlotControl v-if="showCanvas && slotOptions.length > 0" :slots="slotOptions"
+                        :active-hovered-slot="hoveredSlotName"
+                        :selected-slots="selectedSlotNames"
                         @toggle-slot="handleSlotToggle" @update-alpha="handleSlotAlphaUpdate"
                         @show-all="handleShowAllSlots" @hide-all="handleHideAllSlots" @slot-hover="handleSlotHover"
-                        @slot-leave="handleSlotLeave" />
+                        @slot-leave="handleSlotLeave" @select-slot="handleSlotSelection" />
+                </div>
+
+                <div v-if="showCanvas" class="slot-batch-panel">
+                    <div class="slot-batch-header">
+                        <div>
+                            <div class="slot-batch-title">{{ t('projectView.customizer.title') }}</div>
+                            <div class="slot-batch-subtitle">
+                                {{ selectedSlotNames.length > 0
+                                    ? t('projectView.customizer.selectedSummary', { count: selectedSlotNames.length })
+                                    : t('projectView.customizer.emptySelection') }}
+                            </div>
+                        </div>
+                        <button class="slot-panel-button slot-panel-button-ghost slot-panel-button-compact" @click="openBulkSelectDialog">
+                            {{ t('projectView.customizer.bulkSelect') }}
+                        </button>
+                    </div>
+
+                    <template v-if="selectedSlotNames.length > 0">
+                        <div class="slot-selection-chip-list">
+                            <span class="slot-selection-chip" v-for="name in selectedSlotNames" :key="name">{{ name }}</span>
+                        </div>
+
+                        <div class="slot-batch-control">
+                            <label>{{ t('projectView.customizer.visible') }}</label>
+                            <input
+                                type="checkbox"
+                                :checked="selectedSlotPrimary?.visible ?? true"
+                                @change="applySelectedVisibility(($event.target as HTMLInputElement).checked)"
+                            />
+                        </div>
+
+                        <div class="slot-batch-control">
+                            <label>{{ t('projectView.customizer.alpha') }}</label>
+                            <input
+                                type="range"
+                                min="0"
+                                max="1"
+                                step="0.05"
+                                :value="selectedSlotPrimary?.alpha ?? 1"
+                                @input="applySelectedAlpha(parseFloat(($event.target as HTMLInputElement).value))"
+                            />
+                            <span class="slot-batch-value">{{ Math.round((selectedSlotPrimary?.alpha ?? 1) * 100) }}%</span>
+                        </div>
+
+                        <div class="slot-batch-control">
+                            <label>{{ t('projectView.customizer.tint') }}</label>
+                            <ColorPicker trigger-variant="panel"
+                                :model-value="selectedSlotPrimary?.tint ?? 0xffffff"
+                                @update:modelValue="applySelectedTint" />
+                        </div>
+
+                        <div class="slot-batch-actions">
+                            <button class="slot-panel-button" @click="toggleShaderEditor">
+                                {{ t('projectView.customizer.shader') }}
+                            </button>
+                            <button class="slot-panel-button slot-panel-button-danger" @click="handleResetShader">
+                                {{ t('projectView.customizer.clearShader') }}
+                            </button>
+                            <button class="slot-panel-button slot-panel-button-ghost" @click="clearSelectedSlots">
+                                {{ t('projectView.customizer.clearSelection') }}
+                            </button>
+                        </div>
+                        <div class="slot-save-section">
+                            <label>{{ t('projectView.customizer.saveAsCharacter') }}</label>
+                            <input
+                                v-model="customCharacterName"
+                                class="slot-name-input"
+                                :placeholder="t('projectView.customizer.characterNamePlaceholder')"
+                            />
+                            <div class="slot-batch-actions">
+                                <button class="slot-panel-button slot-panel-button-primary" @click="saveCustomCharacter">
+                                    {{ t('projectView.customizer.save') }}
+                                </button>
+                                <button
+                                    v-if="currentPreviewCharacter?.isCustom"
+                                    class="slot-panel-button slot-panel-button-danger"
+                                    @click="deleteCustomCharacter(currentPreviewCharacter.id || '')"
+                                >
+                                    {{ t('projectView.customizer.deleteCurrent') }}
+                                </button>
+                            </div>
+                        </div>
+                    </template>
+
+                    <div class="slot-custom-list" v-if="customCharacters.length > 0">
+                        <div class="slot-custom-list-title">{{ t('projectView.customizer.customCharacters') }}</div>
+                        <div class="slot-custom-item" v-for="item in customCharacters" :key="item.id">
+                            <span>{{ item.displayName || item.characterName }}</span>
+                            <button class="slot-custom-delete" @click="deleteCustomCharacter(item.id || '')">
+                                {{ t('common.delete') }}
+                            </button>
+                        </div>
+                    </div>
                 </div>
 
 
@@ -149,19 +244,85 @@
                 </div> -->
 
                 <!-- Shader编辑器浮动面板 -->
-                <Transition name="shader-overlay">
-                    <div v-if="showShaderEditor && showCanvas" class="shader-editor-overlay"
-                        @click.self="toggleShaderEditor">
-                        <Transition name="shader-panel">
-                            <div class="shader-editor-panel" v-if="showShaderEditor">
-                                <div class="shader-editor-header">
-                                    <h3>{{ t('projectView.shaderEditorTitle') }}</h3>
-                                    <button @click="toggleShaderEditor" class="close-btn">×</button>
+                <Transition name="shader-floating">
+                    <div
+                        v-if="showShaderEditor && showCanvas"
+                        ref="shaderWindowRef"
+                        class="shader-floating-window"
+                        :class="{ dragging: shaderWindowDragging }"
+                        :style="shaderFloatingStyle"
+                    >
+                        <div class="shader-floating-header" @mousedown.prevent="startShaderWindowDrag">
+                            <div class="shader-floating-title-group">
+                                <h3>{{ t('projectView.shaderEditorTitle') }}</h3>
+                                <div class="shader-floating-subtitle">
+                                    <span class="shader-floating-count">{{ selectedSlotNames.length }}</span>
+                                    <span
+                                        v-for="slotName in shaderSelectedSlotPreview"
+                                        :key="slotName"
+                                        class="shader-floating-chip"
+                                    >
+                                        {{ slotName }}
+                                    </span>
+                                    <span
+                                        v-if="selectedSlotNames.length > shaderSelectedSlotPreview.length"
+                                        class="shader-floating-chip"
+                                    >
+                                        +{{ selectedSlotNames.length - shaderSelectedSlotPreview.length }}
+                                    </span>
                                 </div>
-                                <ShaderEditor :ref="shaderEditorRef" @apply-shader="handleApplyShader"
-                                    @reset-shader="handleResetShader" />
                             </div>
-                        </Transition>
+                            <button @mousedown.stop @click="toggleShaderEditor" class="close-btn">×</button>
+                        </div>
+                        <div class="shader-floating-body">
+                            <ShaderEditor :ref="shaderEditorRef" @apply-shader="handleApplyShader"
+                                @reset-shader="handleResetShader" />
+                        </div>
+                    </div>
+                </Transition>
+
+                <Transition name="shader-overlay">
+                    <div v-if="showBulkSelectDialog" class="shader-editor-overlay" @click.self="closeBulkSelectDialog">
+                        <div class="bulk-select-dialog">
+                            <div class="shader-editor-header">
+                                <h3>{{ t('projectView.customizer.bulkSelectTitle') }}</h3>
+                                <button @click="closeBulkSelectDialog" class="close-btn">×</button>
+                            </div>
+                            <input
+                                ref="bulkSelectInputRef"
+                                v-model="bulkSelectKeyword"
+                                class="slot-name-input"
+                                :placeholder="t('projectView.customizer.bulkSelectPlaceholder')"
+                                @keydown.enter.prevent="applyBulkSelect"
+                                @keydown.esc.prevent="closeBulkSelectDialog"
+                            />
+                            <div class="bulk-select-helper">
+                                {{ bulkSelectKeyword.trim()
+                                    ? (matchedBulkSlotNames.length > 0
+                                        ? `${matchedBulkSlotNames.length} / ${slotOptions.length}`
+                                        : t('projectView.customizer.messages.noSlotMatched', { keyword: bulkSelectKeyword.trim() }))
+                                    : t('projectView.customizer.bulkSelectPlaceholder') }}
+                            </div>
+                            <div v-if="matchedBulkSlotNames.length > 0" class="bulk-select-results">
+                                <button
+                                    v-for="slotName in matchedBulkSlotNames.slice(0, 24)"
+                                    :key="slotName"
+                                    type="button"
+                                    class="bulk-select-result"
+                                    @click="applyBulkSelect([slotName])"
+                                >
+                                    {{ slotName }}
+                                </button>
+                            </div>
+                            <div class="slot-batch-actions">
+                                <button class="slot-panel-button slot-panel-button-primary" @click="() => applyBulkSelect()">
+                                    {{ t('projectView.customizer.bulkSelectApply') }}
+                                </button>
+                                <button class="slot-panel-button slot-panel-button-ghost" @click="closeBulkSelectDialog">
+                                    {{ t('common.cancel') }}
+                                </button>
+                            </div>
+                        </div>
                     </div>
                 </Transition>
             </div>
@@ -205,19 +366,25 @@ import Dropdown from '../components/common/Dropdown.vue';
 import ControlHint from '../components/common/ControlHint.vue';
 import SlotControl from '../components/common/SlotControl.vue';
 import ShaderEditor from '../components/common/ShaderEditor.vue';
+import ColorPicker from '../components/common/ColorPicker.vue';
 import DialogueUiFloatingPanel from '../components/DialogueUiFloatingPanel.vue';
 import { ResType } from '../script/var';
-import { createPixiApp, IApp, load, setupSpineInteraction } from '../script/render/preview-canvas';
+import { createPixiApp, IApp, layoutPreviewSpine, load, resizePreviewApp, setupSpineInteraction } from '../script/render/preview-canvas';
 import { Spine } from 'pixi-spine';
 import * as PIXI from 'pixi.js';
-import CanvasManager from '../script/render/canvas-manager';
-import { useActionStore } from '../stores/action-store';
-import type { CharacterUrls, DropdownOption } from '../types/app';
-import { applyUIAnimationConfig, type UIAnimationConfig } from '../script/render/animation-config';
 import { OutlineFilter } from 'pixi-filters';
+import CanvasManager from '../script/render/canvas-manager';
+import AssetManager from '../script/asset-manager';
+import { useActionStore } from '../stores/action-store';
+import type { CharacterType, CharacterUrls, DropdownOption, SlotCustomization, SpineCharacterCustomization } from '../types/app';
+import { applyUIAnimationConfig, type UIAnimationConfig } from '../script/render/animation-config';
 import { useWatermarkStore } from '../stores/watermark-store';
 import { useDialogueUiStore } from '../stores/dialogue-ui-store';
 import { getCurrentWindow } from '@tauri-apps/api/window';
+import massage from '../script/common/massage';
+import CustomCharacterService from '../script/custom-character-service';
+import { applySlotRuntimeColor, applySpineCustomization, cloneCustomization, type ApplySpineCustomizationOptions } from '../script/spine-customization';
+import { getCharacterId, getCharacterResourceKey } from '../utils/character';
 
 const { t } = useI18n();
 
@@ -292,42 +459,63 @@ const characterTypeOptions = computed<DropdownOption[]>(() => [
     { label: t('projectView.characterTypes.cover'), value: 'cover' }
 ]);
 
-// 动画混合配置相关的响应式数据
-const mixDuration = ref<number>(0.3);
-const selectedMixPresetIndex = ref<number>(0);
-const mixPresetOptions = computed<DropdownOption[]>(() => [
-    { label: t('projectView.mixPresets.default'), value: 0 },
-    { label: t('projectView.mixPresets.fast'), value: 1 },
-    { label: t('projectView.mixPresets.slow'), value: 2 },
-    { label: t('projectView.mixPresets.custom'), value: 3 }
-]);
-
-// 自定义混合配置
-const customMixFromIndex = ref<number>(0);
-const customMixToIndex = ref<number>(0);
-const customMixDuration = ref<number>(0.3);
-
-// 当前混合配置列表
-interface MixConfig {
-    from: string;
-    to: string;
-    duration: number;
-}
-const currentMixConfigs = ref<MixConfig[]>([]);
-
 // 插槽控制相关的响应式数据
 interface SlotData {
     name: string;
     visible: boolean;
     alpha: number;
+    tint: number;
+    shader: SlotCustomization['shader'] | null;
 }
 const slotOptions = ref<SlotData[]>([]);
+const hoveredSlotName = ref<string | null>(null);
+const selectedSlotNames = ref<string[]>([]);
+const customCharacterName = ref('');
+const currentPreviewCharacter = ref<CharacterType | null>(null);
+const customCharacters = ref<CharacterType[]>([]);
+const currentCustomization = ref<SpineCharacterCustomization>({ slots: {} });
+const showBulkSelectDialog = ref(false);
+const bulkSelectKeyword = ref('');
+const bulkSelectInputRef = ref<HTMLInputElement | null>(null);
+const matchedBulkSlotNames = computed(() => {
+    const keyword = bulkSelectKeyword.value.trim().toLowerCase();
+    if (!keyword) {
+        return [];
+    }
+
+    return slotOptions.value
+        .filter((slot) => slot.name.toLowerCase().includes(keyword))
+        .map((slot) => slot.name);
+});
+
+const selectedSlotPrimary = computed(() => {
+    if (selectedSlotNames.value.length === 0) {
+        return null;
+    }
+
+    return slotOptions.value.find((slot) => slot.name === selectedSlotNames.value[0]) || null;
+});
+const shaderSelectedSlotPreview = computed(() => selectedSlotNames.value.slice(0, 3));
 
 // Shader控制相关的响应式数据
 const showShaderEditor = ref<boolean>(false);
-const hasActiveShaders = ref<boolean>(false);
-const currentShaderFilters = ref<any[]>([]);
 const shaderEditorRef = ref<any>(null);
+const shaderWindowRef = ref<HTMLDivElement | null>(null);
+const shaderWindowDragging = ref(false);
+const shaderWindowPosition = ref({ left: 0, top: 0 });
+let slotOutlineContainer: PIXI.Container | null = null;
+
+interface SlotOutlineOverlay {
+    container: PIXI.Container;
+    texture: PIXI.RenderTexture;
+    transform: PIXI.Matrix;
+    outerSprite: PIXI.Sprite;
+    innerSprite: PIXI.Sprite;
+    outerFilter: OutlineFilter;
+    innerFilter: OutlineFilter;
+}
+
+const slotOutlineOverlays = new Map<string, SlotOutlineOverlay>();
 
 // Shader编辑器状态保存
 const savedShaderState = ref<{
@@ -340,7 +528,7 @@ const savedShaderState = ref<{
     uniforms: []
 });
 
-let _last_url = '';
+let _last_preview_identity = '';
 
 // 当前激活的 Tab ('canvas' | 'preview' | 'script')
 const activeTab = ref<'canvas' | 'preview' | 'script'>('canvas');
@@ -351,25 +539,348 @@ watch(activeTab, (tab) => {
     }
 });
 const actionStore = useActionStore();
+const shaderFloatingStyle = computed(() => ({
+    left: `${shaderWindowPosition.value.left}px`,
+    top: `${shaderWindowPosition.value.top}px`,
+}));
 
 // Script 相关的响应式数据
 const scriptContent = ref<string>('');
 
-const handleRenderType = (data: { url: string, type: ResType, characterUrls?: CharacterUrls }) => {
+const resetPreviewInteraction = () => {
+    if (cleanup) {
+        cleanup();
+        cleanup = undefined;
+    }
+
+    handleSlotLeave();
+    clearSelectedSlots();
+};
+
+const loadCustomCharacters = async () => {
+    customCharacters.value = await CustomCharacterService.getInstance().list();
+};
+
+const getDefaultCustomization = (): SpineCharacterCustomization => ({
+    selectedAnimationName: undefined,
+    selectedSkinName: undefined,
+    slots: {},
+});
+
+const refreshCurrentCustomization = () => {
+    currentCustomization.value = {
+        selectedAnimationName: animationOptions.value[selectedAnimationIndex.value]?.label,
+        selectedSkinName: skinOptions.value[selectedSkinIndex.value]?.label,
+        slots: slotOptions.value.reduce<Record<string, SlotCustomization>>((acc, slot) => {
+            acc[slot.name] = {
+                visible: slot.visible,
+                alpha: slot.alpha,
+                tint: slot.tint,
+                shader: slot.shader ?? null,
+            };
+            return acc;
+        }, {}),
+    };
+};
+
+const mixTintColor = (baseTint: number, overlayTint: number, strength: number) => {
+    const baseR = (baseTint >> 16) & 0xff;
+    const baseG = (baseTint >> 8) & 0xff;
+    const baseB = baseTint & 0xff;
+    const overlayR = (overlayTint >> 16) & 0xff;
+    const overlayG = (overlayTint >> 8) & 0xff;
+    const overlayB = overlayTint & 0xff;
+
+    const mixChannel = (base: number, overlay: number) => {
+        return Math.round(base + (overlay - base) * strength);
+    };
+
+    return (
+        (mixChannel(baseR, overlayR) << 16) |
+        (mixChannel(baseG, overlayG) << 8) |
+        mixChannel(baseB, overlayB)
+    );
+};
+
+const getInteractiveSlotTint = (slotName: string) => {
+    let tint = currentCustomization.value.slots[slotName]?.tint ?? 0xffffff;
+
+    if (selectedSlotNames.value.includes(slotName)) {
+        tint = mixTintColor(tint, 0x4aa3ff, 0.26);
+    }
+
+    if (hoveredSlotName.value === slotName) {
+        tint = mixTintColor(tint, 0xffd24d, 0.18);
+    }
+
+    return tint;
+};
+
+const syncSlotInteractiveState = () => {
+    if (!previewSpine.value?.skeleton) {
+        syncSlotOutlineOverlay();
+        return;
+    }
+
+    previewSpine.value.skeleton.slots.forEach((slot: any) => {
+        applySlotRuntimeColor(
+            slot,
+            getInteractiveSlotTint(slot.data.name),
+            currentCustomization.value.slots[slot.data.name]?.alpha,
+        );
+    });
+
+    syncSlotOutlineOverlay();
+};
+
+const destroySlotOutlineOverlay = (slotName: string) => {
+    const overlay = slotOutlineOverlays.get(slotName);
+    if (!overlay) {
+        return;
+    }
+
+    overlay.outerSprite.filters = [];
+    overlay.innerSprite.filters = [];
+    overlay.container.destroy({ children: true });
+    overlay.texture.destroy(true);
+    slotOutlineOverlays.delete(slotName);
+};
+
+const clearSlotOutlineOverlays = () => {
+    [...slotOutlineOverlays.keys()].forEach(destroySlotOutlineOverlay);
+};
+
+const ensureSlotOutlineContainer = () => {
+    const app = previewAPP.value?.application;
+    if (!app) {
+        return null;
+    }
+
+    let container = slotOutlineContainer;
+    if (!container || container.destroyed) {
+        container = new PIXI.Container();
+        container.visible = false;
+        container.eventMode = 'none';
+        slotOutlineContainer = container;
+        app.stage.addChild(container);
+    } else if (container.parent !== app.stage) {
+        app.stage.addChild(container);
+    }
+
+    if (container.parent === app.stage) {
+        app.stage.setChildIndex(container, app.stage.children.length - 1);
+    }
+
+    return container;
+};
+
+const getOutlineSlotTarget = (slotName: string) => {
+    const slot = previewSpine.value?.skeleton?.findSlot(slotName) as any;
+    const target = slot?.currentMesh || slot?.currentSprite;
+    if (!slot || !target || !target.visible || !target.renderable || (slot.color?.a ?? 1) <= 0) {
+        return null;
+    }
+
+    return target as PIXI.DisplayObject;
+};
+
+const ensureSlotOutlineOverlay = (slotName: string) => {
+    const outlineContainer = ensureSlotOutlineContainer();
+    const renderer = previewAPP.value?.application.renderer;
+    if (!outlineContainer || !renderer) {
+        return null;
+    }
+
+    let overlay = slotOutlineOverlays.get(slotName);
+    if (overlay) {
+        if (overlay.container.parent !== outlineContainer) {
+            outlineContainer.addChild(overlay.container);
+        }
+        return overlay;
+    }
+
+    const texture = PIXI.RenderTexture.create({
+        width: 1,
+        height: 1,
+        resolution: renderer.resolution,
+    });
+
+    const outerFilter = new OutlineFilter(4.5, 0xffffff, 0.1, 0.38, true);
+    const innerFilter = new OutlineFilter(2.2, 0x4aa3ff, 0.1, 1, true);
+    const outerSprite = new PIXI.Sprite(texture);
+    const innerSprite = new PIXI.Sprite(texture);
+    outerSprite.filters = [outerFilter];
+    innerSprite.filters = [innerFilter];
+    outerSprite.eventMode = 'none';
+    innerSprite.eventMode = 'none';
+
+    const container = new PIXI.Container();
+    container.eventMode = 'none';
+    container.addChild(outerSprite);
+    container.addChild(innerSprite);
+    outlineContainer.addChild(container);
+
+    overlay = {
+        container,
+        texture,
+        transform: new PIXI.Matrix(),
+        outerSprite,
+        innerSprite,
+        outerFilter,
+        innerFilter,
+    };
+    slotOutlineOverlays.set(slotName, overlay);
+    return overlay;
+};
+
+const updateSlotOutlineTexture = (slotName: string, padding: number) => {
+    const overlay = ensureSlotOutlineOverlay(slotName);
+    const renderer = previewAPP.value?.application.renderer;
+    const target = getOutlineSlotTarget(slotName);
+    if (!overlay || !renderer || !target) {
+        return null;
+    }
+
+    const bounds = target.getBounds();
+    if (!Number.isFinite(bounds.width) || !Number.isFinite(bounds.height) || bounds.width <= 0 || bounds.height <= 0) {
+        overlay.container.visible = false;
+        return null;
+    }
+
+    const textureWidth = Math.max(1, Math.ceil(bounds.width + padding * 2));
+    const textureHeight = Math.max(1, Math.ceil(bounds.height + padding * 2));
+
+    overlay.texture.resize(textureWidth, textureHeight);
+    overlay.transform.identity();
+    overlay.transform.translate(-bounds.x + padding, -bounds.y + padding);
+    renderer.render(target, {
+        renderTexture: overlay.texture,
+        clear: true,
+        transform: overlay.transform,
+        skipUpdateTransform: true,
+    });
+
+    overlay.outerSprite.position.set(bounds.x - padding, bounds.y - padding);
+    overlay.innerSprite.position.copyFrom(overlay.outerSprite.position);
+    overlay.outerSprite.texture = overlay.texture;
+    overlay.innerSprite.texture = overlay.texture;
+    overlay.container.visible = true;
+
+    return overlay;
+};
+
+const syncSlotOutlineOverlay = () => {
+    const outlineContainer = ensureSlotOutlineContainer();
+    if (!outlineContainer) {
+        return;
+    }
+
+    if (activeTab.value !== 'preview' || !showCanvas.value || !previewSpine.value?.skeleton) {
+        clearSlotOutlineOverlays();
+        outlineContainer.visible = false;
+        return;
+    }
+
+    const hasHovered = !!hoveredSlotName.value;
+    const hasSelected = selectedSlotNames.value.length > 0;
+    if (!hasHovered && !hasSelected) {
+        clearSlotOutlineOverlays();
+        outlineContainer.visible = false;
+        return;
+    }
+
+    outlineContainer.visible = true;
+
+    const wantedSlots = new Set<string>(selectedSlotNames.value);
+    if (hoveredSlotName.value) {
+        wantedSlots.add(hoveredSlotName.value);
+    }
+
+    [...slotOutlineOverlays.keys()]
+        .filter((slotName) => !wantedSlots.has(slotName))
+        .forEach(destroySlotOutlineOverlay);
+
+    selectedSlotNames.value.forEach((slotName) => {
+        const overlay = updateSlotOutlineTexture(slotName, 12);
+        if (!overlay) {
+            return;
+        }
+
+        overlay.outerFilter.thickness = hoveredSlotName.value === slotName ? 5.2 : 4.8;
+        overlay.outerFilter.color = 0xffffff;
+        overlay.outerFilter.alpha = hoveredSlotName.value === slotName ? 0.5 : 0.38;
+        overlay.innerFilter.thickness = hoveredSlotName.value === slotName ? 2.6 : 2.2;
+        overlay.innerFilter.color = hoveredSlotName.value === slotName ? 0x77d8ff : 0x4aa3ff;
+        overlay.innerFilter.alpha = 1;
+    });
+
+    if (hoveredSlotName.value && !selectedSlotNames.value.includes(hoveredSlotName.value)) {
+        const overlay = updateSlotOutlineTexture(hoveredSlotName.value, 10);
+        if (overlay) {
+            overlay.outerFilter.thickness = 4.2;
+            overlay.outerFilter.color = 0xfff4c2;
+            overlay.outerFilter.alpha = 0.32;
+            overlay.innerFilter.thickness = 1.9;
+            overlay.innerFilter.color = 0xffd24d;
+            overlay.innerFilter.alpha = 0.96;
+        }
+    }
+};
+
+const applyCurrentCustomization = (options: ApplySpineCustomizationOptions = {}) => {
+    if (!previewSpine.value) {
+        return;
+    }
+
+    const shaderFilterArea = options.filterArea ?? previewAPP.value?.application.screen?.clone?.() ?? null;
+    applySpineCustomization(previewSpine.value, currentCustomization.value, {
+        ...options,
+        filterArea: shaderFilterArea,
+    });
+    syncSlotInteractiveState();
+};
+
+const setSlotCustomization = (slotName: string, patch: Partial<SlotCustomization>) => {
+    currentCustomization.value.slots[slotName] = {
+        ...currentCustomization.value.slots[slotName],
+        ...patch,
+    };
+};
+
+const applySlotCustomizationBatch = (slotNames: string[]) => {
+    const uniqueSlotNames = [...new Set(slotNames)];
+    if (uniqueSlotNames.length === 0) {
+        return;
+    }
+
+    applyCurrentCustomization({
+        includeAnimation: false,
+        includeSkin: false,
+        slotNames: uniqueSlotNames,
+    });
+};
+
+const handleRenderType = async (data: { url: string, type: ResType, characterUrls?: CharacterUrls, character?: CharacterType }) => {
     console.log("点击");
-    if (_last_url == data.url) {
+    const previewIdentity = data.character?.id || data.url;
+    if (_last_preview_identity == previewIdentity) {
         console.log("两者的url相同");
+        resetPreviewInteraction();
         showImage.value = false;
         showVideo.value = false;
         showText.value = false;
-        _last_url = '';
+        _last_preview_identity = '';
         activeTab.value = 'canvas';
         return;
     }
 
     activeTab.value = 'preview';
+    currentPreviewCharacter.value = data.character || null;
+    customCharacterName.value = data.character?.displayName || data.character?.characterName || '';
+    currentCustomization.value = cloneCustomization(data.character?.customization) || getDefaultCustomization();
     switch (data.type) {
         case ResType.Image:
+            resetPreviewInteraction();
             if (imgRef.value && videoRef.value) {
                 imgRef.value.src = data.url;
                 videoRef.value.pause();
@@ -379,9 +890,10 @@ const handleRenderType = (data: { url: string, type: ResType, characterUrls?: Ch
                 showVideo.value = false;
                 showText.value = false;
             }
-            _last_url = data.url;
+            _last_preview_identity = previewIdentity;
             break;
         case ResType.Video:
+            resetPreviewInteraction();
             if (imgRef.value && videoRef.value) {
                 imgRef.value.src = '';
                 videoRef.value.src = data.url;
@@ -390,7 +902,7 @@ const handleRenderType = (data: { url: string, type: ResType, characterUrls?: Ch
                 showVideo.value = true;
                 showText.value = false;
             }
-            _last_url = data.url;
+            _last_preview_identity = previewIdentity;
             break;
         case ResType.Spine:
             console.log("渲染Spine");
@@ -404,8 +916,13 @@ const handleRenderType = (data: { url: string, type: ResType, characterUrls?: Ch
             }
 
             if (previewAPP.value) {
+                resetPreviewInteraction();
+
                 // 如果有已经有load当再次加载时应当销毁Spine
                 if (previewSpine.value) {
+                    if (previewSpine.value.parent) {
+                        previewSpine.value.parent.removeChild(previewSpine.value);
+                    }
                     previewSpine.value.destroy();
                 }
                 load(previewAPP.value.application, data).then((result) => {
@@ -418,6 +935,34 @@ const handleRenderType = (data: { url: string, type: ResType, characterUrls?: Ch
                         // 存储角色资源到组件级别
                         characterAssets = assets;
 
+                        const preferredVariant = currentPreviewCharacter.value?.resourceVariant;
+                        if (preferredVariant && preferredVariant !== 'default') {
+                            const preferredIndex = characterTypeOptions.value.findIndex((item) => item.value === preferredVariant);
+                            if (preferredIndex >= 0) {
+                                selectedCharacterType.value = preferredIndex;
+                            }
+
+                            if (preferredVariant === 'aim' && assets.aim) {
+                                if (previewSpine.value && previewSpine.value.parent) {
+                                    previewSpine.value.parent.removeChild(previewSpine.value);
+                                }
+                                previewSpine.value = assets.aim;
+                                if (previewSpine.value) {
+                                    previewAPP.value?.application.stage.addChild(previewSpine.value);
+                                }
+                            }
+
+                            if (preferredVariant === 'cover' && assets.cover) {
+                                if (previewSpine.value && previewSpine.value.parent) {
+                                    previewSpine.value.parent.removeChild(previewSpine.value);
+                                }
+                                previewSpine.value = assets.cover;
+                                if (previewSpine.value) {
+                                    previewAPP.value?.application.stage.addChild(previewSpine.value);
+                                }
+                            }
+                        }
+
                     } else {
                         // 单个Spine模式
                         const spine = result as any;
@@ -429,15 +974,35 @@ const handleRenderType = (data: { url: string, type: ResType, characterUrls?: Ch
 
                     // 获取动画列表并设置下拉框选项
                     updateAnimationOptions(previewSpine.value);
-                    // 获取皮肤列表并设置下拉框选项
-                    updateSkinOptions(previewSpine.value);
-                    // 获取插槽列表并设置选项
-                    updateSlotOptions(previewSpine.value);
                     // 应用初始混合配置
                     applyCurrentMixConfig();
 
+                    if (currentCustomization.value.selectedSkinName && previewSpine.value?.skeleton?.data?.findSkin(currentCustomization.value.selectedSkinName)) {
+                        previewSpine.value.skeleton.setSkinByName(currentCustomization.value.selectedSkinName);
+                        previewSpine.value.skeleton.setSlotsToSetupPose();
+                    }
+
+                    if (currentCustomization.value.selectedAnimationName && previewSpine.value?.state?.hasAnimation(currentCustomization.value.selectedAnimationName)) {
+                        previewSpine.value.state.setAnimation(0, currentCustomization.value.selectedAnimationName, true);
+                        const animationIndex = animationOptions.value.findIndex((option) => option.label === currentCustomization.value.selectedAnimationName);
+                        if (animationIndex >= 0) {
+                            selectedAnimationIndex.value = animationIndex;
+                        }
+                    }
+
+                    const skinIndex = skinOptions.value.findIndex((option) => option.label === currentCustomization.value.selectedSkinName);
+                    if (skinIndex >= 0) {
+                        selectedSkinIndex.value = skinIndex;
+                    }
+
+                    applyCurrentCustomization();
+
                     if (previewSpine.value && previewAPP.value) {
-                        cleanup = setupSpineInteraction(previewSpine.value, previewAPP.value?.application);
+                        cleanup = setupSpineInteraction(previewSpine.value, previewAPP.value.application, {
+                            onSlotHover: handleSlotHover,
+                            onSlotLeave: handleSlotLeave,
+                            onSlotSelect: handleSlotSelection,
+                        });
                     }
                 });
             }
@@ -447,12 +1012,14 @@ const handleRenderType = (data: { url: string, type: ResType, characterUrls?: Ch
         case ResType.Document:
         default:
             console.log("不支持预览这种类型的文件");
-            _last_url = data.url;
+            resetPreviewInteraction();
+            _last_preview_identity = previewIdentity;
             showImage.value = false;
             showVideo.value = false;
             showText.value = true;
             break;
     }
+    _last_preview_identity = previewIdentity;
 }
 
 const isFullScreen = ref(false);
@@ -496,17 +1063,31 @@ const fullScreen = async () => {
     }
 }
 
+const handlePreviewShortcuts = (event: KeyboardEvent) => {
+    if (activeTab.value !== 'preview' || !showCanvas.value) {
+        return;
+    }
+
+    if (event.ctrlKey && event.shiftKey && event.key.toLowerCase() === 'f') {
+        event.preventDefault();
+        openBulkSelectDialog();
+    }
+};
+
 onMounted(() => {
     // 初始化CanvasManager
     CanvasManager.getInstance();
+    loadCustomCharacters();
     if (projectView.value) {
         console.log("proView-width", projectView.value.offsetHeight);
         previewAPP.value = createPixiApp(projectView.value.offsetWidth, projectView.value.offsetHeight - 5);
+        previewAPP.value.application.ticker.add(syncSlotOutlineOverlay);
         handelResizeCanvasToPreview();
     }
 
     // 监听窗口大小变化，动态更新 Pixi 应用大小
     window.addEventListener('resize', handelResizeCanvasToPreview);
+    window.addEventListener('keydown', handlePreviewShortcuts);
 })
 
 watch(() => actionStore.isEditMode, () => {
@@ -524,22 +1105,37 @@ watch(isFullScreen, (val) => {
 const handelResizeCanvasToPreview = () => {
     if (projectView.value) {
         const app = previewAPP.value?.application;
-        previewAPP.value?.application.renderer.resize(projectView.value.offsetWidth, projectView.value.offsetHeight - 5);
+        if (app) {
+            resizePreviewApp(app, projectView.value.offsetWidth, projectView.value.offsetHeight - 5);
+        }
+
         if (previewSpine.value && app) {
-            previewSpine.value.x = app.view.width / 2;
-            const lastSacle = previewSpine.value.scale.x;
-
-            previewSpine.value.y = app.view.height * 0.95;
-
-            // 设置缩放比例
-            previewSpine.value.scale.set((app.view.height / (previewSpine.value.height / lastSacle / 0.90)));
-            console.log(previewSpine.value.scale);
+            layoutPreviewSpine(previewSpine.value, app);
+            const customizedSlots = Object.keys(currentCustomization.value.slots || {});
+            if (customizedSlots.length > 0) {
+                applyCurrentCustomization({
+                    includeAnimation: false,
+                    includeSkin: false,
+                    slotNames: customizedSlots,
+                });
+            }
         }
     }
+
+    syncShaderWindowPosition();
 }
 
 onUnmounted(() => {
+    if (cleanup) {
+        cleanup();
+    }
+    previewAPP.value?.application.ticker.remove(syncSlotOutlineOverlay);
+    clearSlotOutlineOverlays();
+    slotOutlineContainer?.destroy({ children: true });
+    slotOutlineContainer = null;
+    stopShaderWindowDrag();
     window.removeEventListener('resize', handelResizeCanvasToPreview)
+    window.removeEventListener('keydown', handlePreviewShortcuts)
 });
 
 // 更新动画选项列表
@@ -566,6 +1162,7 @@ const updateAnimationOptions = (spine: Spine | undefined) => {
 
             selectedAnimationIndex.value = selectedIndex;
             spine.state.setAnimation(0, animations[selectedIndex].name, true);
+            spine.update(0);
         }
     }
 
@@ -603,6 +1200,11 @@ const updateSkinOptions = (spine: Spine | undefined) => {
             selectedSkinIndex.value = selectedIndex;
             spine.skeleton.setSkinByName(skins[selectedIndex].name);
             spine.skeleton.setSlotsToSetupPose();
+            spine.update(0);
+
+            if (previewAPP.value && previewSpine.value === spine) {
+                layoutPreviewSpine(spine, previewAPP.value.application);
+            }
         }
     }
 };
@@ -613,16 +1215,10 @@ const handleAnimationChange = (animationIndex: number) => {
     if (previewSpine.value && previewSpine.value.spineData && previewSpine.value.spineData.animations) {
         const animations = previewSpine.value.spineData.animations;
         if (animations[animationIndex]) {
-            previewSpine.value.state.setAnimation(0, animations[animationIndex].name, true);
-
-            // 重新应用用户设置的透明度
-            slotOptions.value.forEach(slotData => {
-                if (previewSpine.value && previewSpine.value.skeleton) {
-                    const slot = previewSpine.value.skeleton.findSlot(slotData.name);
-                    if (slot) {
-                        slot.color.a = slotData.alpha;
-                    }
-                }
+            currentCustomization.value.selectedAnimationName = animations[animationIndex].name;
+            applyCurrentCustomization({
+                includeAnimation: true,
+                includeSkin: false,
             });
         }
     }
@@ -634,23 +1230,16 @@ const handleSkinChange = (skinIndex: number) => {
     if (previewSpine.value && previewSpine.value.spineData && previewSpine.value.spineData.skins) {
         const skins = previewSpine.value.spineData.skins;
         if (skins[skinIndex]) {
-            previewSpine.value.skeleton.setSkinByName(skins[skinIndex].name);
-            previewSpine.value.skeleton.setSlotsToSetupPose();
-
-            // 重新应用用户设置的透明度
-            slotOptions.value.forEach(slotData => {
-                if (previewSpine.value && previewSpine.value.skeleton) {
-                    const slot = previewSpine.value.skeleton.findSlot(slotData.name);
-                    if (slot) {
-                        slot.color.a = slotData.alpha;
-                    }
-                }
+            currentCustomization.value.selectedSkinName = skins[skinIndex].name;
+            applyCurrentCustomization({
+                includeAnimation: false,
+                includeSkin: true,
             });
         }
     }
 };
 
-let cleanup: () => void;
+let cleanup: (() => void) | undefined;
 
 // 处理角色类型切换
 const handleCharacterTypeChange = (typeIndex: number) => {
@@ -700,105 +1289,34 @@ const handleCharacterTypeChange = (typeIndex: number) => {
         if (cleanup) {
             cleanup();
         }
+        handleSlotLeave();
 
         // 添加到舞台
         previewAPP.value.application.stage.addChild(targetSpine);
 
-        // 设置位置和缩放
-        targetSpine.x = previewAPP.value.application.view.width / 2;
-        const lastScale = targetSpine.scale.x;
-        targetSpine.y = previewAPP.value.application.view.height * 0.93;
-        targetSpine.scale.set((previewAPP.value.application.view.height / (targetSpine.height / lastScale / 0.90)));
+        // 使用真实渲染边界重新布局
+        layoutPreviewSpine(targetSpine, previewAPP.value.application);
 
         // 更新当前Spine引用
         previewSpine.value = targetSpine;
 
         if (previewSpine.value) {
-            cleanup = setupSpineInteraction(previewSpine.value, previewAPP.value.application);
+            cleanup = setupSpineInteraction(previewSpine.value, previewAPP.value.application, {
+                onSlotHover: handleSlotHover,
+                onSlotLeave: handleSlotLeave,
+                onSlotSelect: handleSlotSelection,
+            });
         }
 
         // 重新初始化动画、皮肤和插槽选项
         updateAnimationOptions(targetSpine);
-        updateSkinOptions(targetSpine);
-        updateSlotOptions(targetSpine);
+        applyCurrentCustomization({
+            includeAnimation: true,
+            includeSkin: true,
+        });
 
         console.log(`切换到角色类型: ${characterType}`);
     }
-};
-
-// 处理混合时长变化
-const handleMixDurationChange = () => {
-    applyCurrentMixConfig();
-};
-
-// 处理混合预设变化
-const handleMixPresetChange = (presetIndex: number) => {
-    selectedMixPresetIndex.value = presetIndex;
-
-    // 根据预设设置混合时长
-    switch (presetIndex) {
-        case 0: // 默认混合
-            mixDuration.value = 0.3;
-            break;
-        case 1: // 快速混合
-            mixDuration.value = 0.1;
-            break;
-        case 2: // 慢速混合
-            mixDuration.value = 0.8;
-            break;
-        case 3: // 自定义混合
-            // 保持当前设置
-            break;
-    }
-
-    if (presetIndex !== 3) {
-        // 非自定义预设时，清空自定义混合配置
-        currentMixConfigs.value = [];
-        applyCurrentMixConfig();
-    }
-};
-
-// 处理自定义混合变化
-const handleCustomMixChange = () => {
-    // 实时预览自定义混合效果
-};
-
-// 添加自定义混合配置
-const addCustomMix = () => {
-    if (previewSpine.value && previewSpine.value.spineData && previewSpine.value.spineData.animations) {
-        const animations = previewSpine.value.spineData.animations;
-        const fromAnim = animations[customMixFromIndex.value];
-        const toAnim = animations[customMixToIndex.value];
-
-        if (fromAnim && toAnim) {
-            const newMix: MixConfig = {
-                from: fromAnim.name,
-                to: toAnim.name,
-                duration: customMixDuration.value
-            };
-
-            // 检查是否已存在相同的混合配置
-            const existingIndex = currentMixConfigs.value.findIndex(
-                mix => mix.from === newMix.from && mix.to === newMix.to
-            );
-
-            if (existingIndex !== -1) {
-                // 更新现有配置
-                currentMixConfigs.value[existingIndex] = newMix;
-            } else {
-                // 添加新配置
-                currentMixConfigs.value.push(newMix);
-            }
-
-            applyCurrentMixConfig();
-        }
-    }
-};
-
-// 移除混合配置
-const removeMix = (index: number) => {
-    currentMixConfigs.value.splice(index, 1);
-    applyCurrentMixConfig();
 };
 
 // 应用当前混合配置
@@ -809,9 +1327,9 @@ const applyCurrentMixConfig = () => {
 
     // 创建UI配置对象
     const uiConfig: UIAnimationConfig = {
-        mixDuration: mixDuration.value,
-        presetIndex: selectedMixPresetIndex.value,
-        customMixConfigs: currentMixConfigs.value
+        mixDuration: 0.3,
+        presetIndex: 0,
+        customMixConfigs: []
     };
 
     // 使用新的UI配置函数
@@ -824,9 +1342,15 @@ const updateSlotOptions = (spine: Spine | undefined) => {
         const slots = spine.skeleton.slots;
         slotOptions.value = slots.map((slot: any) => ({
             name: slot.data.name,
-            visible: true,
-            alpha: 1.0
+            visible: currentCustomization.value.slots[slot.data.name]?.visible ?? !!slot.getAttachment?.(),
+            alpha: currentCustomization.value.slots[slot.data.name]?.alpha ?? 1.0,
+            tint: currentCustomization.value.slots[slot.data.name]?.tint ?? 0xffffff,
+            shader: currentCustomization.value.slots[slot.data.name]?.shader ?? null,
         }));
+
+        selectedSlotNames.value = selectedSlotNames.value.filter((slotName) =>
+            slotOptions.value.some((item) => item.name === slotName)
+        );
     }
 };
 
@@ -835,33 +1359,8 @@ const handleSlotToggle = (slotName: string, visible: boolean) => {
     const slotData = slotOptions.value.find(slot => slot.name === slotName);
     if (slotData) {
         slotData.visible = visible;
-
-        if (previewSpine.value && previewSpine.value.skeleton) {
-            const skeleton = previewSpine.value.skeleton;
-            const slot = skeleton.findSlot(slotName);
-            if (slot) {
-                if (visible) {
-                    // 恢复插槽的attachment - 通过skeleton的setAttachment方法
-                    const slotDataFromSkeleton = skeleton.data.findSlot(slotName);
-                    if (slotDataFromSkeleton && slotDataFromSkeleton.attachmentName) {
-                        skeleton.setAttachment(slotName, slotDataFromSkeleton.attachmentName);
-                    } else if ((slot as any).originalAttachment) {
-                        // 如果有保存的原始attachment，恢复它
-                        skeleton.setAttachment(slotName, (slot as any).originalAttachment.name);
-                        delete (slot as any).originalAttachment;
-                    }
-                } else {
-                    // 隐藏插槽 - 使用skeleton.setAttachment(null)方法
-                    const attachment = slot.getAttachment();
-                    if (attachment) {
-                        // 保存当前attachment以便恢复
-                        (slot as any).originalAttachment = attachment;
-                        // 使用正确的Spine API方法隐藏插槽
-                        (skeleton as any).setAttachment(slotName, null);
-                    }
-                }
-            }
-        }
+        setSlotCustomization(slotName, { visible });
+        applySlotCustomizationBatch([slotName]);
     }
 };
 
@@ -870,13 +1369,8 @@ const handleSlotAlphaUpdate = (slotName: string, alpha: number) => {
     const slotData = slotOptions.value.find(slot => slot.name === slotName);
     if (slotData) {
         slotData.alpha = alpha;
-
-        if (previewSpine.value && previewSpine.value.skeleton) {
-            const slot = previewSpine.value.skeleton.findSlot(slotName);
-            if (slot) {
-                slot.color.a = alpha;
-            }
-        }
+        setSlotCustomization(slotName, { alpha });
+        applySlotCustomizationBatch([slotName]);
     }
 };
 
@@ -884,114 +1378,245 @@ const handleSlotAlphaUpdate = (slotName: string, alpha: number) => {
 const handleShowAllSlots = () => {
     slotOptions.value.forEach(slot => {
         slot.visible = true;
-        // 不要重置透明度，保持用户设置的值
-
-        if (previewSpine.value && previewSpine.value.skeleton) {
-            const skeleton = previewSpine.value.skeleton;
-            const spineSlot = skeleton.findSlot(slot.name);
-            if (spineSlot) {
-                // 恢复插槽的attachment
-                const slotData = skeleton.data.findSlot(slot.name);
-                if (slotData && slotData.attachmentName) {
-                    skeleton.setAttachment(slot.name, slotData.attachmentName);
-                }
-                // 使用用户设置的透明度而不是强制设为1.0
-                spineSlot.color.a = slot.alpha;
-            }
-        }
+        setSlotCustomization(slot.name, { visible: true });
     });
+    applySlotCustomizationBatch(slotOptions.value.map((slot) => slot.name));
 };
 
 // 隐藏所有插槽
 const handleHideAllSlots = () => {
     slotOptions.value.forEach(slot => {
         slot.visible = false;
+        setSlotCustomization(slot.name, { visible: false });
+    });
+    applySlotCustomizationBatch(slotOptions.value.map((slot) => slot.name));
+};
 
-        if (previewSpine.value && previewSpine.value.skeleton) {
-            const skeleton = previewSpine.value.skeleton;
-            const spineSlot = skeleton.findSlot(slot.name);
-            if (spineSlot) {
-                // 隐藏插槽 - 使用skeleton.setAttachment(null)方法
-                const attachment = spineSlot.getAttachment();
-                if (attachment) {
-                    // 保存当前attachment以便恢复
-                    (spineSlot as any).originalAttachment = attachment;
-                    // 使用正确的Spine API方法隐藏插槽
-                    (skeleton as any).setAttachment(slot.name, null);
-                }
-            }
+const handleSlotSelection = (slotName: string, append: boolean = false) => {
+    if (!append) {
+        selectedSlotNames.value = [slotName];
+    } else if (selectedSlotNames.value.includes(slotName)) {
+        selectedSlotNames.value = selectedSlotNames.value.filter((name) => name !== slotName);
+    } else {
+        selectedSlotNames.value = [...selectedSlotNames.value, slotName];
+    }
+
+    syncSlotInteractiveState();
+};
+
+const clearSelectedSlots = () => {
+    selectedSlotNames.value = [];
+    syncSlotInteractiveState();
+};
+
+const applySelectedVisibility = (visible: boolean) => {
+    selectedSlotNames.value.forEach((slotName) => {
+        const slotData = slotOptions.value.find((slot) => slot.name === slotName);
+        if (slotData) {
+            slotData.visible = visible;
+            setSlotCustomization(slotName, { visible });
         }
     });
+    applySlotCustomizationBatch(selectedSlotNames.value);
+};
+
+const applySelectedAlpha = (alpha: number) => {
+    selectedSlotNames.value.forEach((slotName) => {
+        const slotData = slotOptions.value.find((slot) => slot.name === slotName);
+        if (slotData) {
+            slotData.alpha = alpha;
+            setSlotCustomization(slotName, { alpha });
+        }
+    });
+    applySlotCustomizationBatch(selectedSlotNames.value);
+};
+
+const applySelectedTint = (tint: number) => {
+    selectedSlotNames.value.forEach((slotName) => {
+        const slotData = slotOptions.value.find((slot) => slot.name === slotName);
+        if (slotData) {
+            slotData.tint = tint;
+            setSlotCustomization(slotName, { tint });
+        }
+    });
+    applySlotCustomizationBatch(selectedSlotNames.value);
+};
+
+const openBulkSelectDialog = () => {
+    showBulkSelectDialog.value = true;
+    nextTick(() => bulkSelectInputRef.value?.focus());
+};
+
+const closeBulkSelectDialog = () => {
+    showBulkSelectDialog.value = false;
+    bulkSelectKeyword.value = '';
+};
+
+const applyBulkSelect = (matchedNames: string[] = matchedBulkSlotNames.value) => {
+    if (matchedNames.length === 0) {
+        const keyword = bulkSelectKeyword.value.trim();
+        if (keyword) {
+            massage(t('projectView.customizer.messages.noSlotMatched', { keyword }), 'error', 2000);
+        }
+        return;
+    }
+
+    selectedSlotNames.value = [...matchedNames];
+    closeBulkSelectDialog();
+    syncSlotInteractiveState();
+};
+
+const saveCustomCharacter = async () => {
+    if (!currentPreviewCharacter.value) {
+        return;
+    }
+
+    const name = customCharacterName.value.trim();
+    if (!name) {
+        massage(t('projectView.customizer.messages.enterCharacterName'), 'error', 2000);
+        return;
+    }
+
+    refreshCurrentCustomization();
+
+    const baseCharacter = currentPreviewCharacter.value;
+    const variant = characterTypeOptions.value[selectedCharacterType.value]?.value as 'default' | 'aim' | 'cover' | undefined;
+    const savedCharacter: CharacterType = {
+        ...baseCharacter,
+        id: `custom:${Date.now()}`,
+        isCustom: true,
+        baseCharacterId: baseCharacter.baseCharacterId || getCharacterId(baseCharacter),
+        characterName: name,
+        displayName: name,
+        resourceVariant: variant || baseCharacter.resourceVariant,
+        resourceKey: getCharacterResourceKey(baseCharacter, variant || 'default'),
+        customization: cloneCustomization(currentCustomization.value),
+    };
+
+    await CustomCharacterService.getInstance().save(savedCharacter);
+    actionStore.addLoadRes({
+        name: savedCharacter.characterName,
+        path: getCharacterResourceKey(savedCharacter),
+        type: ResType.Spine,
+        characterId: getCharacterId(savedCharacter),
+    });
+    await AssetManager.getInstance().reloadResConfig();
+    await loadCustomCharacters();
+    currentPreviewCharacter.value = savedCharacter;
+    window.dispatchEvent(new CustomEvent('custom-characters-updated'));
+    massage(t('projectView.customizer.messages.saved', { name }), 'success', 2000);
+};
+
+const deleteCustomCharacter = async (characterId: string) => {
+    if (!characterId) {
+        return;
+    }
+
+    await CustomCharacterService.getInstance().remove(characterId);
+    delete actionStore.loadResMap[characterId];
+    await AssetManager.getInstance().reloadResConfig();
+    await loadCustomCharacters();
+    if (currentPreviewCharacter.value?.id === characterId) {
+        currentPreviewCharacter.value = null;
+        customCharacterName.value = '';
+    }
+    window.dispatchEvent(new CustomEvent('custom-characters-updated'));
+    massage(t('projectView.customizer.messages.deleted'), 'success', 2000);
 };
 
 // 悬停时
 const handleSlotHover = (slotName: string) => {
-    if (!previewSpine.value?.skeleton) return;
-
-    const slot = previewSpine.value.skeleton.findSlot(slotName);
-    if (!slot) return;
-
-    // Spine slot 实际渲染的对象，可能是 sprite 或 mesh
-    const target = (slot as any).currentSprite || (slot as any).currentMesh;
-    if (!target) return;
-
-    // 保存原始状态（只保存一次）
-    if (!(slot as any)._originalColor) {
-        (slot as any)._originalColor = {
-            r: slot.color.r,
-            g: slot.color.g,
-            b: slot.color.b,
-            a: slot.color.a
-        };
-    }
-    if (!(slot as any)._originalFilters) {
-        (slot as any)._originalFilters = target.filters || [];
-    }
-
-    // ✅ 高亮（变成亮黄色），但保持用户设置的透明度
-    const slotData = slotOptions.value.find(s => s.name === slotName);
-    const userAlpha = slotData ? slotData.alpha : slot.color.a;
-
-    slot.color.r = 1.0;
-    slot.color.g = 1.0;
-    slot.color.b = 0.3; // 偏金黄
-    slot.color.a = userAlpha; // 保持用户设置的透明度
-
-    // ✅ 添加描边
-    const outline = new OutlineFilter(4, 0xffd700, 1); // 4px，金黄色，强度1
-    target.filters = [...(slot as any)._originalFilters, outline];
+    if (hoveredSlotName.value === slotName) return;
+    hoveredSlotName.value = slotName;
+    syncSlotInteractiveState();
 };
 
 // 离开时
 const handleSlotLeave = () => {
-    if (!previewSpine.value?.skeleton) return;
-
-    previewSpine.value.skeleton.slots.forEach((slot: any) => {
-        const target = slot.currentSprite || slot.currentMesh;
-        if (!target) return;
-
-        // 恢复颜色，但保持用户设置的透明度
-        if (slot._originalColor) {
-            // 查找用户设置的透明度值
-            const slotData = slotOptions.value.find(s => s.name === slot.data.name);
-            const userAlpha = slotData ? slotData.alpha : slot._originalColor.a;
-
-            slot.color.r = slot._originalColor.r;
-            slot.color.g = slot._originalColor.g;
-            slot.color.b = slot._originalColor.b;
-            slot.color.a = userAlpha; // 使用用户设置的透明度而不是原始透明度
-            delete slot._originalColor;
-        }
-
-        // 恢复滤镜
-        if (slot._originalFilters) {
-            target.filters = slot._originalFilters;
-            delete slot._originalFilters;
-        }
-    });
+    hoveredSlotName.value = null;
+    syncSlotInteractiveState();
 };
+
+let shaderDragOffsetX = 0;
+let shaderDragOffsetY = 0;
+
+const clampShaderWindowPosition = (left: number, top: number) => {
+    const view = projectView.value;
+    const windowEl = shaderWindowRef.value;
+
+    if (!view) {
+        return { left, top };
+    }
+
+    const maxLeft = Math.max(10, view.clientWidth - (windowEl?.offsetWidth || 430) - 10);
+    const maxTop = Math.max(10, view.clientHeight - (windowEl?.offsetHeight || 540) - 10);
+
+    return {
+        left: Math.min(Math.max(10, left), maxLeft),
+        top: Math.min(Math.max(10, top), maxTop),
+    };
+};
+
+const resetShaderWindowPosition = () => {
+    if (!projectView.value) {
+        return;
+    }
+
+    const nextLeft = projectView.value.clientWidth - 430 - 14;
+    shaderWindowPosition.value = clampShaderWindowPosition(nextLeft, 190);
+};
+
+const syncShaderWindowPosition = () => {
+    shaderWindowPosition.value = clampShaderWindowPosition(
+        shaderWindowPosition.value.left,
+        shaderWindowPosition.value.top,
+    );
+};
+
+const handleShaderWindowDrag = (event: MouseEvent) => {
+    if (!shaderWindowDragging.value || !projectView.value) {
+        return;
+    }
+
+    const viewRect = projectView.value.getBoundingClientRect();
+    const nextLeft = event.clientX - viewRect.left - shaderDragOffsetX;
+    const nextTop = event.clientY - viewRect.top - shaderDragOffsetY;
+    shaderWindowPosition.value = clampShaderWindowPosition(nextLeft, nextTop);
+};
+
+const stopShaderWindowDrag = () => {
+    if (!shaderWindowDragging.value) {
+        return;
+    }
+
+    shaderWindowDragging.value = false;
+    window.removeEventListener('mousemove', handleShaderWindowDrag);
+    window.removeEventListener('mouseup', stopShaderWindowDrag);
+    document.body.style.userSelect = '';
+};
+
+const startShaderWindowDrag = (event: MouseEvent) => {
+    if (!shaderWindowRef.value) {
+        return;
+    }
+
+    const windowRect = shaderWindowRef.value.getBoundingClientRect();
+    shaderDragOffsetX = event.clientX - windowRect.left;
+    shaderDragOffsetY = event.clientY - windowRect.top;
+    shaderWindowDragging.value = true;
+
+    window.addEventListener('mousemove', handleShaderWindowDrag);
+    window.addEventListener('mouseup', stopShaderWindowDrag);
+    document.body.style.userSelect = 'none';
+};
+
 // Shader编辑器相关方法
 const toggleShaderEditor = () => {
+    if (!showShaderEditor.value && selectedSlotNames.value.length === 0) {
+        massage(t('projectView.customizer.messages.selectSlotFirst'), 'error', 2000);
+        return;
+    }
+
     if (showShaderEditor.value) {
         // 关闭时保存状态
         if (shaderEditorRef.value) {
@@ -1004,7 +1629,17 @@ const toggleShaderEditor = () => {
     } else {
         // 打开时恢复状态
         nextTick(() => {
-            if (shaderEditorRef.value && savedShaderState.value.selectedPreset) {
+            if (shaderWindowPosition.value.left === 0 && shaderWindowPosition.value.top === 0) {
+                resetShaderWindowPosition();
+            } else {
+                syncShaderWindowPosition();
+            }
+            if (
+                shaderEditorRef.value &&
+                (savedShaderState.value.selectedPreset ||
+                    savedShaderState.value.fragmentShader ||
+                    savedShaderState.value.uniforms.length > 0)
+            ) {
                 shaderEditorRef.value.restoreState(savedShaderState.value);
             }
         });
@@ -1014,81 +1649,45 @@ const toggleShaderEditor = () => {
 
 // 应用Shader到Spine角色
 const handleApplyShader = (shaderData: any) => {
-    if (!previewSpine.value || !previewAPP.value) {
-        console.warn('Spine或PIXI应用未初始化');
+    if (selectedSlotNames.value.length === 0) {
         return;
     }
 
     try {
-        // 创建自定义滤镜
-        const filter = new PIXI.Filter(undefined, shaderData.fragmentShader, shaderData.uniforms);
+        selectedSlotNames.value.forEach((slotName) => {
+            const slotData = slotOptions.value.find((slot) => slot.name === slotName);
+            if (slotData) {
+                slotData.shader = {
+                    name: shaderData.name,
+                    fragmentShader: shaderData.fragmentShader,
+                    uniforms: JSON.parse(JSON.stringify(shaderData.uniforms || {})),
+                };
+                setSlotCustomization(slotName, { shader: slotData.shader });
+            }
+        });
 
-        // 清除之前的滤镜
-        if (previewSpine.value.filters) {
-            previewSpine.value.filters = [];
-        }
-
-        // 应用新滤镜
-        previewSpine.value.filters = [filter];
-        currentShaderFilters.value = [filter];
-        hasActiveShaders.value = true;
-
-        // 如果Shader包含时间uniform，启动动画循环
-        if (shaderData.uniforms.iTime !== undefined || shaderData.uniforms.uTime !== undefined) {
-            startShaderAnimation(filter, shaderData.uniforms);
-        }
-
-        console.log('Shader应用成功:', shaderData.name);
+        applySlotCustomizationBatch(selectedSlotNames.value);
+        showShaderEditor.value = false;
     } catch (error) {
         console.error('应用Shader失败:', error);
     }
 };
 
-// Shader动画循环
-let shaderAnimationId: number | null = null;
-const startShaderAnimation = (filter: PIXI.Filter, initialUniforms: any) => {
-    if (shaderAnimationId) {
-        cancelAnimationFrame(shaderAnimationId);
-    }
-
-    const startTime = Date.now();
-    const animate = () => {
-        const currentTime = (Date.now() - startTime) / 1000; // 转换为秒
-
-        // 更新时间uniform
-        if (filter.uniforms.iTime !== undefined) {
-            filter.uniforms.iTime = currentTime;
-        }
-        if (filter.uniforms.uTime !== undefined) {
-            filter.uniforms.uTime = currentTime;
-        }
-
-        shaderAnimationId = requestAnimationFrame(animate);
-    };
-
-    animate();
-};
-
 // 重置Shader效果
 const handleResetShader = () => {
-    if (previewSpine.value) {
-        previewSpine.value.filters = [];
-        currentShaderFilters.value = [];
-        hasActiveShaders.value = false;
-
-        // 停止动画循环
-        if (shaderAnimationId) {
-            cancelAnimationFrame(shaderAnimationId);
-            shaderAnimationId = null;
-        }
-
-        console.log('Shader效果已重置');
+    if (selectedSlotNames.value.length === 0) {
+        return;
     }
-};
 
-// 清除所有Shader效果
-const clearAllShaders = () => {
-    handleResetShader();
+    selectedSlotNames.value.forEach((slotName) => {
+        const slotData = slotOptions.value.find((slot) => slot.name === slotName);
+        if (slotData) {
+            slotData.shader = null;
+            setSlotCustomization(slotName, { shader: null });
+        }
+    });
+
+    applySlotCustomizationBatch(selectedSlotNames.value);
 };
 </script>
 
@@ -1388,17 +1987,22 @@ const clearAllShaders = () => {
     top: 10px;
     right: 10px;
     z-index: 10;
-    background: rgba(0, 0, 0, 0.7);
-    padding: 10px;
-    border-radius: 5px;
+    min-width: 220px;
+    background: rgba(0, 0, 0, 0.78);
+    padding: 10px 12px;
+    border-radius: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.28);
     display: flex;
     align-items: center;
     gap: 10px;
 }
 
 .animation-selector label {
-    color: white;
-    font-size: 14px;
+    color: rgba(255, 255, 255, 0.86);
+    font-size: 13px;
     white-space: nowrap;
 }
 
@@ -1407,17 +2011,22 @@ const clearAllShaders = () => {
     top: 70px;
     right: 10px;
     z-index: 10;
-    background: rgba(0, 0, 0, 0.7);
-    padding: 10px;
-    border-radius: 5px;
+    min-width: 220px;
+    background: rgba(0, 0, 0, 0.78);
+    padding: 10px 12px;
+    border-radius: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.28);
     display: flex;
     align-items: center;
     gap: 10px;
 }
 
 .skin-selector label {
-    color: white;
-    font-size: 14px;
+    color: rgba(255, 255, 255, 0.86);
+    font-size: 13px;
     white-space: nowrap;
 }
 
@@ -1426,18 +2035,302 @@ const clearAllShaders = () => {
     top: 130px;
     right: 10px;
     z-index: 10;
-    background: rgba(0, 0, 0, 0.7);
-    padding: 10px;
-    border-radius: 5px;
+    min-width: 220px;
+    background: rgba(0, 0, 0, 0.78);
+    padding: 10px 12px;
+    border-radius: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.28);
     display: flex;
     align-items: center;
     gap: 10px;
 }
 
 .character-type-selector label {
-    color: white;
-    font-size: 14px;
+    color: rgba(255, 255, 255, 0.86);
+    font-size: 13px;
     white-space: nowrap;
+}
+
+.slot-batch-panel {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    z-index: 10;
+    width: min(300px, calc(100vw - 32px));
+    max-height: calc(100% - 20px);
+    overflow-y: auto;
+    padding: 14px;
+    border-radius: 10px;
+    background: rgba(0, 0, 0, 0.84);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 16px 32px rgba(0, 0, 0, 0.3);
+}
+
+.slot-batch-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+}
+
+.slot-batch-title {
+    color: #fff;
+    font-size: 15px;
+    font-weight: 600;
+}
+
+.slot-batch-subtitle {
+    margin-top: 4px;
+    color: rgba(255, 255, 255, 0.56);
+    font-size: 12px;
+    line-height: 1.45;
+}
+
+.slot-selection-chip-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 12px;
+}
+
+.slot-selection-chip {
+    padding: 4px 8px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: #fff;
+    font-size: 11px;
+}
+
+.slot-batch-control {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 12px;
+    color: #fff;
+}
+
+.slot-batch-control label {
+    min-width: 56px;
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.7);
+}
+
+.slot-batch-control input[type="range"] {
+    flex: 1;
+    accent-color: #4caf50;
+}
+
+.slot-batch-control input[type="checkbox"] {
+    accent-color: #4caf50;
+}
+
+.slot-batch-value {
+    min-width: 40px;
+    text-align: right;
+    color: rgba(255, 255, 255, 0.58);
+    font-size: 12px;
+}
+
+.slot-batch-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 12px;
+}
+
+.slot-panel-button {
+    appearance: none;
+    padding: 8px 12px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 7px;
+    background: rgba(255, 255, 255, 0.08);
+    color: #fff;
+    font-size: 12px;
+    cursor: pointer;
+    transition: background-color 0.2s ease, border-color 0.2s ease, transform 0.2s ease, opacity 0.2s ease;
+}
+
+.slot-panel-button:hover {
+    background: rgba(255, 255, 255, 0.14);
+    border-color: rgba(255, 255, 255, 0.2);
+    transform: translateY(-1px);
+}
+
+.slot-panel-button-primary {
+    background: rgba(76, 175, 80, 0.22);
+    border-color: rgba(76, 175, 80, 0.38);
+}
+
+.slot-panel-button-primary:hover {
+    background: rgba(76, 175, 80, 0.32);
+    border-color: rgba(76, 175, 80, 0.48);
+}
+
+.slot-panel-button-danger {
+    background: rgba(244, 67, 54, 0.18);
+    border-color: rgba(244, 67, 54, 0.32);
+}
+
+.slot-panel-button-danger:hover {
+    background: rgba(244, 67, 54, 0.28);
+    border-color: rgba(244, 67, 54, 0.44);
+}
+
+.slot-panel-button-ghost {
+    background: rgba(255, 255, 255, 0.04);
+}
+
+.slot-panel-button-compact {
+    flex-shrink: 0;
+    white-space: nowrap;
+}
+
+.slot-save-section {
+    margin-top: 16px;
+    padding-top: 16px;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    color: #fff;
+}
+
+.slot-save-section label,
+.slot-custom-list-title {
+    display: block;
+    margin-bottom: 8px;
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.7);
+}
+
+.slot-name-input {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 7px;
+    background: rgba(255, 255, 255, 0.06);
+    color: #fff;
+    outline: none;
+    transition: border-color 0.2s ease, background-color 0.2s ease;
+}
+
+.slot-name-input::placeholder {
+    color: rgba(255, 255, 255, 0.34);
+}
+
+.slot-name-input:focus {
+    border-color: rgba(255, 255, 255, 0.2);
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.slot-custom-list {
+    margin-top: 16px;
+    padding-top: 16px;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.slot-custom-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 10px;
+    margin-top: 8px;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    color: #fff;
+    font-size: 12px;
+}
+
+.slot-custom-delete {
+    border: 1px solid rgba(244, 67, 54, 0.1);
+    border-radius: 6px;
+    background: rgba(244, 67, 54, 0.08);
+    color: #ff9d95;
+    padding: 4px 8px;
+    cursor: pointer;
+    transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+.slot-custom-delete:hover {
+    background: rgba(244, 67, 54, 0.16);
+    border-color: rgba(244, 67, 54, 0.24);
+}
+
+.bulk-select-dialog {
+    width: min(460px, 92vw);
+    padding: 0 16px 16px;
+    border-radius: 12px;
+    background: rgba(0, 0, 0, 0.88);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 16px 32px rgba(0, 0, 0, 0.32);
+}
+
+.bulk-select-helper {
+    margin-top: 10px;
+    color: rgba(255, 255, 255, 0.56);
+    font-size: 12px;
+    line-height: 1.45;
+}
+
+.bulk-select-results {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 12px;
+    max-height: 168px;
+    overflow-y: auto;
+    padding-right: 2px;
+}
+
+.slot-batch-panel::-webkit-scrollbar,
+.bulk-select-results::-webkit-scrollbar,
+.shader-floating-body::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+.slot-batch-panel::-webkit-scrollbar-track,
+.bulk-select-results::-webkit-scrollbar-track,
+.shader-floating-body::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.slot-batch-panel::-webkit-scrollbar-thumb,
+.bulk-select-results::-webkit-scrollbar-thumb,
+.shader-floating-body::-webkit-scrollbar-thumb {
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.16);
+}
+
+.slot-batch-panel::-webkit-scrollbar-thumb:hover,
+.bulk-select-results::-webkit-scrollbar-thumb:hover,
+.shader-floating-body::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.28);
+}
+
+.bulk-select-result {
+    appearance: none;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.08);
+    color: #fff;
+    padding: 6px 10px;
+    font-size: 12px;
+    cursor: pointer;
+    transition: background-color 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+}
+
+.bulk-select-result:hover {
+    background: rgba(255, 255, 255, 0.14);
+    border-color: rgba(255, 255, 255, 0.22);
+    transform: translateY(-1px);
 }
 
 .animation-mix-config {
@@ -1625,14 +2518,94 @@ const clearAllShaders = () => {
     font-weight: bold;
 }
 
-/* Shader编辑器浮动面板样式 */
+.shader-floating-window {
+    position: absolute;
+    z-index: 18;
+    width: 392px;
+    height: min(560px, calc(100% - 210px));
+    min-width: 320px;
+    min-height: 320px;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    resize: both;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    background: rgba(0, 0, 0, 0.88);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    box-shadow: 0 16px 32px rgba(0, 0, 0, 0.32);
+}
+
+.shader-floating-window.dragging {
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+}
+
+.shader-floating-header,
+.shader-editor-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 14px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    background: rgba(255, 255, 255, 0.04);
+}
+
+.shader-floating-header {
+    cursor: move;
+}
+
+.shader-floating-title-group {
+    min-width: 0;
+    flex: 1;
+}
+
+.shader-floating-title-group h3,
+.shader-editor-header h3 {
+    color: #fff;
+    margin: 0;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.shader-floating-subtitle {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+    margin-top: 6px;
+}
+
+.shader-floating-count,
+.shader-floating-chip {
+    padding: 3px 8px;
+    border-radius: 999px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.08);
+    color: rgba(255, 255, 255, 0.66);
+    font-size: 11px;
+    line-height: 1;
+    white-space: nowrap;
+}
+
+.shader-floating-count {
+    color: #fff;
+}
+
+.shader-floating-body {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+}
+
 .shader-editor-overlay {
     position: fixed;
     top: 0;
     left: 0;
     right: 0;
     bottom: 0;
-    background: var(--overlay-bg);
+    background: rgba(10, 12, 18, 0.6);
     z-index: 1000;
     display: flex;
     align-items: center;
@@ -1640,103 +2613,57 @@ const clearAllShaders = () => {
     padding: 20px;
 }
 
-.shader-editor-panel {
-    background: var(--primary-bg);
-    border: 1px solid var(--main-border-color);
-    border-radius: var(--border-radius);
-    width: 90%;
-    max-width: 800px;
-    max-height: 90vh;
-    overflow-y: auto;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
-}
-
-/* 自定义滚动条样式 */
-.shader-editor-panel::-webkit-scrollbar {
-    background-color: transparent;
-    width: 8px;
-    height: 8px;
-}
-
-.shader-editor-panel::-webkit-scrollbar-track {
-    background: transparent;
-}
-
-.shader-editor-panel::-webkit-scrollbar-thumb {
-    border-radius: 10px;
-    border: 2px solid transparent;
-    background-color: var(--deep-border-color);
-}
-
-.shader-editor-panel:hover::-webkit-scrollbar-thumb {
-    background-color: var(--deep-border-color);
-}
-
-.shader-editor-panel::-webkit-scrollbar-thumb:hover {
-    background-color: var(--high-hover-bg);
-}
-
-.shader-editor-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 15px 20px;
-    border-bottom: 1px solid var(--main-border-color);
-    background: var(--secondary-bg);
-}
-
-.shader-editor-header h3 {
-    color: var(--text-color);
-    margin: 0;
-    font-size: 16px;
-    font-weight: 600;
-}
-
 .close-btn {
-    background: none;
-    border: none;
-    color: var(--text-color);
-    font-size: 24px;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: #fff;
+    font-size: 20px;
     cursor: pointer;
     padding: 0;
-    width: 30px;
-    height: 30px;
+    width: 32px;
+    height: 32px;
     display: flex;
     align-items: center;
     justify-content: center;
-    border-radius: 50%;
-    transition: background-color 0.2s;
+    border-radius: 8px;
+    transition: background-color 0.2s, border-color 0.2s;
 }
 
 .close-btn:hover {
-    background: var(--high-hover-bg);
+    background: rgba(255, 255, 255, 0.14);
+    border-color: rgba(255, 255, 255, 0.18);
 }
 
 /* Shader 编辑器动画 */
 .shader-overlay-enter-active,
-.shader-overlay-leave-active {
-    transition: all 0.3s ease;
+.shader-overlay-leave-active,
+.shader-floating-enter-active,
+.shader-floating-leave-active {
+    transition: opacity 0.22s ease, transform 0.22s ease;
 }
 
 .shader-overlay-enter-from,
-.shader-overlay-leave-to {
+.shader-overlay-leave-to,
+.shader-floating-enter-from,
+.shader-floating-leave-to {
     opacity: 0;
 }
 
-.shader-panel-enter-active,
-.shader-panel-leave-active {
-    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+.shader-floating-enter-from,
+.shader-floating-leave-to {
+    transform: translateY(12px) scale(0.98);
 }
 
-.shader-panel-enter-from,
-.shader-panel-leave-to {
-    opacity: 0;
-    transform: scale(0.9) translateY(-20px);
-}
-
-.shader-panel-enter-to,
-.shader-panel-leave-from {
+.shader-floating-enter-to,
+.shader-floating-leave-from {
     opacity: 1;
-    transform: scale(1) translateY(0);
+    transform: translateY(0) scale(1);
+}
+
+@media (max-width: 1180px) {
+    .shader-floating-window {
+        width: min(392px, calc(100% - 20px));
+        height: min(520px, calc(100% - 220px));
+    }
 }
 </style>

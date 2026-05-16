@@ -282,7 +282,7 @@ import Tooltip from '../../common/Tooltip.vue';
 import { VueDraggable } from 'vue-draggable-plus';
 // 添加ResourceManager和相关类型的导入
 import ResourceManager from '../../../script/resource-manager';
-import { ASSET_CHARACTER, ResType } from '../../../script/var';
+import { ResType } from '../../../script/var';
 import { Spine } from 'pixi-spine';
 import {
     createDialogueSpeaker,
@@ -292,6 +292,7 @@ import {
     normalizeDialogueSpeaker,
 } from '../../../utils/dialogue-speaker';
 import { getCharacterDisplayName } from '../../../utils/character-name';
+import { getCharacterResourceKey } from '../../../utils/character';
 
 const props = defineProps<{
     title: string,
@@ -546,7 +547,7 @@ const bindCharacter = (index: number) => {
             animation: 'idle',
             ease: EasingFunction.EaseInOutSine,
             duration: 300,
-            spine: (markRaw(ResourceManager.getResource(ASSET_CHARACTER + res.path?.name + "/" + res.path?.skel, ResType.Spine) ?? {}) as Raw<Spine>) ?? undefined,
+            spine: (markRaw(ResourceManager.getResource(getCharacterResourceKey(res), ResType.Spine) ?? {}) as Raw<Spine>) ?? undefined,
         }
 
         messages.value[index].parms.amintionOption = messages.value[index].parms?.spine?.state.data.skeletonData.animations.map((item, _index) => {
@@ -756,7 +757,7 @@ const serialization = () => {
                 // 不直接序列化spine对象，而是保存spine的资源key
                 spineResourceKey: message.parms.spine ?
                     (message.parms.CharacterName ?
-                        ASSET_CHARACTER + message.parms.character.path?.name + "/" + message.parms.character.path?.skel :
+                        getCharacterResourceKey(message.parms.character) :
                         undefined) :
                     undefined,
                 // 移除spine对象本身
@@ -773,7 +774,7 @@ const serialization = () => {
                 // 同样处理预选角色的spine
                 spineResourceKey: preSelectedCharacter.value.parms.spine ?
                     (preSelectedCharacter.value.parms.CharacterName ?
-                        ASSET_CHARACTER + preSelectedCharacter.value.parms.character.path?.name + "/" + preSelectedCharacter.value.parms.character.path?.skel :
+                        getCharacterResourceKey(preSelectedCharacter.value.parms.character) :
                         undefined) :
                     undefined,
                 spine: undefined

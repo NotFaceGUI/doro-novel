@@ -112,7 +112,7 @@ import CanvasManager from '../../../script/render/canvas-manager';
 import { setModification } from '../../../script/util/common';
 import { Modification, PropertyPath } from '../../../script/common/snapshot';
 import ToggleSwitch from '../../common/ToggleSwitch.vue';
-import { ASSET_CHARACTER, DEFAULT_SPINE_SCALE, ResType } from '../../../script/var';
+import { DEFAULT_SPINE_SCALE, ResType } from '../../../script/var';
 import { selectCharacterType, selectImageType } from '../../../script/common/search-action';
 import { handleSceneState, useCommonState } from '../../../script/common/common-action-item';
 import { ActionItems, GameMode, InputOption, LoadRes } from '../../../types/app';
@@ -125,6 +125,7 @@ import Dropdown from '../../common/Dropdown.vue';
 import { useI18n } from 'vue-i18n';
 import { useViewportStore } from '../../../stores/viewport-store';
 import { getCharacterDisplayName } from '../../../utils/character-name';
+import { getCharacterId, getCharacterResourceKey } from '../../../utils/character';
 
 const canvasManager = CanvasManager.getInstance();
 let viewport = canvasManager.viewport;
@@ -236,11 +237,12 @@ const addCharacter = () => {
             isInitShow: true,
         }
 
-        setModification(modification, `characters.${res.path?.name}.x`, obj.x, "add");
-        setModification(modification, `characters.${res.path?.name}.y`, obj.y, "add");
-        setModification(modification, `characters.${res.path?.name}.scale`, obj.scale, "add");
+        const characterKey = getCharacterId(res);
+        setModification(modification, `characters.${characterKey}.x`, obj.x, "add");
+        setModification(modification, `characters.${characterKey}.y`, obj.y, "add");
+        setModification(modification, `characters.${characterKey}.scale`, obj.scale, "add");
         // 组装key
-        const key = ASSET_CHARACTER + res.path?.name + "/" + res.path?.skel;
+        const key = getCharacterResourceKey(res);
         // 添加角色
         canvasManager.addCharacterSpine(key, obj);
     })
@@ -281,9 +283,10 @@ const updateCharacterPosition = (index: number) => {
     }
 
     // 修改值
-    setModification(modification, `characters.${character.character.path?.name}.x`, character.x);
-    setModification(modification, `characters.${character.character.path?.name}.y`, character.y);
-    setModification(modification, `characters.${character.character.path?.name}.scale`, character.scale);
+    const characterKey = getCharacterId(character.character);
+    setModification(modification, `characters.${characterKey}.x`, character.x);
+    setModification(modification, `characters.${characterKey}.y`, character.y);
+    setModification(modification, `characters.${characterKey}.scale`, character.scale);
 }
 
 // 拖拽相关变量

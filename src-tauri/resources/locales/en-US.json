@@ -168,8 +168,9 @@
     "audioUnsupported": "Your browser does not support the audio element."
   },
   "controlHint": {
-    "moveView": "Move View",
-    "zoomView": "Scroll to Zoom"
+    "moveView": "Left Drag to Move",
+    "zoomView": "Scroll to Zoom",
+    "hoverSlot": "Hover to Highlight Slots"
   },
   "slotControl": {
     "title": "Slot Control",
@@ -308,7 +309,34 @@
     },
     "shaderEditorTitle": "Shader Effect Editor",
     "scriptPlaceholder": "Write your story script here...",
-    "editing": "Editing"
+    "editing": "Editing",
+    "customizer": {
+      "title": "Part Editor",
+      "selectedSummary": "{count} parts selected",
+      "emptySelection": "Click a part in the canvas or batch-select with the shortcut",
+      "bulkSelect": "Batch Select",
+      "bulkSelectTitle": "Select Parts by Keyword",
+      "bulkSelectPlaceholder": "Enter a slot keyword, for example hair",
+      "bulkSelectApply": "Select Matched Parts",
+      "visible": "Visible",
+      "alpha": "Alpha",
+      "tint": "Tint",
+      "shader": "Edit Shader",
+      "clearShader": "Clear Shader",
+      "clearSelection": "Clear Selection",
+      "saveAsCharacter": "Save As New Character",
+      "characterNamePlaceholder": "Enter a new character name",
+      "save": "Save Character",
+      "deleteCurrent": "Delete Current Character",
+      "customCharacters": "Custom Characters",
+      "messages": {
+        "selectSlotFirst": "Select at least one part first",
+        "enterCharacterName": "Enter a new character name",
+        "saved": "Custom character saved: {name}",
+        "deleted": "Custom character deleted",
+        "noSlotMatched": "No parts matched keyword {keyword}"
+      }
+    }
   },
   "actionCommon": {
     "waitExecution": "Block Execution"
@@ -519,10 +547,12 @@
     "dissolveAnimationEnabled": "Dissolve animation enabled",
     "timeAnimationEnabled": "Time animation enabled",
     "presets": {
-      "glow": "Glow Effect",
-      "wave": "Wave Distortion",
-      "colorShift": "Color Shift",
-      "dissolve": "Dissolve Effect"
+      "colorReplace": "Color Replace",
+      "trueTint": "True Tint",
+      "gradientTint": "Gradient Tint",
+      "softBlur": "Soft Blur",
+      "mosaic": "Mosaic",
+      "posterize": "Posterize"
     }
   },
   "actionBgm": {

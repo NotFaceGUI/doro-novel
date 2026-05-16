@@ -13,6 +13,7 @@ import { useProjectStore } from '../../stores/project-store';
 import { LOCAL_OPEN_KEY } from '../var';
 import massage from './massage';
 import { i18n } from '../../locales/i18n';
+import { getCharacterResourceKey } from '../../utils/character';
 
 function resetCurrentProjectRuntime() {
     const actionStore = useActionStore();
@@ -28,8 +29,8 @@ function resetCurrentProjectRuntime() {
 
     actionStore.maxCharacter = [];
 
-    Object.entries(actionStore.loadResMap).forEach(([key, loadRes]) => {
-        ResourceManager.removeResource(key, loadRes.type);
+    Object.entries(actionStore.loadResMap).forEach(([, loadRes]) => {
+        ResourceManager.removeResource(loadRes.path, loadRes.type);
     });
     actionStore.loadResMap = {} as Record<string, LoadRes>;
     actionStore.isPlaying = false;
@@ -209,9 +210,10 @@ export async function openProject(filePath: string) {
 
                     for (const charData of actionData.maxCharacter) {
                         // 使用ResourceManager重新加载spine
-                        const spine = ResourceManager.getResource<Spine>(charData.spineResourceKey, ResType.Spine) as Spine;
+                        const spineResourceKey = charData.spineResourceKey || getCharacterResourceKey(charData.character);
+                        const spine = ResourceManager.getResource<Spine>(spineResourceKey, ResType.Spine) as Spine;
 
-                        console.log("加载角色Spine: ", charData.spineResourceKey, spine);
+                        console.log("加载角色Spine: ", spineResourceKey, spine);
 
                         // 构建角色信息对象
                         const characterInfo = {
@@ -223,7 +225,7 @@ export async function openProject(filePath: string) {
                         };
 
                         // 调用addCharacterSpine方法将角色添加到场景中
-                        canvasManager.addCharacterSpine(charData.spineResourceKey, characterInfo);
+                        canvasManager.addCharacterSpine(spineResourceKey, characterInfo);
                     }
                 }
             }

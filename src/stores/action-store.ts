@@ -11,6 +11,7 @@ import CanvasManager from '../script/render/canvas-manager';
 import { UIRender } from '../script/render/ui-render';
 import { useBranchStore } from './branch-store';
 
+const getLoadResMapKey = (loadRes: LoadRes) => loadRes.characterId || loadRes.path;
 
 
 export const useActionStore = defineStore('action', () => {
@@ -300,10 +301,11 @@ export const useActionStore = defineStore('action', () => {
 
   // 添加 LoadRes
   function addLoadRes(loadRes: LoadRes): boolean {
-    if (loadResMap.value[loadRes.path]) {
+    const mapKey = getLoadResMapKey(loadRes);
+    if (loadResMap.value[mapKey]) {
       return false;
     }
-    loadResMap.value[loadRes.path] = loadRes;
+    loadResMap.value[mapKey] = loadRes;
     resolveResource(loadRes.path).then((allPath) => {
       const resUrl = convertFileSrc(allPath);
       ResourceManager.loadResource(loadRes.path, resUrl, loadRes.type);
@@ -314,13 +316,14 @@ export const useActionStore = defineStore('action', () => {
 
   // 异步添加资源 这个主要是为了需要同步拿到加载后的资源的
   async function addLoadResAsync(loadRes: LoadRes): Promise<boolean> {
+    const mapKey = getLoadResMapKey(loadRes);
     // 如果资源已存在，立即返回false
-    if (loadResMap.value[loadRes.path]) {
+    if (loadResMap.value[mapKey]) {
       return false;
     }
 
     // 添加到资源映射
-    loadResMap.value[loadRes.path] = loadRes;
+    loadResMap.value[mapKey] = loadRes;
 
     try {
       // 解析资源路径
@@ -333,7 +336,7 @@ export const useActionStore = defineStore('action', () => {
       return true;
     } catch (error) {
       // 加载失败时从映射中移除
-      delete loadResMap.value[loadRes.path];
+      delete loadResMap.value[mapKey];
       // 重新抛出错误以便调用方可以捕获
       throw error;
     }

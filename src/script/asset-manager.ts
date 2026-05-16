@@ -2,13 +2,15 @@ import { BaseDirectory, join, resolveResource } from "@tauri-apps/api/path";
 import { ASSET_AUDIO, ASSET_CHARACTER, ASSET_IMAGE, ASSET_PACKAGE, ASSET_VIDEO, CHARACTER_CONFIG } from './var';
 import { AssetPath, dirs, CharacterType } from '../types/app';
 import { DirEntry, exists, mkdir, readDir, readTextFile } from "@tauri-apps/plugin-fs";
+import CustomCharacterService from './custom-character-service';
+import { normalizeCharacter } from '../utils/character';
 
 
 class AssetManager {
     private static instance: AssetManager;
     private assetPath: { character: string; image: string; video: string; audio: string; package: string; } | undefined;
 
-    public characters!: CharacterType[];
+    public characters: CharacterType[] | null = null;
 
     private constructor() {
         console.log("资源管理器初始化！");
@@ -72,21 +74,53 @@ class AssetManager {
         return this.assetPath;
     }
 
-    public async getResConfig() {
-        if (this.characters) {
-            return this.characters;
-        }
-        const p = await resolveResource('resources');
-        const configs = await this.getCurrenPathAllForTyep(p);
-        for(const config of configs){
-            if (config.data.name == CHARACTER_CONFIG) {
-                const contents = await readTextFile(config.path);
-                this.characters = JSON.parse(contents);
-                console.log(this.characters);
+    private async loadBuiltinCharacters(): Promise<CharacterType[]> {
+        const candidateResourcePaths = [
+            `resources/${CHARACTER_CONFIG}`,
+            CHARACTER_CONFIG,
+        ];
+
+        for (const resourcePath of candidateResourcePaths) {
+            try {
+                const resolvedPath = await resolveResource(resourcePath);
+                const contents = await readTextFile(resolvedPath);
+                const builtinCharacters = JSON.parse(contents);
+
+                if (Array.isArray(builtinCharacters)) {
+                    return builtinCharacters.map((character) => normalizeCharacter(character as CharacterType));
+                }
+            } catch (error) {
+                console.warn(`角色配置读取失败: ${resourcePath}`, error);
             }
         }
 
+        console.error(`未找到角色配置文件: ${CHARACTER_CONFIG}`);
+        return [];
+    }
+
+    public async getResConfig(): Promise<CharacterType[]> {
+        if (this.characters) {
+            return this.characters;
+        }
+
+        const builtinCharacters = await this.loadBuiltinCharacters();
+
+        let customCharacters: CharacterType[] = [];
+        try {
+            customCharacters = await CustomCharacterService.getInstance().list();
+        } catch (error) {
+            console.error('读取自定义角色失败:', error);
+        }
+
+        this.characters = [...builtinCharacters, ...customCharacters.map(normalizeCharacter)];
+        console.log(this.characters);
         return this.characters;
+    }
+
+    public async reloadResConfig() {
+        this.characters = null;
+        await CustomCharacterService.getInstance().clearCache();
+        return this.getResConfig();
     }
 
     public async getAudioFiles(): Promise<dirs[]> {

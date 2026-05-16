@@ -168,8 +168,9 @@
     "audioUnsupported": "当前浏览器不支持音频元素。"
   },
   "controlHint": {
-    "moveView": "移动视角",
-    "zoomView": "滚轮缩放"
+    "moveView": "左键拖拽移动",
+    "zoomView": "滚轮缩放",
+    "hoverSlot": "悬停高亮部位"
   },
   "slotControl": {
     "title": "部位控制",
@@ -308,7 +309,34 @@
     },
     "shaderEditorTitle": "Shader 特效编辑器",
     "scriptPlaceholder": "在这里编写剧情脚本...",
-    "editing": "正在编辑"
+    "editing": "正在编辑",
+    "customizer": {
+      "title": "部件编辑器",
+      "selectedSummary": "已选中 {count} 个部件",
+      "emptySelection": "点击画布里的部件或用快捷键批量选中",
+      "bulkSelect": "批量选中",
+      "bulkSelectTitle": "按关键词批量选中",
+      "bulkSelectPlaceholder": "输入部件关键词，例如 hair",
+      "bulkSelectApply": "选中匹配部件",
+      "visible": "显示",
+      "alpha": "透明",
+      "tint": "着色",
+      "shader": "编辑 Shader",
+      "clearShader": "清除 Shader",
+      "clearSelection": "清空选择",
+      "saveAsCharacter": "保存为新角色",
+      "characterNamePlaceholder": "输入新角色名称",
+      "save": "保存角色",
+      "deleteCurrent": "删除当前角色",
+      "customCharacters": "自定义角色",
+      "messages": {
+        "selectSlotFirst": "请先选中至少一个部件",
+        "enterCharacterName": "请输入新角色名称",
+        "saved": "已保存自定义角色：{name}",
+        "deleted": "已删除自定义角色",
+        "noSlotMatched": "没有匹配到包含 {keyword} 的部件"
+      }
+    }
   },
   "actionCommon": {
     "waitExecution": "阻塞执行"
@@ -520,10 +548,12 @@
     "timeAnimationEnabled": "时间动画已启用"
     ,
     "presets": {
-      "glow": "发光效果",
-      "wave": "波浪扭曲",
-      "colorShift": "颜色偏移",
-      "dissolve": "溶解效果"
+      "colorReplace": "颜色替换",
+      "trueTint": "真实着色",
+      "gradientTint": "渐变着色",
+      "softBlur": "柔和模糊",
+      "mosaic": "马赛克",
+      "posterize": "色阶压缩"
     }
   },
   "actionBgm": {

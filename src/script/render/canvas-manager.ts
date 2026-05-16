@@ -16,6 +16,8 @@ import { markRaw } from 'vue';
 import { useViewportStore } from '../../stores/viewport-store';
 import '@pixi/gif';
 import { AnimatedGIF } from '@pixi/gif';
+import { applySpineCustomization } from '../spine-customization';
+import { getCharacterId, getCharacterResourceKey } from '../../utils/character';
 
 interface Layer {
     container: PIXI.Container,
@@ -149,60 +151,8 @@ class CanvasManager {
     public cameraIndicatorsStart!: PIXI.Graphics;
     public cameraIndicatorsEnd!: PIXI.Graphics;
 
-    private drawCameraIndicator(graphics: PIXI.Graphics) {
-        graphics.clear();
-
-        // 设置线条样式
-        graphics.lineStyle(2, 0x00ff00, 1); // 绿色边框
-        graphics.beginFill(0x000000, 0.7);  // 黑色机身，半透明
-
-        // 绘制机身矩形
-        const bodyWidth = 20;
-        const bodyHeight = 12;
-        graphics.drawRect(-bodyWidth / 2, -bodyHeight / 2, bodyWidth, bodyHeight);
-
-        // 绘制镜头（圆形）
-        graphics.beginFill(0xffffff, 1); // 白色镜头
-        const lensRadius = 4;
-        graphics.drawCircle(bodyWidth / 2 + lensRadius / 2, 0, lensRadius);
-
-        // 绘制闪光灯（小矩形在机身上方）
-        graphics.beginFill(0xffd700, 1); // 黄色
-        graphics.drawRect(-bodyWidth / 2 + 2, -bodyHeight / 2 - 4, 6, 4);
-
-        graphics.endFill();
-    };
-
     // 添加连线图形对象
     public cameraConnectionLine!: PIXI.Graphics;
-
-    private drawCameraConnectionLine() {
-        if (!this.cameraConnectionLine) {
-            this.cameraConnectionLine = new PIXI.Graphics();
-            this.app.stage.addChild(this.cameraConnectionLine);
-        }
-
-        this.cameraConnectionLine.clear();
-
-        // 获取两个摄像机指示器的位置
-        const startPos = this.cameraIndicatorsStart.position;
-        const endPos = this.cameraIndicatorsEnd.position;
-
-        // 设置连线样式
-        this.cameraConnectionLine.lineStyle(20, 0xff6600, 0.8); // 橙色连线，半透明
-
-        // 绘制连线
-        this.cameraConnectionLine.moveTo(startPos.x, startPos.y);
-        this.cameraConnectionLine.lineTo(endPos.x, endPos.y);
-
-        // 在连线中点添加一个小圆点作为标记
-        const midX = (startPos.x + endPos.x) / 2;
-        const midY = (startPos.y + endPos.y) / 2;
-
-        this.cameraConnectionLine.beginFill(0xff6600, 1); // 橙色填充
-        this.cameraConnectionLine.drawCircle(midX, midY, 3);
-        this.cameraConnectionLine.endFill();
-    };
 
     // 公共方法：更新摄像机连线
     public updateCameraConnectionLine() {
@@ -420,10 +370,26 @@ class CanvasManager {
     public addCharacterSpine(key: string, characterInfo: { character: CharacterType, x: number, y: number, scale: number, isInitShow: boolean }) {
         // const characterURL = ResourceManager.allResUrl[key];
         // 确保资源已加载
-        let spine = ResourceManager.getResource<Spine>(key, ResType.Spine) as Spine
+        const resourceKey = key || getCharacterResourceKey(characterInfo.character);
+
+        // 检查场景中是否有这个角色了 > 有就clone一个新的spine出来（无法使用getResource获取了）
+        //                       > 没有就正常加入角色到场景
+        const existingCharacter = this.action.maxCharacter.find(
+            (char) => (char.characterKey || getCharacterId(char.character)) === getCharacterId(characterInfo.character)
+        );
+
+        const sourceSpine = (ResourceManager.getResource<Spine>(resourceKey, ResType.Spine) as Spine) || existingCharacter?.spine;
+        if (!sourceSpine) {
+            console.warn('未找到可用的 Spine 资源:', resourceKey);
+            return;
+        }
+
+        let spine = new Spine(sourceSpine.spineData);
         console.log("spine version:", spine.spineData.version);
         const info: sceneCharacter = {
             character: characterInfo.character,
+            characterKey: getCharacterId(characterInfo.character),
+            spineResourceKey: resourceKey,
             x: characterInfo.x,
             y: characterInfo.y,
             scale: characterInfo.scale,
@@ -432,12 +398,6 @@ class CanvasManager {
             animationOption: [],
             isInitShow: characterInfo.isInitShow,
         }
-
-        // 检查场景中是否有这个角色了 > 有就clone一个新的spine出来（无法使用getResource获取了）
-        //                       > 没有就正常加入角色到场景
-        const existingCharacter = this.action.maxCharacter.find(
-            (char) => char.character.characterName === info.character.characterName
-        );
 
         if (existingCharacter) {
             // 如果已经存在，则克隆 Spine 对象
@@ -454,6 +414,7 @@ class CanvasManager {
         spine.scale.set(/* (this.app.view.height / (spine.height / 0.9)) - 0.05 */DEFAULT_SPINE_SCALE);
 
         info.scale = spine.scale.x;
+        info.spine = markRaw(spine);
 
         this.action.maxCharacter.push(info);
         this.viewport.addChild(spine);
@@ -510,6 +471,10 @@ class CanvasManager {
         if (spine.state.hasAnimation('idle')) {
             spine.state.setAnimation(0, 'idle', true);
             spine.autoUpdate = true;
+        }
+
+        if (characterInfo.character.customization) {
+            applySpineCustomization(spine, characterInfo.character.customization);
         }
 
         console.log("所有动画：", spine.state.data.skeletonData.animations);

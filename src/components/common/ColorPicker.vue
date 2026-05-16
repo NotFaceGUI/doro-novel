@@ -1,8 +1,14 @@
 <template>
-    <div class="color-picker" ref="colorPickerRef">
-        <div class="color-display" @click="togglePicker" :style="{ backgroundColor: displayColor }">
-            <!-- <span class="color-text">{{ displayColor }}</span> -->
-        </div>
+    <div class="color-picker" :class="`variant-${triggerVariant}`" ref="colorPickerRef">
+        <button
+            type="button"
+            class="color-display"
+            @click="togglePicker"
+            :style="triggerVariant === 'default' ? { backgroundColor: displayColor } : undefined"
+        >
+            <span class="color-display-swatch" :style="{ backgroundColor: displayColor }"></span>
+            <span class="color-display-text">{{ displayColor.toUpperCase() }}</span>
+        </button>
         
         <Teleport to="body">
             <div v-if="showPicker" class="color-picker-panel" @click.stop :style="panelStyle">
@@ -131,13 +137,16 @@ import { ref, computed, watch, nextTick, onUnmounted } from 'vue';
 
 interface Props {
     modelValue: number;
+    triggerVariant?: 'default' | 'panel';
 }
 
 interface Emits {
     (e: 'update:modelValue', value: number): void;
 }
 
-const props = defineProps<Props>();
+const props = withDefaults(defineProps<Props>(), {
+    triggerVariant: 'default'
+});
 const emit = defineEmits<Emits>();
 
 // 组件引用
@@ -558,27 +567,31 @@ function rgbToHsv(r: number, g: number, b: number) {
 }
 
 .color-display {
-    width: 5px;
-    height: 25px;
-    /* border: 1px solid var(--border-color); */
-    /* border-radius: var(--border-radius); */
+    border: none;
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: all 0.2s ease;
-    background-color: var(--input-bg);
+    gap: 0;
+    padding: 0;
     transition: all 0.2s ease-in-out;
+    background-color: transparent;
     position: relative;
 }
 
-.color-display:hover {
+.variant-default .color-display {
+    width: 5px;
+    height: 25px;
+    transition: all 0.2s ease-in-out;
+}
+
+.variant-default .color-display:hover {
     border-color: var(--button-bg);
     width: 30px;
     box-shadow: 0 0 5px rgba(255, 153, 0, 0.3);
 }
 
-.color-display:hover::after{
+.variant-default .color-display:hover::after{
     content: '';
     position: absolute;
     top: 50%;
@@ -586,6 +599,47 @@ function rgbToHsv(r: number, g: number, b: number) {
     transform: translate(-50%, -50%);
     width: 10px;
     height: 10px;
+}
+
+.variant-default .color-display-swatch {
+    display: none;
+}
+
+.variant-default .color-display-text {
+    display: none;
+}
+
+.variant-panel .color-display {
+    min-width: 104px;
+    height: 34px;
+    padding: 0 10px;
+    gap: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 7px;
+    background: rgba(255, 255, 255, 0.06);
+    color: #fff;
+}
+
+.variant-panel .color-display:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.2);
+    transform: translateY(-1px);
+}
+
+.color-display-swatch {
+    width: 18px;
+    height: 18px;
+    border-radius: 5px;
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.16);
+    flex-shrink: 0;
+}
+
+.color-display-text {
+    font-size: 12px;
+    line-height: 1;
+    color: #fff;
+    letter-spacing: 0.02em;
 }
 
 .color-text {

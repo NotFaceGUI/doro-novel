@@ -133,6 +133,7 @@ import { cloneControlPoints, createProgressBezierEasing, DEFAULT_CUBIC_BEZIER_PO
 import { getCharacterDisplayName } from '../../../utils/character-name';
 
 import { createStippleTransparencyFilter, createAlphaFilter } from '../../../script/common/effect';
+import { getCharacterId } from '../../../utils/character';
 
 
 const canvas = CanvasManager.getInstance();
@@ -368,9 +369,7 @@ const onSelectEaseOption = (index: number) => {
 // 更新角色信息
 const updateCharacterInfo = () => {
     if (currentCharacter.value) {
-        const spine = canvas.viewport.children.find(child =>
-            child.name === currentCharacter.value?.character.path?.name
-        );
+        const spine = currentCharacter.value.spine;
 
         if (spine) {
             lastCharacter.value = {
@@ -654,7 +653,7 @@ const targetAction = async () => {
     handleSceneState(canvas, props);
 
     if (currentCharacter.value) {
-        const characterPreview = actionStore.previewSnapshot.characters.get(currentCharacter.value?.character.characterName);
+        const characterPreview = actionStore.previewSnapshot.characters.get(getCharacterId(currentCharacter.value.character));
         console.log("characterPreview:", characterPreview);
         currentCharacter.value.spine.x = characterPreview?.x || currentCharacter.value.spine.x;
         currentCharacter.value.spine.y = characterPreview?.y || currentCharacter.value.spine.y;
@@ -694,9 +693,10 @@ const saveModification = () => {
     if (!currentCharacter.value || !modification) return;
 
     // 保存角色相关的修改到 modification Map
-    setModification(modification, `characters.${currentCharacter.value.character.path?.name}.x`, targetState.value.x);
-    setModification(modification, `characters.${currentCharacter.value.character.path?.name}.y`, targetState.value.y);
-    setModification(modification, `characters.${currentCharacter.value.character.path?.name}.scale`, targetState.value.scale);
+    const characterKey = getCharacterId(currentCharacter.value.character);
+    setModification(modification, `characters.${characterKey}.x`, targetState.value.x);
+    setModification(modification, `characters.${characterKey}.y`, targetState.value.y);
+    setModification(modification, `characters.${characterKey}.scale`, targetState.value.scale);
 };
 
 // 保存可见性修改
@@ -929,7 +929,7 @@ onMounted(() => {
         if (isSelected.value) {
             // 查找被点击的 Spine 对应的角色索引
             const clickedCharacterIndex = action.maxCharacter.findIndex(
-                (char) => char.character.characterName === characterInfo.character.characterName
+                (char) => getCharacterId(char.character) === getCharacterId(characterInfo.character)
             );
 
             if (clickedCharacterIndex !== -1 && clickedCharacterIndex !== selectedCharacterIndex.value) {

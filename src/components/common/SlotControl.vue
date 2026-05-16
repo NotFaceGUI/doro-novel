@@ -1,7 +1,10 @@
 <template>
   <div class="slot-control" :class="{ 'expanded': isExpanded }">
     <div class="slot-control-header" @click="toggleExpanded">
-      <span class="header-title">{{ t('slotControl.title') }}</span>
+      <div class="header-main">
+        <span class="header-title">{{ t('slotControl.title') }}</span>
+        <span class="header-count">{{ filteredSlots.length }}/{{ slots.length }}</span>
+      </div>
       <svg 
         class="expand-icon" 
         :class="{ 'rotated': isExpanded }"
@@ -21,19 +24,33 @@
     </div>
     
     <div class="slot-control-content" v-if="isExpanded">
+      <div class="slot-search">
+        <input
+          v-model="searchKeyword"
+          class="slot-search-input"
+          type="text"
+          :placeholder="t('projectView.customizer.bulkSelectPlaceholder')"
+        />
+      </div>
+
       <div class="slot-list">
+        <div v-if="filteredSlots.length === 0 && searchKeyword.trim()" class="slot-empty">
+          {{ t('projectView.customizer.messages.noSlotMatched', { keyword: searchKeyword.trim() }) }}
+        </div>
         <div 
-          v-for="slot in slots" 
+          v-for="slot in filteredSlots" 
           :key="slot.name"
           class="slot-item"
-          :class="{ 'disabled': !slot.visible, 'highlighted': slot.name === hoveredSlot }"
+          :class="{ 'disabled': !slot.visible, 'highlighted': slot.name === (hoveredSlot ?? props.activeHoveredSlot ?? null), 'selected': props.selectedSlots?.includes(slot.name) }"
           @mouseenter="handleSlotHover(slot.name)"
           @mouseleave="handleSlotLeave()"
+          @click="selectSlot(slot.name, $event)"
         >
           <label class="slot-label">
             <input 
               type="checkbox" 
               :checked="slot.visible"
+              @click.stop
               @change="toggleSlot(slot.name, ($event.target as HTMLInputElement)?.checked ?? false)"
               class="slot-checkbox"
             />
@@ -49,6 +66,7 @@
               max="1" 
               step="0.1"
               :value="slot.alpha"
+              @click.stop
               @input="updateSlotAlpha(slot.name, parseFloat(($event.target as HTMLInputElement)?.value ?? '0'))"
               class="opacity-slider"
             />
@@ -78,17 +96,20 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
+import { computed, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 interface SlotData {
   name: string;
   visible: boolean;
   alpha: number;
+  tint?: number;
 }
 
 interface Props {
   slots: SlotData[];
+  activeHoveredSlot?: string | null;
+  selectedSlots?: string[];
 }
 
 interface Emits {
@@ -98,14 +119,16 @@ interface Emits {
   (e: 'hide-all'): void;
   (e: 'slot-hover', slotName: string): void;
   (e: 'slot-leave'): void;
+  (e: 'select-slot', slotName: string, append: boolean): void;
 }
 
-defineProps<Props>();
+const props = defineProps<Props>();
 const emit = defineEmits<Emits>();
 const { t } = useI18n();
 
 const isExpanded = ref(false);
 const hoveredSlot = ref<string | null>(null);
+const searchKeyword = ref('');
 
 const toggleExpanded = () => {
   isExpanded.value = !isExpanded.value;
@@ -129,6 +152,10 @@ const updateSlotAlpha = (slotName: string, alpha: number) => {
   emit('update-alpha', slotName, alpha);
 };
 
+const selectSlot = (slotName: string, event: MouseEvent) => {
+  emit('select-slot', slotName, !!(event.ctrlKey || event.metaKey || event.shiftKey));
+};
+
 const showAllSlots = () => {
   emit('show-all');
 };
@@ -137,8 +164,7 @@ const hideAllSlots = () => {
   emit('hide-all');
 };
 
-// 格式化插槽名称，让其更易读
-const formatSlotName = (name: string) => {
+function formatSlotName(name: string) {
   // 移除常见的前缀和后缀
   let formatted = name.replace(/^(slot_|bone_|attachment_)/, '');
   
@@ -151,7 +177,20 @@ const formatSlotName = (name: string) => {
   }
   
   return formatted || name; // 如果格式化后为空，返回原名称
-};
+}
+
+const filteredSlots = computed(() => {
+  const keyword = searchKeyword.value.trim().toLowerCase();
+  if (!keyword) {
+    return props.slots;
+  }
+
+  return props.slots.filter((slot) => {
+    const rawName = slot.name.toLowerCase();
+    const displayName = formatSlotName(slot.name).toLowerCase();
+    return rawName.includes(keyword) || displayName.includes(keyword);
+  });
+});
 </script>
 
 <style scoped>
@@ -160,33 +199,48 @@ const formatSlotName = (name: string) => {
   top: 10px;
   right: 270px;
   z-index: 10;
-  background: rgba(0, 0, 0, 0.85);
-  backdrop-filter: blur(10px);
-  border-radius: 8px;
+  width: min(240px, calc(100vw - 32px));
   min-width: 200px;
   max-width: 280px;
+  background: rgba(0, 0, 0, 0.84);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-radius: 10px;
   transition: all 0.3s ease;
   border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 16px 32px rgba(0, 0, 0, 0.28);
 }
 
 .slot-control-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 12px 16px;
+  padding: 12px 14px;
   cursor: pointer;
   user-select: none;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.header-main {
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .header-title {
-  color: white;
+  color: #fff;
   font-size: 14px;
-  font-weight: 500;
+  font-weight: 600;
+}
+
+.header-count {
+  color: rgba(255, 255, 255, 0.56);
+  font-size: 11px;
+  line-height: 1;
 }
 
 .expand-icon {
-  color: #ccc;
+  color: rgba(255, 255, 255, 0.62);
   transition: transform 0.3s ease;
 }
 
@@ -199,31 +253,78 @@ const formatSlotName = (name: string) => {
   overflow-y: auto;
 }
 
+.slot-search {
+  padding: 10px 12px 0;
+}
+
+.slot-search-input {
+  width: 100%;
+  height: 32px;
+  padding: 0 10px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.06);
+  color: #fff;
+  outline: none;
+  transition: border-color 0.2s ease, background-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.slot-search-input::placeholder {
+  color: rgba(255, 255, 255, 0.36);
+}
+
+.slot-search-input:focus {
+  border-color: rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.09);
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.08);
+}
+
 .slot-list {
-  padding: 8px;
+  padding: 10px 12px 12px;
+}
+
+.slot-empty {
+  padding: 12px;
+  border: 1px dashed rgba(255, 255, 255, 0.12);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.04);
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 12px;
+  text-align: center;
 }
 
 .slot-item {
   margin-bottom: 8px;
-  padding: 8px;
-  border-radius: 6px;
+  padding: 9px 10px;
+  border-radius: 8px;
   background: rgba(255, 255, 255, 0.05);
   transition: all 0.2s ease;
   border: 1px solid transparent;
 }
 
 .slot-item:hover {
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.08);
 }
 
 .slot-item.disabled {
-  opacity: 0.6;
+  opacity: 0.62;
 }
 
 .slot-item.highlighted {
-  background: rgba(76, 175, 80, 0.2);
-  border: 1px solid rgba(76, 175, 80, 0.5);
-  box-shadow: 0 0 8px rgba(76, 175, 80, 0.3);
+  background: rgba(76, 175, 80, 0.18);
+  border: 1px solid rgba(76, 175, 80, 0.42);
+  box-shadow: 0 0 10px rgba(76, 175, 80, 0.18);
+}
+
+.slot-item.selected {
+  background: rgba(91, 153, 255, 0.18);
+  border: 1px solid rgba(91, 153, 255, 0.42);
+  box-shadow: 0 0 10px rgba(91, 153, 255, 0.14);
+}
+
+.slot-item.selected.highlighted {
+  background: rgba(88, 177, 140, 0.2);
+  border-color: rgba(88, 177, 140, 0.5);
 }
 
 .slot-label {
@@ -240,17 +341,18 @@ const formatSlotName = (name: string) => {
 .checkbox-custom {
   width: 16px;
   height: 16px;
-  border: 2px solid #666;
-  border-radius: 3px;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  border-radius: 4px;
   margin-right: 8px;
   position: relative;
   transition: all 0.2s ease;
   flex-shrink: 0;
+  background: rgba(255, 255, 255, 0.06);
 }
 
 .slot-checkbox:checked + .checkbox-custom {
-  background: #4CAF50;
-  border-color: #4CAF50;
+  background: #4caf50;
+  border-color: #4caf50;
 }
 
 .slot-checkbox:checked + .checkbox-custom::after {
@@ -266,7 +368,7 @@ const formatSlotName = (name: string) => {
 }
 
 .slot-name {
-  color: white;
+  color: #fff;
   font-size: 13px;
   flex: 1;
 }
@@ -281,16 +383,17 @@ const formatSlotName = (name: string) => {
 .opacity-slider {
   flex: 1;
   height: 4px;
-  background: #333;
+  background: rgba(255, 255, 255, 0.12);
   border-radius: 2px;
   outline: none;
+  accent-color: #4caf50;
 }
 
 .opacity-slider::-webkit-slider-thumb {
   -webkit-appearance: none;
   width: 14px;
   height: 14px;
-  background: #4CAF50;
+  background: #4caf50;
   border-radius: 50%;
   cursor: pointer;
 }
@@ -298,14 +401,14 @@ const formatSlotName = (name: string) => {
 .opacity-slider::-moz-range-thumb {
   width: 14px;
   height: 14px;
-  background: #4CAF50;
+  background: #4caf50;
   border-radius: 50%;
   cursor: pointer;
   border: none;
 }
 
 .opacity-value {
-  color: #ccc;
+  color: rgba(255, 255, 255, 0.58);
   font-size: 11px;
   min-width: 35px;
   text-align: right;
@@ -315,7 +418,7 @@ const formatSlotName = (name: string) => {
   display: flex;
   gap: 8px;
   padding: 12px;
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .control-btn {
@@ -325,31 +428,32 @@ const formatSlotName = (name: string) => {
   justify-content: center;
   gap: 6px;
   padding: 8px 12px;
-  border: none;
-  border-radius: 6px;
+  border: 1px solid transparent;
+  border-radius: 7px;
   font-size: 12px;
   cursor: pointer;
-  transition: all 0.2s ease;
+  color: #fff;
+  transition: background-color 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
 }
 
 .show-all {
-  background: rgba(76, 175, 80, 0.2);
-  color: #4CAF50;
-  border: 1px solid rgba(76, 175, 80, 0.3);
+  background: rgba(76, 175, 80, 0.18);
+  border-color: rgba(76, 175, 80, 0.32);
 }
 
 .show-all:hover {
-  background: rgba(76, 175, 80, 0.3);
+  background: rgba(76, 175, 80, 0.28);
+  transform: translateY(-1px);
 }
 
 .hide-all {
-  background: rgba(244, 67, 54, 0.2);
-  color: #f44336;
-  border: 1px solid rgba(244, 67, 54, 0.3);
+  background: rgba(244, 67, 54, 0.18);
+  border-color: rgba(244, 67, 54, 0.32);
 }
 
 .hide-all:hover {
-  background: rgba(244, 67, 54, 0.3);
+  background: rgba(244, 67, 54, 0.28);
+  transform: translateY(-1px);
 }
 
 /* 滚动条样式 */
@@ -358,17 +462,17 @@ const formatSlotName = (name: string) => {
 }
 
 .slot-control-content::-webkit-scrollbar-track {
-  background: rgba(255, 255, 255, 0.1);
+  background: transparent;
   border-radius: 3px;
 }
 
 .slot-control-content::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.3);
+  background: rgba(255, 255, 255, 0.16);
   border-radius: 3px;
 }
 
 .slot-control-content::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.5);
+  background: rgba(255, 255, 255, 0.28);
 }
 
 /* 响应式设计 */
@@ -376,6 +480,7 @@ const formatSlotName = (name: string) => {
   .slot-control {
     top: 170px;
     right: 5px;
+    width: min(220px, calc(100vw - 10px));
     min-width: 180px;
     max-width: 220px;
   }
@@ -391,9 +496,5 @@ const formatSlotName = (name: string) => {
   .slot-name {
     font-size: 12px;
   }
-}
-
-* {
-  transition: all 0.3s ease;
 }
 </style>

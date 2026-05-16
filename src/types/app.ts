@@ -44,15 +44,45 @@ enum Company {
 }
 
 export interface CharacterType {
+    id?: string;
     characterName: string;
+    displayName?: string;
     quality: "ssr" | "sr" | "r";
     company: Company;
+    resourceVariant?: "default" | "aim" | "cover";
+    resourceKey?: string;
+    isCustom?: boolean;
+    baseCharacterId?: string;
+    customization?: SpineCharacterCustomization;
     path?: {
         name: string;
         skel: string;
         aimSkel?: string;
         coverSkel?: string;
     };
+}
+
+export interface ShaderUniformMap {
+    [key: string]: number | number[];
+}
+
+export interface SlotShaderConfig {
+    name: string;
+    fragmentShader: string;
+    uniforms: ShaderUniformMap;
+}
+
+export interface SlotCustomization {
+    visible?: boolean;
+    alpha?: number;
+    tint?: number;
+    shader?: SlotShaderConfig | null;
+}
+
+export interface SpineCharacterCustomization {
+    selectedAnimationName?: string;
+    selectedSkinName?: string;
+    slots: Record<string, SlotCustomization>;
 }
 
 export interface CharacterUrls {
@@ -94,6 +124,7 @@ export interface LoadRes {
     name: string;
     path: string;
     type: ResType;
+    characterId?: string;
     resource?: any;
 }
 
@@ -191,6 +222,7 @@ export interface DialogTextData {
         amintionOption?: DropdownOption[];
         animationIndex?: number; // 动画索引
         isLoop: boolean; // 是否循环播放动画
+        spineResourceKey?: string;
     };
     advancedMode?: boolean;
 }
@@ -216,6 +248,8 @@ export interface DropdownOption {
 
 export interface sceneCharacter {
     character: CharacterType,
+    characterKey?: string,
+    spineResourceKey?: string,
     x: number,
     y: number,
     scale: number,

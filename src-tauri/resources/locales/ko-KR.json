@@ -168,8 +168,9 @@
     "audioUnsupported": "브라우저가 audio 요소를 지원하지 않습니다."
   },
   "controlHint": {
-    "moveView": "시점 이동",
-    "zoomView": "휠로 확대/축소"
+    "moveView": "좌클릭 드래그 이동",
+    "zoomView": "휠로 확대/축소",
+    "hoverSlot": "호버 시 부위 강조"
   },
   "slotControl": {
     "title": "부위 제어",
@@ -308,7 +309,34 @@
     },
     "shaderEditorTitle": "Shader 효과 편집기",
     "scriptPlaceholder": "여기에 스토리 스크립트를 작성하세요...",
-    "editing": "편집 중"
+    "editing": "편집 중",
+    "customizer": {
+      "title": "부품 편집기",
+      "selectedSummary": "{count}개 부품 선택됨",
+      "emptySelection": "캔버스에서 부품을 클릭하거나 단축키로 일괄 선택하세요",
+      "bulkSelect": "일괄 선택",
+      "bulkSelectTitle": "키워드로 부품 일괄 선택",
+      "bulkSelectPlaceholder": "hair 같은 부품 키워드를 입력",
+      "bulkSelectApply": "일치한 부품 선택",
+      "visible": "표시",
+      "alpha": "투명도",
+      "tint": "색상",
+      "shader": "Shader 편집",
+      "clearShader": "Shader 지우기",
+      "clearSelection": "선택 해제",
+      "saveAsCharacter": "새 캐릭터로 저장",
+      "characterNamePlaceholder": "새 캐릭터 이름 입력",
+      "save": "캐릭터 저장",
+      "deleteCurrent": "현재 캐릭터 삭제",
+      "customCharacters": "커스텀 캐릭터",
+      "messages": {
+        "selectSlotFirst": "먼저 하나 이상의 부품을 선택하세요",
+        "enterCharacterName": "새 캐릭터 이름을 입력하세요",
+        "saved": "커스텀 캐릭터 저장됨: {name}",
+        "deleted": "커스텀 캐릭터가 삭제되었습니다",
+        "noSlotMatched": "{keyword} 와 일치하는 부품이 없습니다"
+      }
+    }
   },
   "actionCommon": {
     "waitExecution": "실행 차단"
@@ -519,10 +547,12 @@
     "dissolveAnimationEnabled": "디졸브 애니메이션이 활성화됨",
     "timeAnimationEnabled": "시간 애니메이션이 활성화됨",
     "presets": {
-      "glow": "발광 효과",
-      "wave": "물결 왜곡",
-      "colorShift": "색상 이동",
-      "dissolve": "디졸브 효과"
+      "colorReplace": "색상 교체",
+      "trueTint": "실제 틴트",
+      "gradientTint": "그라디언트 틴트",
+      "softBlur": "소프트 블러",
+      "mosaic": "모자이크",
+      "posterize": "포스터라이즈"
     }
   },
   "actionBgm": {

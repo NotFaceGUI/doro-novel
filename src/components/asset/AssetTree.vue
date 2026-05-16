@@ -22,6 +22,24 @@
     </ul>
     <ul v-else >
         <!-- 有角色分类（不可点击，仅用于展开/收缩） -->
+        <li v-if="customCharacters.length > 0">
+            <div class="el no-wrap section-header" @click="toggleSection('custom')">
+                <span>📁</span>
+                自定义
+                <span class="count">({{ customCharacters.length }})</span>
+                <span class="caret">{{ sections.custom ? '▼' : '▶' }}</span>
+            </div>
+            <ul v-show="sections.custom" class="asset-tree-spine">
+                <li v-for="char in customCharacters" :key="char.id || char.characterName">
+                    <div @click="toggleSpine(char)" class="el no-wrap" draggable="true"
+                        @dragstart="handleDragStart($event, char)">
+                        {{ char.displayName || char.characterName }}
+                    </div>
+                </li>
+            </ul>
+        </li>
+
+        <!-- 有角色分类（不可点击，仅用于展开/收缩） -->
         <li>
             <div class="el no-wrap section-header" @click="toggleSection('characters')">
                 <span>📁</span>
@@ -30,10 +48,10 @@
                 <span class="caret">{{ sections.characters ? '▼' : '▶' }}</span>
             </div>
             <ul v-show="sections.characters" class="asset-tree-spine">
-                <li v-for="char in gameCharacters" :key="char.characterName">
+                <li v-for="char in gameCharacters" :key="char.id || char.characterName">
                     <div @click="toggleSpine(char)" class="el no-wrap" draggable="true"
                         @dragstart="handleDragStart($event, char)">
-                        {{ getCharacterDisplayName(char.characterName) }} <span
+                        {{ char.displayName || getCharacterDisplayName(char.characterName) }} <span
                             style="font-size: 10px;color: #888;" v-if="char.characterName.startsWith('c') && getCharacterTranslatedName(char.characterName) !== char.characterName">{{
                                 getCharacterTranslatedName(char.characterName) }}</span>
                     </div>
@@ -50,10 +68,10 @@
                 <span class="caret">{{ sections.others ? '▼' : '▶' }}</span>
             </div>
             <ul v-show="sections.others" class="asset-tree-spine">
-                <li v-for="char in otherCharacters" :key="char.characterName">
+                <li v-for="char in otherCharacters" :key="char.id || char.characterName">
                     <div @click="toggleSpine(char)" class="el no-wrap" draggable="true"
                         @dragstart="handleDragStart($event, char)">
-                        {{ getCharacterDisplayName(char.characterName) }}
+                        {{ char.displayName || getCharacterDisplayName(char.characterName) }}
                     </div>
                 </li>
             </ul>
@@ -63,7 +81,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch, onMounted, computed } from 'vue';
+import { ref, watch, onMounted, computed, onUnmounted } from 'vue';
 import { CharacterType, CharacterUrls, dirs, DragType } from '../../types/app';
 import { ASSET_CHARACTER, ResType } from '../../script/var';
 import { resolveResource } from '@tauri-apps/api/path';
@@ -80,39 +98,62 @@ const props = defineProps<{
 
 const characters = ref<CharacterType[]>([]);
 // 分类折叠状态（分类标题不可点击打开，仅用于展开/收缩）
-const sections = ref<{ characters: boolean; others: boolean }>({ characters: true, others: true });
+const sections = ref<{ custom: boolean; characters: boolean; others: boolean }>({ custom: true, characters: true, others: true });
 
 // 计算分类：以 c+数字 开头视为“有角色”，其余归为“其他”
 const gameCharacters = computed(() =>
-    characters.value.filter((c) => /^c\d+/.test(c.characterName))
+    characters.value.filter((c) => !c.isCustom && /^c\d+/.test(c.characterName || ''))
 );
 const otherCharacters = computed(() =>
-    characters.value.filter((c) => !/^c\d+/.test(c.characterName))
+    characters.value.filter((c) => !c.isCustom && !/^c\d+/.test(c.characterName || ''))
 );
+const customCharacters = computed(() => characters.value.filter((c) => c.isCustom));
 
-const toggleSection = (key: 'characters' | 'others') => {
+const toggleSection = (key: 'custom' | 'characters' | 'others') => {
     sections.value[key] = !sections.value[key];
 };
 
-onMounted(async () => {
+const loadCharacters = async () => {
     if (props.type == ResType.Spine) {
-        AssetManager.getInstance().getResConfig().then(res => {
-            // 对角色进行排序：游戏角色（c+数字）优先，然后按名称排序
-            characters.value = res.sort((a, b) => {
-                // 使用正则表达式匹配游戏角色 (c + 数字)
-                const gameCharacterRegex = /^c\d+/;
-                const aIsGameChar = gameCharacterRegex.test(a.characterName);
-                const bIsGameChar = gameCharacterRegex.test(b.characterName);
+        try {
+            const res = await AssetManager.getInstance().getResConfig();
+            const list = Array.isArray(res) ? res : [];
 
-                // 优先显示游戏角色
+            // 对角色进行排序：自定义优先，然后游戏角色（c+数字）优先，最后按名称排序
+            characters.value = [...list].sort((a, b) => {
+                if (!!a.isCustom !== !!b.isCustom) {
+                    return a.isCustom ? -1 : 1;
+                }
+
+                const gameCharacterRegex = /^c\d+/;
+                const aName = a.characterName || '';
+                const bName = b.characterName || '';
+                const aIsGameChar = gameCharacterRegex.test(aName);
+                const bIsGameChar = gameCharacterRegex.test(bName);
+
                 if (aIsGameChar && !bIsGameChar) return -1;
                 if (!aIsGameChar && bIsGameChar) return 1;
 
-                // 然后按名称排序
-                return a.characterName.localeCompare(b.characterName);
+                return aName.localeCompare(bName);
             });
-        })
+        } catch (error) {
+            console.error('角色列表加载失败:', error);
+            characters.value = [];
+        }
     }
+};
+
+const handleCustomCharactersUpdated = () => {
+    loadCharacters();
+};
+
+onMounted(async () => {
+    loadCharacters();
+    window.addEventListener('custom-characters-updated', handleCustomCharactersUpdated);
+});
+
+onUnmounted(() => {
+    window.removeEventListener('custom-characters-updated', handleCustomCharactersUpdated);
 });
 
 const handleDragStart = (event: DragEvent, file: dirs | CharacterType) => {
@@ -154,7 +195,7 @@ const toggle = (file: dirs) => {
 };
 
 const toggleSpine = async (char: CharacterType) => {
-    const path = ASSET_CHARACTER + char.path?.name + "/" + char.path?.skel;
+    const path = char.resourceKey || (ASSET_CHARACTER + char.path?.name + "/" + char.path?.skel);
 
     // 构建文件数据对象，包含主要的 skel 文件信息
     const fileData = {
@@ -186,12 +227,12 @@ const toggleSpine = async (char: CharacterType) => {
     ;
 
     // 调用 lookFile 处理主要的 skel 文件
-    lookFile(path, fileData, characterUrls);
+    lookFile(path, fileData, characterUrls, char);
 }
 
 const lookFile = async (filePath: string, fileData: DirEntry, characterUrls: CharacterUrls = {
     main: ''
-}) => {
+}, character?: CharacterType) => {
     const allPath = await resolveResource(filePath);
     // console.log(filePath);
     const resUrl = convertFileSrc(allPath);
@@ -209,12 +250,12 @@ const lookFile = async (filePath: string, fileData: DirEntry, characterUrls: Cha
     }
 
     // 向父组件抛出事件
-    emit('look-file', { url: resUrl, type: props.type, file: fileData, characterUrls: characterUrls });
+    emit('look-file', { url: resUrl, type: props.type, file: fileData, characterUrls: characterUrls, character });
 }
 
 // 抛出事件让最外层处理
-const throwEvent = (data: { url: string, type: ResType, file: DirEntry, characterUrls: CharacterUrls | undefined }) => {
-    emit('look-file', { url: data.url, type: data.type, file: data.file, characterUrls: data.characterUrls });
+const throwEvent = (data: { url: string, type: ResType, file: DirEntry, characterUrls: CharacterUrls | undefined, character?: CharacterType }) => {
+    emit('look-file', { url: data.url, type: data.type, file: data.file, characterUrls: data.characterUrls, character: data.character });
 }
 
 // 在组件挂载时加载展开状态

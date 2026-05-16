@@ -67,7 +67,7 @@ import { useCharacterConfigStore } from '../stores/character-config-store';
 import { useBranchStore } from '../stores/branch-store';
 import { useProjectStore } from '../stores/project-store';
 import { Actions, LoadRes, type Project } from '../types/app';
-import { LOCAL_OPEN_KEY, ResType, ASSET_CHARACTER } from '../script/var';
+import { LOCAL_OPEN_KEY, ResType } from '../script/var';
 import { resolveResource } from '@tauri-apps/api/path';
 import { writeTextFile, readTextFile } from '@tauri-apps/plugin-fs';
 import { invoke } from '@tauri-apps/api/core';
@@ -81,6 +81,7 @@ import { PowerShellService } from '../script/powershell-service';
 import massage from '../script/common/massage';
 import { getCurrentLocale, setLocale } from '../locales/i18n';
 import { SUPPORTED_LOCALES, type SupportedLocale } from '../utils/i18n-loader';
+import { getCharacterId, getCharacterResourceKey } from '../utils/character';
 
 const { t } = useI18n();
 const dropdowns = reactive([false, false, false, false]);
@@ -139,6 +140,7 @@ const collectStoresData = () => {
     // 安全地序列化maxCharacter，去除spine属性，记录resourceKey
     const safeMaxCharacter = actionStore.maxCharacter.map(char => ({
         character: char.character,
+        characterKey: char.characterKey || getCharacterId(char.character),
         x: char.x,
         y: char.y,
         scale: char.scale,
@@ -146,7 +148,7 @@ const collectStoresData = () => {
         animationOption: char.animationOption,
         isInitShow: char.isInitShow,
         // 记录spine的资源key，使用正确的路径格式
-        spineResourceKey: ASSET_CHARACTER + char.character.path?.name + "/" + char.character.path?.skel
+        spineResourceKey: char.spineResourceKey || getCharacterResourceKey(char.character)
     }));
 
     // 序列化actionMap，处理其中的Map对象
@@ -249,8 +251,8 @@ const resetCurrentProjectRuntime = () => {
     actionStore.maxCharacter = [];
 
     // 正确清理loadResMap中的资源
-    Object.entries(actionStore.loadResMap).forEach(([key, loadRes]) => {
-        ResourceManager.removeResource(key, loadRes.type);
+    Object.entries(actionStore.loadResMap).forEach(([, loadRes]) => {
+        ResourceManager.removeResource(loadRes.path, loadRes.type);
     });
     actionStore.loadResMap = {} as Record<string, LoadRes>;
     actionStore.isPlaying = false;
@@ -401,9 +403,10 @@ const openProject = async (filePath?: string) => {
 
                     for (const charData of actionData.maxCharacter) {
                         // 使用ResourceManager重新加载spine
-                        const spine = ResourceManager.getResource<Spine>(charData.spineResourceKey, ResType.Spine) as Spine;
+                        const spineResourceKey = charData.spineResourceKey || getCharacterResourceKey(charData.character);
+                        const spine = ResourceManager.getResource<Spine>(spineResourceKey, ResType.Spine) as Spine;
 
-                        console.log("加载角色Spine: ", charData.spineResourceKey, spine);
+                        console.log("加载角色Spine: ", spineResourceKey, spine);
 
                         // 构建角色信息对象
                         const characterInfo = {
@@ -415,7 +418,7 @@ const openProject = async (filePath?: string) => {
                         };
 
                         // 调用addCharacterSpine方法将角色添加到场景中
-                        canvasManager.addCharacterSpine(charData.spineResourceKey, characterInfo);
+                        canvasManager.addCharacterSpine(spineResourceKey, characterInfo);
                     }
                 }
             }

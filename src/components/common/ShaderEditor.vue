@@ -1,38 +1,59 @@
 <template>
   <div class="shader-editor">
-    <div class="shader-editor-header">
-      <h3>{{ t('shaderEditor.title') }}</h3>
-      <div class="shader-controls">
-        <button @click="applyShader" class="btn btn-primary">
+    <div class="editor-toolbar">
+      <div class="toolbar-block">
+        <div class="editor-section-label">{{ t('shaderEditor.selectPreset') }}</div>
+        <div class="preset-toolbar">
+          <div class="preset-dropdown">
+            <Dropdown
+              v-model="selectedPresetIndex"
+              :options="shaderPresetOptions"
+              :disabled="shaderPresetOptions.length === 0"
+            />
+          </div>
+          <button type="button" @click="loadPreset" class="btn btn-secondary">
+            {{ t('shaderEditor.loadPreset') }}
+          </button>
+        </div>
+      </div>
+
+      <div class="toolbar-actions">
+        <button type="button" @click="applyShader" class="btn btn-primary">
           {{ t('shaderEditor.apply') }}
         </button>
-        <button @click="resetShader" class="btn btn-secondary">
+        <button type="button" @click="resetShader" class="btn btn-secondary">
           {{ t('shaderEditor.reset') }}
-        </button>
-        <button @click="loadPreset" class="btn btn-secondary">
-          {{ t('shaderEditor.loadPreset') }}
         </button>
       </div>
     </div>
 
-    <div class="shader-editor-content">
-      <!-- 预设选择 -->
-      <div class="preset-section">
-        <select v-model="selectedPreset" @change="onPresetChange" class="preset-select">
-          <option value="">{{ t('shaderEditor.selectPreset') }}</option>
-          <option
-            v-for="preset in shaderPresets"
-            :key="preset.name"
-            :value="preset.name"
-          >
-            {{ getPresetLabel(preset.name) }}
-          </option>
-        </select>
-      </div>
+    <div class="editor-switches">
+      <button
+        type="button"
+        class="switch-chip"
+        :class="{ active: realTimePreview }"
+        @click="realTimePreview = !realTimePreview"
+      >
+        {{ t('shaderEditor.realTimePreview') }}
+      </button>
+      <button
+        type="button"
+        class="switch-chip"
+        :class="{ active: enableAnimation }"
+        @click="enableAnimation = !enableAnimation"
+      >
+        {{ t('shaderEditor.enableAnimation') }}
+      </button>
+      <span class="animation-hint" v-if="enableAnimation && hasTimeUniform">
+        {{ t('shaderEditor.timeAnimationEnabled') }}
+      </span>
+    </div>
 
-      <!-- Shader代码编辑器 -->
-      <div class="code-editor">
-        <div class="editor-label">{{ t('shaderEditor.fragmentShader') }}</div>
+    <div class="shader-editor-layout">
+      <div class="editor-surface code-surface">
+        <div class="surface-header">
+          <div class="editor-section-label">{{ t('shaderEditor.fragmentShader') }}</div>
+        </div>
         <textarea
           v-model="fragmentShader"
           class="shader-textarea"
@@ -41,38 +62,44 @@
         ></textarea>
       </div>
 
-      <!-- Uniform参数控制 -->
-      <div class="uniforms-section">
-        <div class="uniforms-header">
-          <span>{{ t('shaderEditor.uniforms') }}</span>
-          <button @click="addUniform" class="btn btn-small">
+      <div class="editor-surface uniforms-surface">
+        <div class="surface-header">
+          <div class="editor-section-label">{{ t('shaderEditor.uniforms') }}</div>
+          <button type="button" @click="addUniform" class="btn btn-small">
             {{ t('shaderEditor.addUniform') }}
           </button>
         </div>
         
-        <div class="uniforms-list">
+        <div v-if="uniforms.length > 0" class="uniforms-list">
           <div
             v-for="(uniform, index) in uniforms"
             :key="index"
             class="uniform-item"
           >
-            <div class="uniform-controls">
+            <div class="uniform-header">
               <input
                 v-model="uniform.name"
                 :placeholder="t('shaderEditor.uniformNamePlaceholder')"
-                class="uniform-name-input"
+                class="field-input uniform-name-input"
               />
-              <select
-                v-model="uniform.type"
-                class="uniform-type-select"
+              <div class="uniform-type-dropdown">
+                <Dropdown
+                  :model-value="getUniformTypeIndex(uniform.type)"
+                  :options="uniformTypeOptions"
+                  :disabled="false"
+                  @update:modelValue="(index) => handleUniformTypeDropdownChange(uniform, index)"
+                />
+              </div>
+              <button
+                type="button"
+                @click="removeUniform(index)"
+                class="btn btn-danger btn-small"
               >
-                <option value="float">float</option>
-                <option value="vec2">vec2</option>
-                <option value="vec3">vec3</option>
-                <option value="vec4">vec4</option>
-              </select>
-              
-              <!-- 根据类型显示不同的输入控件 -->
+                {{ t('common.delete') }}
+              </button>
+            </div>
+
+            <div class="uniform-body">
               <template v-if="uniform.type === 'float'">
                 <input
                   type="range"
@@ -80,13 +107,13 @@
                   :min="uniform.min || 0"
                   :max="uniform.max || 1"
                   :step="0.01"
-                  class="uniform-slider"
+                  class="uniform-slider field-range"
                 />
                 <input
                   type="number"
                   v-model.number="uniform.value"
                   :step="0.01"
-                  class="uniform-number-input"
+                  class="field-input uniform-number-input"
                 />
               </template>
               
@@ -95,13 +122,13 @@
                   type="number"
                   v-model.number="(uniform.value as number[])[0]"
                   :step="0.1"
-                  class="uniform-vec-input"
+                  class="field-input uniform-vec-input"
                 />
                 <input
                   type="number"
                   v-model.number="(uniform.value as number[])[1]"
                   :step="0.1"
-                  class="uniform-vec-input"
+                  class="field-input uniform-vec-input"
                 />
               </template>
               
@@ -110,19 +137,19 @@
                   type="number"
                   v-model.number="(uniform.value as number[])[0]"
                   :step="0.1"
-                  class="uniform-vec-input"
+                  class="field-input uniform-vec-input"
                 />
                 <input
                   type="number"
                   v-model.number="(uniform.value as number[])[1]"
                   :step="0.1"
-                  class="uniform-vec-input"
+                  class="field-input uniform-vec-input"
                 />
                 <input
                   type="number"
                   v-model.number="(uniform.value as number[])[2]"
                   :step="0.1"
-                  class="uniform-vec-input"
+                  class="field-input uniform-vec-input"
                 />
               </template>
               
@@ -131,60 +158,43 @@
                   type="number"
                   v-model.number="(uniform.value as number[])[0]"
                   :step="0.1"
-                  class="uniform-vec-input"
+                  class="field-input uniform-vec-input"
                 />
                 <input
                   type="number"
                   v-model.number="(uniform.value as number[])[1]"
                   :step="0.1"
-                  class="uniform-vec-input"
+                  class="field-input uniform-vec-input"
                 />
                 <input
                   type="number"
                   v-model.number="(uniform.value as number[])[2]"
                   :step="0.1"
-                  class="uniform-vec-input"
+                  class="field-input uniform-vec-input"
                 />
                 <input
                   type="number"
                   v-model.number="(uniform.value as number[])[3]"
                   :step="0.1"
-                  class="uniform-vec-input"
+                  class="field-input uniform-vec-input"
                 />
               </template>
-              
-              <button
-                @click="removeUniform(index)"
-                class="btn btn-danger btn-small"
-              >
-                {{ t('common.delete') }}
-              </button>
             </div>
           </div>
         </div>
-      </div>
-
-      <!-- 实时预览控制 -->
-      <div class="preview-controls">
-        <label class="checkbox-label">
-          <input type="checkbox" v-model="realTimePreview" />
-          {{ t('shaderEditor.realTimePreview') }}
-        </label>
-        <label class="checkbox-label">
-          <input type="checkbox" v-model="enableAnimation" />
-          {{ t('shaderEditor.enableAnimation') }}
-          <span class="animation-hint" v-if="enableAnimation">
-            {{ selectedPreset === 'dissolve' ? t('shaderEditor.dissolveAnimationEnabled') : t('shaderEditor.timeAnimationEnabled') }}
-          </span>
-        </label>
+        <div v-else class="uniform-empty">
+          {{ t('shaderEditor.addUniform') }}
+        </div>
       </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, watch, onMounted } from 'vue'
+import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
+import Dropdown from './Dropdown.vue'
+import type { DropdownOption } from '../../types/app'
 
 // 定义组件的props和emits
 interface ShaderUniform {
@@ -214,167 +224,182 @@ const fragmentShader = ref<string>('')
 const uniforms = ref<ShaderUniform[]>([])
 const realTimePreview = ref<boolean>(false)
 const enableAnimation = ref<boolean>(false)
+const hasTimeUniform = computed(() => {
+  return uniforms.value.some((uniform) => uniform.name === 'iTime' || uniform.name === 'uTime')
+})
+
+const uniformTypeOptions: DropdownOption[] = [
+  { label: 'float', value: 'float' },
+  { label: 'vec2', value: 'vec2' },
+  { label: 'vec3', value: 'vec3' },
+  { label: 'vec4', value: 'vec4' },
+]
 
 // Shader预设
 const shaderPresets = ref<ShaderPreset[]>([
   {
-    name: 'glow',
+    name: 'colorReplace',
     fragmentShader: `precision mediump float;
 varying vec2 vTextureCoord;
 uniform sampler2D uSampler;
-uniform float uGlowIntensity;
-uniform vec3 uGlowColor;
-uniform float iTime;
+uniform vec3 uSourceColor;
+uniform vec3 uTargetColor;
+uniform float uThreshold;
+uniform float uSoftness;
 
 void main() {
     vec4 texColor = texture2D(uSampler, vTextureCoord);
-    
-    // 创建发光效果
-    float glow = sin(iTime * 2.0) * 0.5 + 0.5;
-    vec3 glowEffect = uGlowColor * uGlowIntensity * glow;
-    
-    // 混合原色和发光效果
-    vec3 finalColor = texColor.rgb + glowEffect * texColor.a;
-    
+
+    float edge0 = max(0.0, uThreshold - uSoftness);
+    float edge1 = uThreshold + uSoftness;
+    float colorDistance = distance(texColor.rgb, uSourceColor);
+    float replaceMask = 1.0 - smoothstep(edge0, edge1, colorDistance);
+
+    vec3 replacedColor = mix(texColor.rgb, uTargetColor, replaceMask);
+    gl_FragColor = vec4(replacedColor, texColor.a);
+}`,
+    uniforms: [
+      { name: 'uSourceColor', type: 'vec3', value: [1.0, 1.0, 1.0] },
+      { name: 'uTargetColor', type: 'vec3', value: [1.0, 0.35, 0.35] },
+      { name: 'uThreshold', type: 'float', value: 0.22, min: 0.0, max: 1.0 },
+      { name: 'uSoftness', type: 'float', value: 0.08, min: 0.0, max: 0.5 }
+    ]
+  },
+  {
+    name: 'trueTint',
+    fragmentShader: `precision mediump float;
+varying vec2 vTextureCoord;
+uniform sampler2D uSampler;
+uniform vec3 uTintColor;
+uniform float uTintStrength;
+uniform float uPreserveLight;
+
+void main() {
+    vec4 texColor = texture2D(uSampler, vTextureCoord);
+
+    float light = dot(texColor.rgb, vec3(0.299, 0.587, 0.114));
+    vec3 multiplyTint = texColor.rgb * uTintColor;
+    vec3 lightTint = uTintColor * light;
+    vec3 tinted = mix(multiplyTint, lightTint, clamp(uPreserveLight, 0.0, 1.0));
+    vec3 finalColor = mix(texColor.rgb, tinted, clamp(uTintStrength, 0.0, 1.0));
+
     gl_FragColor = vec4(finalColor, texColor.a);
 }`,
     uniforms: [
-      { name: 'uGlowIntensity', type: 'float', value: 0.5, min: 0, max: 2 },
-      { name: 'uGlowColor', type: 'vec3', value: [1.0, 0.5, 0.0] },
-      { name: 'iTime', type: 'float', value: 0, min: 0, max: 10 }
+      { name: 'uTintColor', type: 'vec3', value: [0.2, 0.75, 1.0] },
+      { name: 'uTintStrength', type: 'float', value: 0.85, min: 0.0, max: 1.0 },
+      { name: 'uPreserveLight', type: 'float', value: 0.65, min: 0.0, max: 1.0 }
     ]
   },
   {
-    name: 'wave',
+    name: 'gradientTint',
     fragmentShader: `precision mediump float;
 varying vec2 vTextureCoord;
 uniform sampler2D uSampler;
-uniform float uWaveAmplitude;
-uniform float uWaveFrequency;
+uniform vec3 uColorA;
+uniform vec3 uColorB;
+uniform float uBlendStrength;
+uniform float uAngle;
+uniform float uScale;
+uniform float uOffset;
+uniform float uFlowSpeed;
 uniform float iTime;
 
 void main() {
-    vec2 coord = vTextureCoord;
-    
-    // 创建波浪扭曲效果
-    coord.x += sin(coord.y * uWaveFrequency + iTime) * uWaveAmplitude;
-    coord.y += cos(coord.x * uWaveFrequency + iTime) * uWaveAmplitude * 0.5;
-    
-    vec4 texColor = texture2D(uSampler, coord);
-    gl_FragColor = texColor;
+    vec4 texColor = texture2D(uSampler, vTextureCoord);
+
+    vec2 direction = vec2(cos(uAngle), sin(uAngle));
+    float gradientPos = dot((vTextureCoord - 0.5) * max(uScale, 0.001), direction);
+    gradientPos = gradientPos + 0.5 + uOffset + iTime * uFlowSpeed;
+    gradientPos = clamp(gradientPos, 0.0, 1.0);
+
+    vec3 gradientColor = mix(uColorA, uColorB, gradientPos);
+    vec3 tinted = texColor.rgb * gradientColor;
+    vec3 finalColor = mix(texColor.rgb, tinted, clamp(uBlendStrength, 0.0, 1.0));
+
+    gl_FragColor = vec4(finalColor, texColor.a);
 }`,
     uniforms: [
-      { name: 'uWaveAmplitude', type: 'float', value: 0.02, min: 0, max: 0.1 },
-      { name: 'uWaveFrequency', type: 'float', value: 10.0, min: 1, max: 50 },
-      { name: 'iTime', type: 'float', value: 0, min: 0, max: 10 }
+      { name: 'uColorA', type: 'vec3', value: [1.0, 0.5, 0.2] },
+      { name: 'uColorB', type: 'vec3', value: [0.3, 0.6, 1.0] },
+      { name: 'uBlendStrength', type: 'float', value: 0.85, min: 0.0, max: 1.0 },
+      { name: 'uAngle', type: 'float', value: 1.57, min: 0.0, max: 6.28 },
+      { name: 'uScale', type: 'float', value: 1.0, min: 0.1, max: 4.0 },
+      { name: 'uOffset', type: 'float', value: 0.0, min: -1.0, max: 1.0 },
+      { name: 'uFlowSpeed', type: 'float', value: 0.0, min: -1.0, max: 1.0 },
+      { name: 'iTime', type: 'float', value: 0.0, min: 0.0, max: 10.0 }
     ]
   },
   {
-    name: 'colorShift',
+    name: 'softBlur',
     fragmentShader: `precision mediump float;
 varying vec2 vTextureCoord;
 uniform sampler2D uSampler;
-uniform float uHueShift;
-uniform float uSaturation;
-uniform float uBrightness;
-
-vec3 rgb2hsv(vec3 c) {
-    vec4 K = vec4(0.0, -1.0 / 3.0, 2.0 / 3.0, -1.0);
-    vec4 p = mix(vec4(c.bg, K.wz), vec4(c.gb, K.xy), step(c.b, c.g));
-    vec4 q = mix(vec4(p.xyw, c.r), vec4(c.r, p.yzx), step(p.x, c.r));
-    float d = q.x - min(q.w, q.y);
-    float e = 1.0e-10;
-    return vec3(abs(q.z + (q.w - q.y) / (6.0 * d + e)), d / (q.x + e), q.x);
-}
-
-vec3 hsv2rgb(vec3 c) {
-    vec4 K = vec4(1.0, 2.0 / 3.0, 1.0 / 3.0, 3.0);
-    vec3 p = abs(fract(c.xxx + K.xyz) * 6.0 - K.www);
-    return c.z * mix(K.xxx, clamp(p - K.xxx, 0.0, 1.0), c.y);
-}
+uniform vec2 uBlurStep;
+uniform float uBlurStrength;
 
 void main() {
     vec4 texColor = texture2D(uSampler, vTextureCoord);
-    
-    vec3 hsv = rgb2hsv(texColor.rgb);
-    hsv.x += uHueShift;
-    hsv.y *= uSaturation;
-    hsv.z *= uBrightness;
-    
-    vec3 rgb = hsv2rgb(hsv);
-    gl_FragColor = vec4(rgb, texColor.a);
+    vec2 stepOffset = max(uBlurStep * uBlurStrength, vec2(0.0));
+
+    vec4 blurColor = texColor * 4.0;
+    blurColor += texture2D(uSampler, vTextureCoord + vec2(stepOffset.x, 0.0)) * 2.0;
+    blurColor += texture2D(uSampler, vTextureCoord - vec2(stepOffset.x, 0.0)) * 2.0;
+    blurColor += texture2D(uSampler, vTextureCoord + vec2(0.0, stepOffset.y)) * 2.0;
+    blurColor += texture2D(uSampler, vTextureCoord - vec2(0.0, stepOffset.y)) * 2.0;
+    blurColor += texture2D(uSampler, vTextureCoord + stepOffset);
+    blurColor += texture2D(uSampler, vTextureCoord - stepOffset);
+    blurColor += texture2D(uSampler, vTextureCoord + vec2(stepOffset.x, -stepOffset.y));
+    blurColor += texture2D(uSampler, vTextureCoord + vec2(-stepOffset.x, stepOffset.y));
+
+    gl_FragColor = blurColor / 16.0;
 }`,
     uniforms: [
-      { name: 'uHueShift', type: 'float', value: 0.0, min: -1, max: 1 },
-      { name: 'uSaturation', type: 'float', value: 1.0, min: 0, max: 2 },
-      { name: 'uBrightness', type: 'float', value: 1.0, min: 0, max: 2 }
+      { name: 'uBlurStep', type: 'vec2', value: [0.003, 0.003] },
+      { name: 'uBlurStrength', type: 'float', value: 1.0, min: 0.0, max: 4.0 }
     ]
   },
   {
-    name: 'dissolve',
+    name: 'mosaic',
     fragmentShader: `precision mediump float;
 varying vec2 vTextureCoord;
 uniform sampler2D uSampler;
-uniform float uDissolveAmount;
-uniform float uEdgeWidth;
-uniform vec3 uEdgeColor;
-uniform float uNoiseScale;
-
-// 改进的噪声函数，创建更自然的溶解模式
-float noise(vec2 st) {
-    vec2 i = floor(st);
-    vec2 f = fract(st);
-    
-    float a = fract(sin(dot(i, vec2(12.9898, 78.233))) * 43758.5453);
-    float b = fract(sin(dot(i + vec2(1.0, 0.0), vec2(12.9898, 78.233))) * 43758.5453);
-    float c = fract(sin(dot(i + vec2(0.0, 1.0), vec2(12.9898, 78.233))) * 43758.5453);
-    float d = fract(sin(dot(i + vec2(1.0, 1.0), vec2(12.9898, 78.233))) * 43758.5453);
-    
-    vec2 u = f * f * (3.0 - 2.0 * f);
-    
-    return mix(a, b, u.x) + (c - a) * u.y * (1.0 - u.x) + (d - b) * u.x * u.y;
-}
-
-// 分形噪声，创建更复杂的溶解模式
-float fbm(vec2 st) {
-    float value = 0.0;
-    float amplitude = 0.5;
-    float frequency = 1.0;
-    
-    for (int i = 0; i < 4; i++) {
-        value += amplitude * noise(st * frequency);
-        amplitude *= 0.5;
-        frequency *= 2.0;
-    }
-    
-    return value;
-}
+uniform vec2 uBlockSize;
+uniform float uBlendStrength;
 
 void main() {
     vec4 texColor = texture2D(uSampler, vTextureCoord);
-    
-    // 使用分形噪声创建更自然的溶解模式
-    vec2 noiseCoord = vTextureCoord * uNoiseScale;
-    float dissolveNoise = fbm(noiseCoord);
-    
-    // 创建溶解遮罩
-    float dissolveMask = step(uDissolveAmount, dissolveNoise);
-    
-    // 创建边缘效果
-    float edgeMask = smoothstep(uDissolveAmount - uEdgeWidth, uDissolveAmount, dissolveNoise);
-    float edge = edgeMask * (1.0 - dissolveMask);
-    
-    // 混合颜色
-    vec3 finalColor = mix(mix(texColor.rgb, uEdgeColor, edge), texColor.rgb, dissolveMask);
-    float finalAlpha = texColor.a * (dissolveMask + edge);
-    
-    gl_FragColor = vec4(finalColor, finalAlpha);
+    vec2 block = max(uBlockSize, vec2(0.001));
+    vec2 mosaicCoord = floor(vTextureCoord / block) * block + block * 0.5;
+    mosaicCoord = clamp(mosaicCoord, 0.0, 1.0);
+
+    vec4 mosaicColor = texture2D(uSampler, mosaicCoord);
+    gl_FragColor = mix(texColor, mosaicColor, clamp(uBlendStrength, 0.0, 1.0));
 }`,
     uniforms: [
-      { name: 'uDissolveAmount', type: 'float', value: 0.0, min: 0, max: 1 },
-      { name: 'uEdgeWidth', type: 'float', value: 0.05, min: 0, max: 0.2 },
-      { name: 'uEdgeColor', type: 'vec3', value: [1.0, 0.3, 0.0] },
-      { name: 'uNoiseScale', type: 'float', value: 8.0, min: 1, max: 20 }
+      { name: 'uBlockSize', type: 'vec2', value: [0.03, 0.03] },
+      { name: 'uBlendStrength', type: 'float', value: 1.0, min: 0.0, max: 1.0 }
+    ]
+  },
+  {
+    name: 'posterize',
+    fragmentShader: `precision mediump float;
+varying vec2 vTextureCoord;
+uniform sampler2D uSampler;
+uniform float uLevels;
+uniform float uBlendStrength;
+
+void main() {
+    vec4 texColor = texture2D(uSampler, vTextureCoord);
+    float levels = max(uLevels, 2.0);
+    vec3 posterColor = floor(texColor.rgb * (levels - 1.0) + 0.5) / (levels - 1.0);
+    vec3 finalColor = mix(texColor.rgb, posterColor, clamp(uBlendStrength, 0.0, 1.0));
+
+    gl_FragColor = vec4(finalColor, texColor.a);
+}`,
+    uniforms: [
+      { name: 'uLevels', type: 'float', value: 5.0, min: 2.0, max: 12.0 },
+      { name: 'uBlendStrength', type: 'float', value: 1.0, min: 0.0, max: 1.0 }
     ]
   }
 ])
@@ -390,8 +415,76 @@ const addUniform = () => {
   })
 }
 
+const getVectorValue = (value: number | number[] | undefined, size: number) => {
+  const source = Array.isArray(value) ? value : typeof value === 'number' ? [value] : []
+  return Array.from({ length: size }, (_, index) => {
+    return typeof source[index] === 'number' ? source[index] : 0
+  })
+}
+
+const handleUniformTypeChange = (uniform: ShaderUniform) => {
+  if (uniform.type === 'float') {
+    uniform.value = Array.isArray(uniform.value) ? uniform.value[0] ?? 0 : uniform.value ?? 0
+    uniform.min ??= 0
+    uniform.max ??= 1
+    return
+  }
+
+  if (uniform.type === 'vec2') {
+    uniform.value = getVectorValue(uniform.value, 2)
+    return
+  }
+
+  if (uniform.type === 'vec3') {
+    uniform.value = getVectorValue(uniform.value, 3)
+    return
+  }
+
+  uniform.value = getVectorValue(uniform.value, 4)
+}
+
 const getPresetLabel = (presetName: string) => {
   return t(`shaderEditor.presets.${presetName}`)
+}
+
+const shaderPresetOptions = computed<DropdownOption[]>(() => {
+  return [
+    { label: t('shaderEditor.selectPreset'), value: -1 },
+    ...shaderPresets.value.map((preset, index) => ({
+      label: getPresetLabel(preset.name),
+      value: index,
+    })),
+  ]
+})
+
+const selectedPresetIndex = computed({
+  get() {
+    const presetIndex = shaderPresets.value.findIndex((preset) => preset.name === selectedPreset.value)
+    return presetIndex >= 0 ? presetIndex + 1 : 0
+  },
+  set(index: number) {
+    if (index <= 0) {
+      selectedPreset.value = ''
+      return
+    }
+
+    selectedPreset.value = shaderPresets.value[index - 1]?.name || ''
+    onPresetChange()
+  },
+})
+
+const getUniformTypeIndex = (type: ShaderUniform['type']) => {
+  return uniformTypeOptions.findIndex((option) => option.value === type)
+}
+
+const handleUniformTypeDropdownChange = (uniform: ShaderUniform, index: number) => {
+  const nextType = uniformTypeOptions[index]?.value as ShaderUniform['type'] | undefined
+  if (!nextType) {
+    return
+  }
+
+  uniform.type = nextType
+  handleUniformTypeChange(uniform)
 }
 
 const removeUniform = (index: number) => {
@@ -477,14 +570,6 @@ const updateAnimationTime = () => {
       timeUniform.value = elapsedTime % 10 // 0-10秒循环
     }
     
-    // 为溶解效果添加自动动画
-    if (selectedPreset.value === 'dissolve') {
-      const dissolveUniform = uniforms.value.find(u => u.name === 'uDissolveAmount')
-      if (dissolveUniform && typeof dissolveUniform.value === 'number') {
-        dissolveUniform.value = (Math.sin(elapsedTime * 0.5) + 1) * 0.5 // 0-1之间的正弦波动
-      }
-    }
-    
     // 实时更新预览
     if (realTimePreview.value) {
       applyShader()
@@ -511,6 +596,13 @@ watch(selectedPreset, () => {
   }
 })
 
+onUnmounted(() => {
+  if (animationId) {
+    cancelAnimationFrame(animationId)
+    animationId = null
+  }
+})
+
 onMounted(() => {
   // 默认加载第一个预设
   if (shaderPresets.value.length > 0) {
@@ -522,262 +614,302 @@ onMounted(() => {
 
 <style scoped>
 .shader-editor {
-  background: var(--primary-bg);
-  border-radius: var(--border-radius);
-  padding: 16px;
-  color: var(--text-color);
+  height: 100%;
+  padding: 12px;
+  color: #fff;
+  overflow-y: auto;
+  overflow-x: hidden;
 }
 
-.shader-editor-header {
+.editor-toolbar {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 16px;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 10px;
+  margin-bottom: 10px;
 }
 
-.shader-editor-header h3 {
-  margin: 0;
-  color: var(--text-color);
-  font-size: 16px;
-  font-weight: 600;
+.toolbar-block {
+  flex: 1;
 }
 
-.shader-controls {
+.toolbar-actions,
+.preset-toolbar,
+.editor-switches,
+.surface-header,
+.uniform-header,
+.uniform-body {
   display: flex;
   gap: 8px;
+  align-items: center;
+}
+
+.toolbar-actions {
+  justify-content: flex-end;
 }
 
 .btn {
-  padding: 6px 12px;
-  border: 1px solid var(--main-border-color);
-  border-radius: var(--border-radius);
-  background: var(--secondary-bg);
-  color: var(--text-color);
+  appearance: none;
+  padding: 8px 12px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 7px;
+  background: rgba(255, 255, 255, 0.08);
+  color: #fff;
   cursor: pointer;
   font-size: 12px;
-  transition: all 0.2s;
+  transition: background-color 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
 }
 
 .btn:hover {
-  background: var(--high-hover-bg);
+  background: rgba(255, 255, 255, 0.14);
+  border-color: rgba(255, 255, 255, 0.2);
+  transform: translateY(-1px);
 }
 
 .btn-primary {
-  background: var(--button-bg);
-  color: var(--text-color);
-  border-color: var(--button-bg);
+  background: rgba(76, 175, 80, 0.22);
+  color: #fff;
+  border-color: rgba(76, 175, 80, 0.38);
 }
 
 .btn-primary:hover {
-  background: var(--button-hover-bg);
+  background: rgba(76, 175, 80, 0.32);
+  border-color: rgba(76, 175, 80, 0.48);
 }
 
 .btn-secondary {
-  background: var(--high-bg);
-  color: var(--text-color);
-  border-color: var(--main-border-color);
-}
-
-.btn-secondary:hover {
-  background: var(--high-hover-bg);
+  background: rgba(255, 255, 255, 0.04);
 }
 
 .btn-danger {
-  background: var(--error-color);
-  color: var(--text-color);
-  border-color: var(--error-color);
-}
-
-.btn-danger:hover {
-  background: #b84a3e;
+  background: rgba(244, 67, 54, 0.18);
+  border-color: rgba(244, 67, 54, 0.3);
 }
 
 .btn-small {
-  padding: 4px 8px;
+  padding: 6px 10px;
   font-size: 11px;
 }
 
-.shader-editor-content {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
+.editor-section-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.68);
+  margin-bottom: 6px;
 }
 
-.preset-section {
-  display: flex;
-  align-items: center;
-  gap: 8px;
+.editor-switches {
+  flex-wrap: wrap;
+  margin-bottom: 10px;
 }
 
-.preset-select {
-  padding: 6px 12px;
-  border: 1px solid var(--main-border-color);
-  border-radius: var(--border-radius);
-  background: var(--input-bg);
-  color: var(--text-color);
-  min-width: 200px;
+.switch-chip {
+  appearance: none;
+  padding: 7px 12px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.06);
+  color: #fff;
+  cursor: pointer;
+  font-size: 12px;
+  transition: background-color 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
 }
 
-.preset-select:focus {
+.switch-chip:hover {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.switch-chip.active {
+  background: rgba(76, 175, 80, 0.24);
+  border-color: rgba(76, 175, 80, 0.4);
+  color: #fff;
+}
+
+.animation-hint {
+  color: rgba(255, 255, 255, 0.58);
+  font-size: 12px;
+}
+
+.shader-editor-layout {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+}
+
+.editor-surface {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+  padding: 12px;
+  min-height: 0;
+}
+
+.surface-header {
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.field-input {
+  width: 100%;
+  height: 36px;
+  padding: 0 10px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 7px;
+  background: rgba(255, 255, 255, 0.06);
+  color: #fff;
   outline: none;
-  border-color: var(--button-bg);
+  transition: border-color 0.2s ease, background-color 0.2s ease;
 }
 
-.code-editor {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
+.field-input:focus {
+  border-color: rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.1);
 }
 
-.editor-label {
-  font-weight: bold;
-  color: var(--sec-text-color);
-  font-size: 14px;
+.field-input::placeholder {
+  color: rgba(255, 255, 255, 0.34);
+}
+
+.preset-toolbar {
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.preset-dropdown {
+  flex: 1 1 220px;
+  min-width: 0;
+}
+
+.preset-dropdown :deep(.dropdown-container),
+.uniform-type-dropdown :deep(.dropdown-container) {
+  width: 100%;
+}
+
+.preset-dropdown :deep(.dropdown),
+.uniform-type-dropdown :deep(.dropdown) {
+  min-height: 36px;
 }
 
 .shader-textarea {
   width: 100%;
+  min-height: 220px;
   font-family: 'Courier New', monospace;
   font-size: 12px;
-  border: 1px solid var(--main-border-color);
-  border-radius: var(--border-radius);
-  padding: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 7px;
+  padding: 12px;
   resize: vertical;
-  background: var(--input-bg);
-  color: var(--text-color);
-  min-height: 200px;
+  background: rgba(255, 255, 255, 0.06);
+  color: #fff;
+  line-height: 1.55;
+  overflow: auto;
 }
 
 .shader-textarea:focus {
   outline: none;
-  border-color: var(--button-bg);
+  border-color: rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.1);
 }
 
 .shader-textarea::placeholder {
-  color: var(--placeholder-color);
-}
-
-.uniforms-section {
-  border: 1px solid var(--main-border-color);
-  border-radius: var(--border-radius);
-  padding: 12px;
-  background: var(--secondary-bg);
-}
-
-.uniforms-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 12px;
-  font-weight: bold;
-  color: var(--sec-text-color);
+  color: rgba(255, 255, 255, 0.34);
 }
 
 .uniforms-list {
   display: flex;
   flex-direction: column;
   gap: 8px;
+  max-height: 360px;
+  overflow-y: auto;
+  padding-right: 4px;
 }
 
 .uniform-item {
   padding: 8px;
-  border: 1px solid var(--deep-border-color);
-  border-radius: var(--border-radius);
-  background: var(--high-bg);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.05);
 }
 
-.uniform-controls {
-  display: flex;
-  align-items: center;
-  gap: 8px;
+.uniform-header {
+  margin-bottom: 8px;
   flex-wrap: wrap;
 }
 
 .uniform-name-input {
-  width: 120px;
-  padding: 4px 8px;
-  border: 1px solid var(--main-border-color);
-  border-radius: var(--border-radius);
-  background: var(--input-bg);
-  color: var(--text-color);
+  flex: 1 1 150px;
 }
 
-.uniform-name-input:focus {
-  outline: none;
-  border-color: var(--button-bg);
-}
-
-.uniform-type-select {
-  width: 100px;
-  padding: 4px 8px;
-  border: 1px solid var(--main-border-color);
-  border-radius: var(--border-radius);
-  background: var(--input-bg);
-  color: var(--text-color);
-}
-
-.uniform-type-select:focus {
-  outline: none;
-  border-color: var(--button-bg);
+.uniform-type-dropdown {
+  flex: 0 1 110px;
+  min-width: 110px;
 }
 
 .uniform-slider {
-  width: 150px;
-  accent-color: var(--button-bg);
+  flex: 1;
+  accent-color: #4caf50;
 }
 
 .uniform-number-input {
   width: 80px;
-  padding: 4px 8px;
-  border: 1px solid var(--main-border-color);
-  border-radius: var(--border-radius);
-  background: var(--input-bg);
-  color: var(--text-color);
-}
-
-.uniform-number-input:focus {
-  outline: none;
-  border-color: var(--button-bg);
 }
 
 .uniform-vec-input {
-  width: 60px;
-  padding: 4px 8px;
-  border: 1px solid var(--main-border-color);
-  border-radius: var(--border-radius);
-  background: var(--input-bg);
-  color: var(--text-color);
+  min-width: 0;
+  flex: 1 1 72px;
 }
 
-.uniform-vec-input:focus {
-  outline: none;
-  border-color: var(--button-bg);
+.uniform-body {
+  flex-wrap: wrap;
+  align-items: stretch;
 }
 
-.preview-controls {
-  display: flex;
-  gap: 16px;
-  align-items: center;
+.field-range {
+  min-width: 120px;
 }
 
-.checkbox-label {
+.uniform-empty {
   display: flex;
   align-items: center;
-  gap: 6px;
-  cursor: pointer;
-  font-size: 14px;
-  color: var(--text-color);
-}
-
-.checkbox-label input[type="checkbox"] {
-  margin: 0;
-  accent-color: var(--button-bg);
-}
-
-.animation-hint {
+  justify-content: center;
+  min-height: 84px;
+  border: 1px dashed rgba(255, 255, 255, 0.12);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.04);
+  color: rgba(255, 255, 255, 0.52);
   font-size: 12px;
-  color: var(--accent-color);
-  margin-left: 8px;
-  font-style: italic;
+}
+
+.shader-editor::-webkit-scrollbar,
+.shader-textarea::-webkit-scrollbar,
+.uniforms-list::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.shader-editor::-webkit-scrollbar-track,
+.shader-textarea::-webkit-scrollbar-track,
+.uniforms-list::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.shader-editor::-webkit-scrollbar-thumb,
+.shader-textarea::-webkit-scrollbar-thumb,
+.uniforms-list::-webkit-scrollbar-thumb {
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.16);
+}
+
+.shader-editor::-webkit-scrollbar-thumb:hover,
+.shader-textarea::-webkit-scrollbar-thumb:hover,
+.uniforms-list::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.28);
+}
+
+@media (min-width: 760px) {
+  .shader-editor-layout {
+    grid-template-columns: minmax(0, 1.05fr) minmax(240px, 0.95fr);
+  }
 }
 </style>

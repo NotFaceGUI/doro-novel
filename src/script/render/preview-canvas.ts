@@ -3,7 +3,6 @@ import { applyAnimationConfig, DEFAULT_ANIMATION_CONFIG } from './animation-conf
 import * as PIXI from 'pixi.js';
 import { ResType } from '../var';
 import { CharacterUrls } from '../../types/app';
-import { ref } from 'vue';
 // import { ease } from 'pixi-ease'
 
 export type ContainerDictionary = Record<string, PIXI.Container>;
@@ -11,6 +10,12 @@ export type ContainerDictionary = Record<string, PIXI.Container>;
 export interface IApp {
     application: PIXI.Application
     uiContainer: ContainerDictionary
+}
+
+export interface SpineInteractionOptions {
+    onSlotHover?: (slotName: string) => void;
+    onSlotLeave?: () => void;
+    onSlotSelect?: (slotName: string, append: boolean) => void;
 }
 
 export function createPixiApp(width: number | undefined, height: number | undefined): IApp {
@@ -23,15 +28,12 @@ export function createPixiApp(width: number | undefined, height: number | undefi
     const pixelRatio = Math.min(window.devicePixelRatio || 1, 2); // 限制最大为2倍
 
     const app = new PIXI.Application({
-        width: (width || 800) * pixelRatio,
-        height: (height || 600) * pixelRatio,
+        width: width || 800,
+        height: height || 600,
         backgroundAlpha: 0,
         resolution: pixelRatio,
-        autoDensity: true, // 手动控制
+        autoDensity: true,
     });
-
-    // 调整stage的缩放以匹配逻辑尺寸
-    app.stage.scale.set(1 / pixelRatio);
 
     container.appendChild(app.view as unknown as Node);
 
@@ -39,6 +41,33 @@ export function createPixiApp(width: number | undefined, height: number | undefi
         application: app,
         uiContainer: {}
     }
+}
+
+export function resizePreviewApp(app: PIXI.Application, width: number, height: number) {
+    app.renderer.resize(Math.max(1, width), Math.max(1, height));
+}
+
+export function layoutPreviewSpine(animation: Spine, app: PIXI.Application) {
+    animation.update(0);
+
+    const bounds = animation.getLocalBounds();
+    if (!Number.isFinite(bounds.width) || !Number.isFinite(bounds.height) || bounds.width <= 0 || bounds.height <= 0) {
+        return;
+    }
+
+    const fitWidth = app.screen.width * 0.78;
+    const fitHeight = app.screen.height * 0.84;
+    const scale = Math.min(fitWidth / bounds.width, fitHeight / bounds.height);
+
+    if (!Number.isFinite(scale) || scale <= 0) {
+        return;
+    }
+
+    animation.scale.set(scale);
+    animation.position.set(
+        app.screen.width / 2 - (bounds.x + bounds.width / 2) * scale,
+        app.screen.height / 2 - (bounds.y + bounds.height / 2) * scale,
+    );
 }
 
 
@@ -51,7 +80,7 @@ interface CharacterAssets {
 }
 
 // 加载单个Spine文件的辅助函数
-async function loadSingleSpine(app: PIXI.Application, url: string): Promise<Spine> {
+async function loadSingleSpine(url: string): Promise<Spine> {
     const resource = await PIXI.Assets.load(url);
     const animation = new Spine(resource.spineData);
     
@@ -72,11 +101,11 @@ async function loadSingleSpine(app: PIXI.Application, url: string): Promise<Spin
 }
 
 // 加载角色的所有资源（main, aim, cover）
-async function loadCharacterAssets(app: PIXI.Application, data: { url: string, type: ResType, characterUrls?: CharacterUrls }): Promise<CharacterAssets> {
+async function loadCharacterAssets(data: { url: string, type: ResType, characterUrls?: CharacterUrls }): Promise<CharacterAssets> {
     console.log("加载角色资源: ", data.characterUrls);
     
     // 加载主体动画
-    const mainAnimation = await loadSingleSpine(app, data.url);
+    const mainAnimation = await loadSingleSpine(data.url);
     
     const assets: CharacterAssets = {
         main: mainAnimation
@@ -87,7 +116,7 @@ async function loadCharacterAssets(app: PIXI.Application, data: { url: string, t
         // 尝试加载 aim 文件
         if (data.characterUrls.aim) {
             try {
-                assets.aim = await loadSingleSpine(app, data.characterUrls.aim);
+                assets.aim = await loadSingleSpine(data.characterUrls.aim);
                 console.log("成功加载 aim 资源");
             } catch (error) {
                 console.warn("无法加载 aim 资源:", error);
@@ -97,7 +126,7 @@ async function loadCharacterAssets(app: PIXI.Application, data: { url: string, t
         // 尝试加载 cover 文件
         if (data.characterUrls.cover) {
             try {
-                assets.cover = await loadSingleSpine(app, data.characterUrls.cover);
+                assets.cover = await loadSingleSpine(data.characterUrls.cover);
                 console.log("成功加载 cover 资源");
             } catch (error) {
                 console.warn("无法加载 cover 资源:", error);
@@ -114,27 +143,18 @@ export function load(app: PIXI.Application, data: { url: string, type: ResType, 
     
     // 如果有 characterUrls，使用新的加载逻辑
     if (data.characterUrls) {
-        return loadCharacterAssets(app, data).then((assets) => {
+        return loadCharacterAssets(data).then((assets) => {
             const mainAnimation = assets.main;
             
             // 设置主动画的位置和缩放
             app.stage.addChild(mainAnimation);
-            mainAnimation.x = app.view.width / 2;
-            const lastScale = mainAnimation.scale.x;
-            mainAnimation.y = app.view.height * 0.93;
-            mainAnimation.scale.set((app.view.height / (mainAnimation.height / lastScale / 0.90)));
             
             console.log(mainAnimation.state.data.skeletonData.animations);
             console.log(mainAnimation.skeleton);
             
             // 使用配置化的动画设置
             applyAnimationConfig(mainAnimation, DEFAULT_ANIMATION_CONFIG, false);
-            
-            // 添加鼠标交互功能
-            // const cleanup = setupSpineInteraction(mainAnimation, app);
-            
-            // 将清理函数存储到主动画对象上
-            // (mainAnimation as any).interactionCleanup = cleanup;
+            layoutPreviewSpine(mainAnimation, app);
             
             // 返回完整的角色资源对象，而不是只返回主动画
             return assets;
@@ -167,25 +187,12 @@ export function load(app: PIXI.Application, data: { url: string, type: ResType, 
             animation.alpha = 1;
             app.stage.addChild(animation);
 
-            animation.x = app.view.width / 2;
-            const lastSacle = animation.scale.x;
-
-            animation.y = app.view.height * 0.93;
-
-            // 设置缩放比例
-            animation.scale.set((app.view.height / (animation.height / lastSacle / 0.90)));
-
             console.log(animation.state.data.skeletonData.animations);
             console.log(animation.skeleton);
 
             // 使用配置化的动画设置
             applyAnimationConfig(animation, DEFAULT_ANIMATION_CONFIG, false);
-
-            // 添加鼠标交互功能
-            const cleanup = setupSpineInteraction(animation, app);
-            
-            // 将清理函数存储到动画对象上
-            (animation as any).interactionCleanup = cleanup;
+            layoutPreviewSpine(animation, app);
 
             // 加载完成，返回动画对象
             resolve(animation);
@@ -197,148 +204,192 @@ export function load(app: PIXI.Application, data: { url: string, type: ResType, 
 }
 
 // 设置Spine动画的交互功能
-export function setupSpineInteraction(animation: Spine, app: PIXI.Application) {
-    // WASD键盘移动相关变量
-    const keys: { [key: string]: boolean } = {};
-    const moveSpeed = 5; // 移动速度
-    let animationFrame: number | null = null;
-
-    // 键盘事件处理
-    const handleKeyDown = (event: KeyboardEvent) => {
-        const key = event.key.toLowerCase();
-        if (['w', 'a', 's', 'd'].includes(key)) {
-            event.preventDefault();
-            keys[key] = true;
-            
-            // 开始移动循环
-            if (!animationFrame) {
-                startMovement();
-            }
-        }
-    };
-
-    const handleKeyUp = (event: KeyboardEvent) => {
-        const key = event.key.toLowerCase();
-        if (['w', 'a', 's', 'd'].includes(key)) {
-            keys[key] = false;
-            
-            // 如果没有按键被按下，停止移动
-            if (!Object.values(keys).some(pressed => pressed)) {
-                stopMovement();
-            }
-        }
-    };
-
-    // 移动更新函数
-    const updateMovement = () => {
-        let moved = false;
-        
-        if (keys['w']) {
-            animation.y -= moveSpeed;
-            moved = true;
-        }
-        if (keys['s']) {
-            animation.y += moveSpeed;
-            moved = true;
-        }
-        if (keys['a']) {
-            animation.x -= moveSpeed;
-            moved = true;
-        }
-        if (keys['d']) {
-            animation.x += moveSpeed;
-            moved = true;
-        }
-        
-        if (moved && Object.values(keys).some(pressed => pressed)) {
-            animationFrame = requestAnimationFrame(updateMovement);
-        } else {
-            animationFrame = null;
-        }
-    };
-
-    const startMovement = () => {
-        if (!animationFrame) {
-            animationFrame = requestAnimationFrame(updateMovement);
-        }
-    };
-
-    const stopMovement = () => {
-        if (animationFrame) {
-            cancelAnimationFrame(animationFrame);
-            animationFrame = null;
-        }
-    };
-
-    // 添加键盘事件监听器
-    document.addEventListener('keydown', handleKeyDown);
-    document.addEventListener('keyup', handleKeyUp);
-
-    // 滚轮缩放事件 - 保留缩放功能
+export function setupSpineInteraction(animation: Spine, app: PIXI.Application, options: SpineInteractionOptions = {}) {
     const canvas = app.view as HTMLCanvasElement;
-    let wheelTimeout: number | null = null;
-    let pendingScale: { scale: number; mouseX: number; mouseY: number } | null = null;
+    let isDragging = false;
+    let isPointerDown = false;
+    let lastPointerX = 0;
+    let lastPointerY = 0;
+    let hoveredSlotName: string | null = null;
+    let pointerDownSlotName: string | null = null;
+    let pointerDownX = 0;
+    let pointerDownY = 0;
 
-    const applyScale = () => {
-        if (!pendingScale) return;
-        
-        const { scale, mouseX, mouseY } = pendingScale;
-        const currentScale = animation.scale.x;
-        
-        // 计算缩放前鼠标相对于动画的位置
-        const localX = (mouseX - animation.x) / currentScale;
-        const localY = (mouseY - animation.y) / currentScale;
-        
-        // 应用新的缩放
-        animation.scale.set(scale);
-        
-        // 调整位置，使鼠标位置保持不变
-        animation.x = mouseX - localX * scale;
-        animation.y = mouseY - localY * scale;
-        
-        pendingScale = null;
-        wheelTimeout = null;
+    const getViewPoint = (clientX: number, clientY: number) => {
+        const rect = canvas.getBoundingClientRect();
+        return {
+            x: clientX - rect.left,
+            y: clientY - rect.top,
+        };
+    };
+
+    const updateCursor = (cursor: string) => {
+        canvas.style.cursor = cursor;
+    };
+
+    const clearHoveredSlot = () => {
+        if (!hoveredSlotName) {
+            return;
+        }
+
+        hoveredSlotName = null;
+        options.onSlotLeave?.();
+    };
+
+    const setHoveredSlot = (slotName: string | null) => {
+        if (hoveredSlotName === slotName) {
+            return;
+        }
+
+        if (!slotName) {
+            clearHoveredSlot();
+            updateCursor(isDragging ? 'grabbing' : 'grab');
+            return;
+        }
+
+        hoveredSlotName = slotName;
+        options.onSlotHover?.(slotName);
+        updateCursor(isDragging ? 'grabbing' : 'pointer');
+    };
+
+    const pickHoveredSlot = (clientX: number, clientY: number) => {
+        const point = getViewPoint(clientX, clientY);
+        const globalPoint = new PIXI.Point(point.x, point.y);
+        const drawOrder = animation.skeleton?.drawOrder || animation.skeleton?.slots || [];
+
+        for (let index = drawOrder.length - 1; index >= 0; index -= 1) {
+            const slot = drawOrder[index] as any;
+            const target = slot.currentMesh || slot.currentSprite;
+            if (!target || !target.visible || !target.renderable || (slot.color?.a ?? 1) <= 0) {
+                continue;
+            }
+
+            if (typeof target.containsPoint === 'function' && target.containsPoint(globalPoint)) {
+                return slot.data.name;
+            }
+
+            const bounds = target.getBounds();
+            if (bounds.contains(globalPoint.x, globalPoint.y)) {
+                return slot.data.name;
+            }
+        }
+
+        return null;
+    };
+
+    const handleMouseDown = (event: MouseEvent) => {
+        if (event.button !== 0) {
+            return;
+        }
+
+        event.preventDefault();
+        const point = getViewPoint(event.clientX, event.clientY);
+        lastPointerX = point.x;
+        lastPointerY = point.y;
+        pointerDownX = point.x;
+        pointerDownY = point.y;
+        pointerDownSlotName = pickHoveredSlot(event.clientX, event.clientY);
+        isPointerDown = true;
+        isDragging = false;
+        updateCursor(pointerDownSlotName ? 'pointer' : 'grab');
+    };
+
+    const handleWindowMouseMove = (event: MouseEvent) => {
+        if (!isPointerDown) {
+            return;
+        }
+
+        const point = getViewPoint(event.clientX, event.clientY);
+        const moveDistance = Math.hypot(point.x - pointerDownX, point.y - pointerDownY);
+        if (!isDragging && moveDistance > 4) {
+            isDragging = true;
+            clearHoveredSlot();
+            updateCursor('grabbing');
+        }
+
+        if (!isDragging) {
+            return;
+        }
+
+        animation.x += point.x - lastPointerX;
+        animation.y += point.y - lastPointerY;
+        lastPointerX = point.x;
+        lastPointerY = point.y;
+    };
+
+    const stopDragging = (event?: MouseEvent) => {
+        if (!isPointerDown) {
+            return;
+        }
+
+        const append = !!(event?.ctrlKey || event?.metaKey || event?.shiftKey);
+        if (!isDragging && pointerDownSlotName) {
+            options.onSlotSelect?.(pointerDownSlotName, append);
+        }
+
+        isPointerDown = false;
+        isDragging = false;
+        pointerDownSlotName = null;
+        updateCursor(hoveredSlotName ? 'pointer' : 'grab');
+    };
+
+    const handleCanvasMouseMove = (event: MouseEvent) => {
+        if (isDragging) {
+            return;
+        }
+
+        setHoveredSlot(pickHoveredSlot(event.clientX, event.clientY));
+    };
+
+    const handleCanvasMouseLeave = () => {
+        if (isDragging) {
+            return;
+        }
+
+        setHoveredSlot(null);
     };
 
     const handleWheel = (event: WheelEvent) => {
         event.preventDefault();
-        
-        // 获取鼠标在画布上的位置
-        const rect = canvas.getBoundingClientRect();
-        const mouseX = (event.clientX - rect.left) * (canvas.width / rect.width);
-        const mouseY = (event.clientY - rect.top) * (canvas.height / rect.height);
-        
-        // 计算缩放因子
+
+        const point = getViewPoint(event.clientX, event.clientY);
         const scaleFactor = event.deltaY > 0 ? 0.95 : 1.05;
         const currentScale = animation.scale.x;
         const newScale = currentScale * scaleFactor;
-        
-        // 限制缩放范围
+
         if (newScale >= 0.1 && newScale <= 5) {
-            pendingScale = { scale: newScale, mouseX, mouseY };
-            
-            // 清除之前的超时
-            if (wheelTimeout) {
-                clearTimeout(wheelTimeout);
-            }
-            
-            // 延迟应用缩放，避免频繁更新
-            wheelTimeout = window.setTimeout(applyScale, 10);
+            const localX = (point.x - animation.x) / currentScale;
+            const localY = (point.y - animation.y) / currentScale;
+
+            animation.scale.set(newScale);
+            animation.x = point.x - localX * newScale;
+            animation.y = point.y - localY * newScale;
         }
     };
 
+    const handleWindowBlur = () => stopDragging();
+
+    canvas.addEventListener('mousedown', handleMouseDown);
+    canvas.addEventListener('mouseenter', handleCanvasMouseMove);
+    canvas.addEventListener('mousemove', handleCanvasMouseMove);
+    canvas.addEventListener('mouseleave', handleCanvasMouseLeave);
     canvas.addEventListener('wheel', handleWheel, { passive: false });
-    
+    window.addEventListener('mousemove', handleWindowMouseMove);
+    window.addEventListener('mouseup', stopDragging);
+    window.addEventListener('blur', handleWindowBlur);
+    updateCursor('grab');
+
     // 清理函数
     return () => {
-        document.removeEventListener('keydown', handleKeyDown);
-        document.removeEventListener('keyup', handleKeyUp);
+        canvas.removeEventListener('mousedown', handleMouseDown);
+        canvas.removeEventListener('mouseenter', handleCanvasMouseMove);
+        canvas.removeEventListener('mousemove', handleCanvasMouseMove);
+        canvas.removeEventListener('mouseleave', handleCanvasMouseLeave);
         canvas.removeEventListener('wheel', handleWheel);
-        if (animationFrame) {
-            cancelAnimationFrame(animationFrame);
-        }
-        if (wheelTimeout) {
-            clearTimeout(wheelTimeout);
-        }
+        window.removeEventListener('mousemove', handleWindowMouseMove);
+        window.removeEventListener('mouseup', stopDragging);
+        window.removeEventListener('blur', handleWindowBlur);
+        clearHoveredSlot();
+        canvas.style.cursor = '';
     };
 }

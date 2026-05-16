@@ -142,7 +142,13 @@ const selectType = (type: ASIType) => {
 
 const selectCharacterType = (data: LoadRes) => {
     AssetManager.getInstance().getResConfig().then(res => {
-        res.filter(v => v.characterName === data.name).forEach(v => {
+        res.filter(v => {
+            if (data.characterId) {
+                return v.id === data.characterId;
+            }
+
+            return v.characterName === data.name;
+        }).forEach(v => {
             emit("select", v);
         })
     })

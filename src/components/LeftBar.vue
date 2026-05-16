@@ -71,7 +71,7 @@ import { ref, onMounted, onBeforeUnmount } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { ASSET_AUDIO, /* DEFAULT_WIDTH ,*/ MAX_WIDTH, MIN_WIDTH, ResType } from '../script/var';
 import AssetManager from '../script/asset-manager';
-import { CharacterUrls, dirs } from '../types/app';
+import { CharacterType, CharacterUrls, dirs } from '../types/app';
 import AssetTree from './asset/AssetTree.vue';
 import { BaseDirectory, DirEntry, watch, WatchEvent, WatchEventKind } from '@tauri-apps/plugin-fs';
 import ResizableTab from './asset/ResizableTab.vue';
@@ -191,13 +191,13 @@ const stopResize = () => {
 // #region 资源管理逻辑
 const assetManager = AssetManager.getInstance();
 
-const handleResUrl = (data: { url: string, type: ResType, file: DirEntry, characterUrls?: CharacterUrls }) => {
+const handleResUrl = (data: { url: string, type: ResType, file: DirEntry, characterUrls?: CharacterUrls, character?: CharacterType }) => {
     console.log("父组件：", data);
 
     // 如果 data.type 没有明确设置，则根据文件扩展名自动检测类型
     let detectedType: ResType = data.type;
     if (detectedType == ResType.Spine) {
-        leftEmit('render-file', { url: data.url, type: detectedType, characterUrls: data.characterUrls });
+        leftEmit('render-file', { url: data.url, type: detectedType, characterUrls: data.characterUrls, character: data.character });
         return;
     }
 

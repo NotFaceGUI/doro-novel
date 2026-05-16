@@ -1,11 +1,15 @@
 <template>
   <div class="control-hint" :class="{ 'show': visible }">
     <div class="hint-item">
-      <div class="key-group">
-        <div class="key">W</div>
-        <div class="key">A</div>
-        <div class="key">S</div>
-        <div class="key">D</div>
+      <div class="mouse-icon">
+        <svg width="28" height="36" viewBox="0 0 28 36" fill="none">
+          <rect x="4" y="3" width="20" height="30" rx="10" stroke="currentColor" stroke-width="2"/>
+          <path d="M14 4V17" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          <path d="M14 5C10.5 5 8 7.4 8 11V16H14V5Z" fill="currentColor"/>
+          <path d="M4 18H1.5M26.5 18H24" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          <path d="M3.5 15.5L1.5 18L3.5 20.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M24.5 15.5L26.5 18L24.5 20.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
       </div>
       <span class="hint-text">{{ t('controlHint.moveView') }}</span>
     </div>
@@ -26,6 +30,7 @@
       </div>
       <span class="hint-text">{{ t('controlHint.zoomView') }}</span>
     </div>
+
   </div>
 </template>
 
@@ -46,10 +51,13 @@ const { t } = useI18n();
 
 const visible = ref(true);
 let hideTimer: number | null = null;
+const handleInteraction = () => {
+  showHint();
+};
 
 const startHideTimer = () => {
   if (props.autoHide) {
-    hideTimer = setTimeout(() => {
+    hideTimer = window.setTimeout(() => {
       visible.value = false;
     }, props.hideDelay);
   }
@@ -65,13 +73,8 @@ const showHint = () => {
 
 onMounted(() => {
   startHideTimer();
-  
-  // 监听键盘和鼠标事件，重新显示提示
-  const handleInteraction = () => {
-    showHint();
-  };
-  
-  window.addEventListener('keydown', handleInteraction);
+
+  window.addEventListener('mousedown', handleInteraction);
   window.addEventListener('wheel', handleInteraction);
 });
 
@@ -79,9 +82,9 @@ onUnmounted(() => {
   if (hideTimer) {
     clearTimeout(hideTimer);
   }
-  
-  window.removeEventListener('keydown', () => {});
-  window.removeEventListener('wheel', () => {});
+
+  window.removeEventListener('mousedown', handleInteraction);
+  window.removeEventListener('wheel', handleInteraction);
 });
 </script>
 
@@ -120,48 +123,6 @@ onUnmounted(() => {
   margin-bottom: 0;
 }
 
-.key-group {
-  display: flex;
-  gap: 4px;
-}
-
-.key {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 28px;
-  height: 28px;
-  background: linear-gradient(145deg, #4a4a4a, #2a2a2a);
-  border: 1px solid #666;
-  border-radius: 6px;
-  font-weight: bold;
-  font-size: 12px;
-  box-shadow: 
-    0 2px 4px rgba(0, 0, 0, 0.3),
-    inset 0 1px 0 rgba(255, 255, 255, 0.1);
-  animation: keyPulse 2s ease-in-out infinite;
-}
-
-.key:nth-child(1) { animation-delay: 0s; }
-.key:nth-child(2) { animation-delay: 0.2s; }
-.key:nth-child(3) { animation-delay: 0.4s; }
-.key:nth-child(4) { animation-delay: 0.6s; }
-
-@keyframes keyPulse {
-  0%, 80%, 100% {
-    transform: scale(1);
-    box-shadow: 
-      0 2px 4px rgba(0, 0, 0, 0.3),
-      inset 0 1px 0 rgba(255, 255, 255, 0.1);
-  }
-  10% {
-    transform: scale(0.95);
-    box-shadow: 
-      0 1px 2px rgba(0, 0, 0, 0.3),
-      inset 0 1px 0 rgba(255, 255, 255, 0.1);
-  }
-}
-
 .mouse-icon {
   display: flex;
   align-items: center;
@@ -196,12 +157,6 @@ onUnmounted(() => {
     left: 10px;
     padding: 12px 16px;
     font-size: 12px;
-  }
-  
-  .key {
-    width: 24px;
-    height: 24px;
-    font-size: 10px;
   }
   
   .mouse-icon {

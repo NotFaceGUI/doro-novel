@@ -168,8 +168,9 @@
     "audioUnsupported": "お使いのブラウザは audio 要素をサポートしていません。"
   },
   "controlHint": {
-    "moveView": "視点移動",
-    "zoomView": "ホイールでズーム"
+    "moveView": "左ドラッグで移動",
+    "zoomView": "ホイールでズーム",
+    "hoverSlot": "ホバーで部位を強調"
   },
   "slotControl": {
     "title": "部位コントロール",
@@ -308,7 +309,34 @@
     },
     "shaderEditorTitle": "Shader エフェクトエディタ",
     "scriptPlaceholder": "ここにストーリースクリプトを書いてください...",
-    "editing": "編集中"
+    "editing": "編集中",
+    "customizer": {
+      "title": "パーツエディタ",
+      "selectedSummary": "{count} 個のパーツを選択中",
+      "emptySelection": "キャンバス上のパーツをクリックするか、ショートカットで一括選択してください",
+      "bulkSelect": "一括選択",
+      "bulkSelectTitle": "キーワードでパーツを一括選択",
+      "bulkSelectPlaceholder": "hair などのパーツキーワードを入力",
+      "bulkSelectApply": "一致したパーツを選択",
+      "visible": "表示",
+      "alpha": "透明度",
+      "tint": "色付け",
+      "shader": "Shader を編集",
+      "clearShader": "Shader をクリア",
+      "clearSelection": "選択解除",
+      "saveAsCharacter": "新しいキャラクターとして保存",
+      "characterNamePlaceholder": "新しいキャラクター名を入力",
+      "save": "キャラクターを保存",
+      "deleteCurrent": "現在のキャラクターを削除",
+      "customCharacters": "カスタムキャラクター",
+      "messages": {
+        "selectSlotFirst": "先に少なくとも 1 つのパーツを選択してください",
+        "enterCharacterName": "新しいキャラクター名を入力してください",
+        "saved": "カスタムキャラクターを保存しました: {name}",
+        "deleted": "カスタムキャラクターを削除しました",
+        "noSlotMatched": "{keyword} に一致するパーツがありません"
+      }
+    }
   },
   "actionCommon": {
     "waitExecution": "実行をブロック"
@@ -519,10 +547,12 @@
     "dissolveAnimationEnabled": "ディゾルブアニメーションが有効です",
     "timeAnimationEnabled": "時間アニメーションが有効です",
     "presets": {
-      "glow": "発光効果",
-      "wave": "波形ゆがみ",
-      "colorShift": "色相シフト",
-      "dissolve": "ディゾルブ効果"
+      "colorReplace": "カラー置換",
+      "trueTint": "実色ティント",
+      "gradientTint": "グラデーション着色",
+      "softBlur": "ソフトぼかし",
+      "mosaic": "モザイク",
+      "posterize": "ポスタライズ"
     }
   },
   "actionBgm": {
