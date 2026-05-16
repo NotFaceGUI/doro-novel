@@ -13,13 +13,11 @@ const spineHeightCache = new Map<string, number>();
 
 // 获取或设置 spine 的初始高度
 function getSpineHeight(spine: Spine, characterName: string | undefined): number {
-    console.log("名称：", characterName)
     if (!characterName) {
         return spine.height;
     }
     if (!spineHeightCache.has(characterName)) {
         spineHeightCache.set(characterName, spine.height);
-        console.log("缓存 spine 高度", spine.height);
     }
     return spineHeightCache.get(characterName) || spine.height;
 }
@@ -179,7 +177,6 @@ function changeCameraEvent(camera: Viewport, options: CameraOptions) {
 
 // 通用机位设置函数
 export function setCamera(options: CameraOptions = {}) {
-    console.log("设置摄像机", options)
     const {
         camera = CanvasManager.getInstance().viewport,
         enableAnimation = false,
@@ -231,7 +228,6 @@ export function setCameraMedium(options: Omit<CameraOptions, 'zoom' | 'centerY'>
         if (spine && spine.skeleton) {
             // 使用缓存的 spine 高度
             const spineHeight = getSpineHeight(spine, options.characterName);
-            console.log("使用缓存的 spine 高度", spineHeight, "原始高度", spine.height);
             preset.centerY = Math.round(spine.y - spineHeight * 0.75);
         } else {
             console.warn("无效的Spine数据");
@@ -255,11 +251,7 @@ export function setCameraSmall(options: Omit<CameraOptions, 'zoom' | 'centerY'> 
         if (spine && spine.skeleton) {
             // 使用缓存的 spine 高度
             const spineHeight = getSpineHeight(spine, options.characterName);
-
-            console.log("使用缓存的 spine 高度(小机位)", spineHeight, "原始高度", spine.height);
             preset.centerY = Math.round(spine.y - spineHeight * 0.75);
-            console.log("小机位的一些属性:", spine.y, spineHeight, preset.centerY)
-
         } else {
             console.warn("无效的Spine数据");
         }

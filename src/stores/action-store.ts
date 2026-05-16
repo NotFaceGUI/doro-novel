@@ -111,7 +111,6 @@ export const useActionStore = defineStore('action', () => {
 
   // 构造预览
   function setPreviewSnapshotAll(endIndex: number, actionTitle: string, startIndex: number = 0) {
-
     // 如果是第一个无论如何都是初始值
     if (endIndex == 0) {
       previewSnapshot.value = Object.assign(previewSnapshot.value, {

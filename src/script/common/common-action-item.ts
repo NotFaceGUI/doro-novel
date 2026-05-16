@@ -71,18 +71,13 @@ export function handleSceneState(canvasManager: CanvasManager, props: { id: numb
         // 获取当前动作的修改
         const actionObj = action.getAction(props.title);
         const actionItem = actionObj.as[actionIndex];
-        console.log("actrion", actionItem);
 
         if (actionItem && actionItem.modification) {
-            console.log(`播放模式下增量更新快照: ${props.title} - ${actionIndex} ${JSON.stringify(actionItem.modification)}`);
-            console.log("预览快照", action.previewSnapshot);
             // 遍历当前动作的所有修改，应用到预览快照
             actionItem.modification.forEach((modification) => {
                 // 调用 setPreviewSnapshot 方法应用修改
                 action.setPreviewSnapshot(modification);
             });
-
-            console.log("预览快照2", action.previewSnapshot);
 
         }
     }

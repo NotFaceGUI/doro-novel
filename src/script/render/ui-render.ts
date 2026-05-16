@@ -17,6 +17,7 @@ import { Spine } from 'pixi-spine';
 import { ButtonComponent } from '../ui/button-component';
 import { Action } from 'pixijs-actions';
 import { useBranchStore } from '../../stores/branch-store';
+import { useActionStore } from '../../stores/action-store';
 import {
     resolveDialogueCommanderUiMetrics,
     resolveDialogueNormalUiMetrics,
@@ -25,6 +26,7 @@ import {
 } from '../../stores/dialogue-ui-store';
 import { setModification } from '../util/common';
 import { getDialogueSpeakerDisplay } from '../../utils/dialogue-speaker';
+import { getCharacterId, getCharacterResourceKey } from '../../utils/character';
 
 
 export class UIRender {
@@ -756,10 +758,7 @@ export class UIRender {
     * 播放对话，每次等待用户点击继续
     */
     private async playDialogue(messages: DialogTextData[], modification: Map<PropertyPath, Modification>) {
-        console.log("对话开始:", messages);
         for (const message of messages) {
-            console.log("当前对话:", message);
-
             // 检查分支条件，如果不满足则跳过此对话
             if (message.requiredBranchTag && !useBranchStore().canShowDialogue(message.requiredBranchTag)) {
                 console.log(`跳过对话，不满足分支条件: ${message.requiredBranchTag}`);
@@ -804,7 +803,6 @@ export class UIRender {
             }
 
         }
-        console.log("对话结束");
     }
 
 
@@ -818,14 +816,55 @@ export class UIRender {
 
     private isUpdateVisibility = false;
 
+    private resolveRuntimeDialogueSpine(message: DialogTextData): Raw<Spine> | undefined {
+        if (!message.parms) {
+            return undefined;
+        }
+
+        const actionStore = useActionStore();
+        const runtimeCharacters = actionStore.maxCharacter;
+        if (!runtimeCharacters.length) {
+            return message.parms.spine;
+        }
+
+        const boundCharacter = message.parms.character;
+        const boundCharacterName = typeof message.parms.CharacterName === 'string'
+            ? message.parms.CharacterName
+            : boundCharacter?.characterName || '';
+        const boundCharacterKey = boundCharacter ? getCharacterId(boundCharacter) : boundCharacterName;
+        const boundSpineResourceKey = typeof message.parms.spineResourceKey === 'string' && message.parms.spineResourceKey
+            ? message.parms.spineResourceKey
+            : (boundCharacter ? getCharacterResourceKey(boundCharacter) : '');
+
+        const runtimeCharacter = runtimeCharacters.find((character) => {
+            const runtimeCharacterKey = character.characterKey || getCharacterId(character.character);
+            const runtimeSpineResourceKey = character.spineResourceKey || getCharacterResourceKey(character.character);
+
+            return (
+                (boundCharacterKey && runtimeCharacterKey === boundCharacterKey) ||
+                (boundSpineResourceKey && runtimeSpineResourceKey === boundSpineResourceKey) ||
+                (boundCharacterName && character.character.characterName === boundCharacterName)
+            );
+        });
+
+        if (!runtimeCharacter?.spine) {
+            return message.parms.spine;
+        }
+
+        message.parms.character = runtimeCharacter.character;
+        message.parms.CharacterName = runtimeCharacter.character.characterName;
+        message.parms.spineResourceKey = runtimeCharacter.spineResourceKey || boundSpineResourceKey;
+        message.parms.spine = runtimeCharacter.spine;
+
+        return runtimeCharacter.spine;
+    }
+
     private async displayMessage(message: DialogTextData, modification: Map<PropertyPath, Modification>) {
-        console.log("日志：", message)
         // 设置摄像机位置
         if (message.parms) {
             // 这里可以添加摄像机移动逻辑
-            console.log("摄像机移动到：", message.parms.CharacterName);
-
             const canvas = CanvasManager.getInstance();
+            const runtimeSpine = this.resolveRuntimeDialogueSpine(message);
 
             // 只有当开启摄像机代理的时候才会取操控摄像机这样不会和代理进行争抢
             if (message.texts[0].isCameraProxy) {
@@ -836,8 +875,8 @@ export class UIRender {
                     enableAnimation: message.parms.isMove,
                     ease: message.parms.ease as EasingFunction,
                     duration: message.parms.duration || 300,
-                    centerX: message.parms.spine?.x || 0,
-                    spine: message.parms.spine,
+                    centerX: runtimeSpine?.x ?? canvas.viewport.center.x,
+                    spine: runtimeSpine,
                     xOffSet: message.parms.xOffSet,
                     yOffSet: message.parms.yOffSet,
                 })
@@ -881,26 +920,26 @@ export class UIRender {
             // }
 
             // 记录说话的角色, 将当前说话的角色的zIndex设置为30, 其他角色的zIndex设置为10
-            if (message.parms.spine) {
+            if (runtimeSpine) {
                 if (this.lastSpine) {
                     this.lastSpine.zIndex = 10;
                 }
-                this.lastSpine = message.parms.spine;
-                message.parms.spine.zIndex = 30;
+                this.lastSpine = runtimeSpine;
+                runtimeSpine.zIndex = 30;
                 CanvasManager.getInstance().viewport.sortChildren();
             }
 
             if (message.parms.animation) {
                 // 如果有动画，播放指定的动画
-                const spine = message.parms.spine;
+                const spine = runtimeSpine;
                 if (spine && spine.state) {
                     const animationName = message.parms.animation;
 
                     // 检查动画是否存在
                     if (spine.state.data.skeletonData.findAnimation(animationName)) {
                         // 获取当前正在播放的动画
-                        const currentAnimation = (spine.state.tracks[0] as any).animation;
-                        console.log("currentAnimation", currentAnimation)
+                        const currentTrack = spine.state.tracks?.[0] as any;
+                        const currentAnimation = currentTrack?.animation;
 
                         // 如果当前没有播放动画或者播放的动画与要播放的动画不同，才设置新动画
                         if (!currentAnimation || currentAnimation.name !== animationName) {
@@ -917,9 +956,6 @@ export class UIRender {
                                     spine.state.setAnimation(0, this.lastAnimationName, true);
                                 }, talkStartDuration * 1000);
                             }
-                            console.log(`为角色 ${message.parms.CharacterName} 播放动画: ${animationName}`);
-                        } else {
-                            console.log(`角色 ${message.parms.CharacterName} 已经在播放动画: ${animationName}，跳过重复播放`);
                         }
                     } else {
                         console.warn(`角色 ${message.parms.CharacterName} 没有可用的动画: ${animationName}`);
@@ -928,8 +964,8 @@ export class UIRender {
             }
 
             // 在normal模式时添加talk动画序列
-            if (message.mode === DialogueType.NORMAL && message.parms.spine) {
-                const spine = message.parms.spine;
+            if (message.mode === DialogueType.NORMAL && runtimeSpine?.state) {
+                const spine = runtimeSpine;
 
                 // 检查是否有talk_start和talk_end动画
                 const hasTalkStart = spine.state.hasAnimation('talk_start');
@@ -953,7 +989,6 @@ export class UIRender {
                         }, talkStartDuration * 1000);
                     }
 
-                    console.log(`为角色 ${message.parms.CharacterName} 开始播放talk动画序列`);
                 } else {
                     console.warn(`角色 ${message.parms.CharacterName} 没有可用的talk_start动画`);
                 }
@@ -1018,14 +1053,15 @@ export class UIRender {
         this.applyNormalDialogueLayout();
 
         // 解析出说话人名称 不带异格
-        tempText.title.text = getDialogueSpeakerDisplay(message.speaker, message.mode).split('：')[0];
+        tempText.title.text = getDialogueSpeakerDisplay(message.speaker, message.mode, {
+            character: message.parms?.character,
+            characterName: message.parms?.CharacterName,
+        }).split(/[:：]/)[0];
         tempText.content.text = '';
 
         let fullText = message.texts[0].text;
         const parseResult = TextTagParser.parse(fullText);
         fullText = parseResult.cleanText;
-
-        console.log("解析出的标签：", parseResult.tags);
 
         let currentText = '';
 
@@ -1033,8 +1069,6 @@ export class UIRender {
         const lengthFactor = 0.5;
         const delayPerCharacter = Math.max(baseDelay - fullText.length * lengthFactor, 15);
         const minSoundInterval = Math.max(delayPerCharacter, 70);
-
-        console.log("文字显示的总时长：", fullText.length * delayPerCharacter);
 
         this.isTextAni = true;
 
@@ -1053,7 +1087,6 @@ export class UIRender {
 
                 // 执行标签逻辑
                 await executeTextTag(tag, context);
-                console.log(`在索引 ${i} 处执行标签 ${tag.name}，属性为 ${tag.attributes}`);
             }
 
             if (i === fullText.length) {
@@ -1096,7 +1129,6 @@ export class UIRender {
             // 清除轨道1上的talk动画
             spine.state.setEmptyAnimation(1, 0.3); // 0.3秒的淡出时间
 
-            console.log(`角色 ${message.parms.CharacterName} 的talk动画已停止`);
         }
     }
 

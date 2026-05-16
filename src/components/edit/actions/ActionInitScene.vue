@@ -51,7 +51,8 @@
                     :default-offset="viewport.worldHeight / (item.y - 100) * 100" :character="item"
                     @position-changed="onChangeY(index, $event)">
                 </CharacterItem> -->
-                <div class="character-item-list" v-for="(item, index) in action.maxCharacter" :key="index">
+                <div class="character-item-list" v-for="(item, index) in sceneCharactersState"
+                    :key="`${item.characterKey}-${index}`">
                     <div class="character-header">
                         <div class="character-name">{{ getCharacterDisplayName(item.character.characterName) }}</div>
                         <div class="drag-handle" @mousedown="startDrag($event, index)"
@@ -105,7 +106,7 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref, onUnmounted, watchEffect } from 'vue';
+import { computed, onMounted, ref, onUnmounted, watch, watchEffect } from 'vue';
 import DynamicInputs from '../../common/DynamicInputs.vue';
 import ActionItemHead from './ActionItemHead.vue';
 import CanvasManager from '../../../script/render/canvas-manager';
@@ -115,7 +116,7 @@ import ToggleSwitch from '../../common/ToggleSwitch.vue';
 import { DEFAULT_SPINE_SCALE, ResType } from '../../../script/var';
 import { selectCharacterType, selectImageType } from '../../../script/common/search-action';
 import { handleSceneState, useCommonState } from '../../../script/common/common-action-item';
-import { ActionItems, GameMode, InputOption, LoadRes } from '../../../types/app';
+import { ActionItems, GameMode, InputOption, LoadRes, sceneCharacter } from '../../../types/app';
 
 import { Texture } from 'pixi.js';
 import { Action } from 'pixijs-actions';
@@ -140,6 +141,168 @@ const props = defineProps<{
 
 // 拿到一些共同的属性
 const { action, actionItem } = useCommonState(props.title, props.id);
+
+type StoredSceneCharacter = {
+    character: sceneCharacter['character'];
+    characterKey: string;
+    spineResourceKey: string;
+    x: number;
+    y: number;
+    scale: number;
+    selectAnimation: number;
+    animationOption: sceneCharacter['animationOption'];
+    isInitShow: boolean;
+};
+
+const sceneCharactersState = ref<StoredSceneCharacter[]>([]);
+
+const toStoredSceneCharacter = (character: sceneCharacter): StoredSceneCharacter => ({
+    character: character.character,
+    characterKey: character.characterKey || getCharacterId(character.character),
+    spineResourceKey: character.spineResourceKey || getCharacterResourceKey(character.character),
+    x: character.x,
+    y: character.y,
+    scale: character.scale,
+    selectAnimation: character.selectAnimation,
+    animationOption: character.animationOption.map((option) => ({ ...option })),
+    isInitShow: character.isInitShow,
+});
+
+const normalizeStoredSceneCharacter = (charData: any): StoredSceneCharacter | null => {
+    if (!charData?.character) {
+        return null;
+    }
+
+    return {
+        character: charData.character,
+        characterKey: charData.characterKey || getCharacterId(charData.character),
+        spineResourceKey: charData.spineResourceKey || getCharacterResourceKey(charData.character),
+        x: typeof charData.x === 'number' ? charData.x : viewport.worldWidth / 2,
+        y: typeof charData.y === 'number' ? charData.y : viewport.worldHeight + 200,
+        scale: typeof charData.scale === 'number' ? charData.scale : DEFAULT_SPINE_SCALE,
+        selectAnimation: typeof charData.selectAnimation === 'number' ? charData.selectAnimation : 0,
+        animationOption: Array.isArray(charData.animationOption)
+            ? charData.animationOption.map((option: any) => ({ ...option }))
+            : [],
+        isInitShow: typeof charData.isInitShow === 'boolean' ? charData.isInitShow : true,
+    };
+};
+
+const getStoredSceneCharacters = (): StoredSceneCharacter[] => {
+    if (sceneCharactersState.value.length > 0) {
+        return sceneCharactersState.value.map((character) => ({
+            ...character,
+            animationOption: character.animationOption.map((option) => ({ ...option })),
+        }));
+    }
+
+    if (Array.isArray(actionItem.actionData?.maxCharacter)) {
+        return actionItem.actionData.maxCharacter
+            .map((charData: any) => normalizeStoredSceneCharacter(charData))
+            .filter((charData: StoredSceneCharacter | null): charData is StoredSceneCharacter => charData !== null);
+    }
+
+    return action.maxCharacter.map(toStoredSceneCharacter);
+};
+
+const persistCurrentActionData = () => {
+    actionItem.actionData = serialization();
+};
+
+const buildSceneCharacterRuntimeKey = (character: {
+    character: sceneCharacter['character'];
+    characterKey?: string;
+    spineResourceKey?: string;
+}) => {
+    const characterKey = character.characterKey || getCharacterId(character.character);
+    const spineResourceKey = character.spineResourceKey || getCharacterResourceKey(character.character);
+    return `${characterKey}::${spineResourceKey}`;
+};
+
+const removeRuntimeCharacter = (character: sceneCharacter) => {
+    if (character.spine?.parent) {
+        character.spine.parent.removeChild(character.spine);
+    }
+    character.spine?.destroy();
+};
+
+const applyStoredCharacterToRuntime = (runtimeCharacter: sceneCharacter, storedCharacter: StoredSceneCharacter) => {
+    runtimeCharacter.character = storedCharacter.character;
+    runtimeCharacter.characterKey = storedCharacter.characterKey;
+    runtimeCharacter.spineResourceKey = storedCharacter.spineResourceKey;
+    runtimeCharacter.x = storedCharacter.x;
+    runtimeCharacter.y = storedCharacter.y;
+    runtimeCharacter.scale = storedCharacter.scale;
+    runtimeCharacter.isInitShow = storedCharacter.isInitShow;
+
+    if (storedCharacter.animationOption.length > 0) {
+        runtimeCharacter.animationOption = storedCharacter.animationOption.map((option) => ({ ...option }));
+    }
+
+    const maxAnimationIndex = Math.max(runtimeCharacter.animationOption.length - 1, 0);
+    runtimeCharacter.selectAnimation = Math.min(storedCharacter.selectAnimation, maxAnimationIndex);
+
+    runtimeCharacter.spine.visible = storedCharacter.isInitShow;
+    runtimeCharacter.spine.scale.set(storedCharacter.scale);
+    runtimeCharacter.spine.position.set(storedCharacter.x, storedCharacter.y);
+    runtimeCharacter.spine.alpha = 1;
+
+    const animationName = runtimeCharacter.animationOption[runtimeCharacter.selectAnimation]?.label;
+    if (animationName) {
+        runtimeCharacter.spine.state.setAnimation(0, animationName, true);
+    } else if (runtimeCharacter.spine.state.hasAnimation('idle')) {
+        runtimeCharacter.spine.state.setAnimation(0, 'idle', true);
+    }
+};
+
+const syncRuntimeCharactersFromStoredState = () => {
+    const storedCharacters = getStoredSceneCharacters();
+    const runtimeBuckets = new Map<string, sceneCharacter[]>();
+
+    action.maxCharacter.forEach((character) => {
+        const key = buildSceneCharacterRuntimeKey(character);
+        if (!runtimeBuckets.has(key)) {
+            runtimeBuckets.set(key, []);
+        }
+        runtimeBuckets.get(key)!.push(character);
+    });
+
+    const nextRuntimeCharacters: sceneCharacter[] = [];
+
+    storedCharacters.forEach((storedCharacter) => {
+        const runtimeKey = buildSceneCharacterRuntimeKey(storedCharacter);
+        const bucket = runtimeBuckets.get(runtimeKey);
+        let runtimeCharacter = bucket?.shift();
+
+        if (!runtimeCharacter) {
+            canvasManager.addCharacterSpine(storedCharacter.spineResourceKey, {
+                character: storedCharacter.character,
+                x: storedCharacter.x,
+                y: storedCharacter.y,
+                scale: storedCharacter.scale,
+                isInitShow: storedCharacter.isInitShow,
+            });
+            runtimeCharacter = action.maxCharacter[action.maxCharacter.length - 1];
+        }
+
+        if (!runtimeCharacter) {
+            return;
+        }
+
+        applyStoredCharacterToRuntime(runtimeCharacter, storedCharacter);
+        nextRuntimeCharacters.push(runtimeCharacter);
+    });
+
+    runtimeBuckets.forEach((bucket) => {
+        bucket.forEach(removeRuntimeCharacter);
+    });
+
+    action.maxCharacter = nextRuntimeCharacters;
+};
+
+const isCurrentSceneItemSelected = computed(() =>
+    action.currentSelectActionTitle === props.title && action.currentSelectActionItemId === props.id
+);
 
 
 
@@ -223,6 +386,7 @@ const selectBackground = () => {
         setModification(modification, 'background.image', res.path);
         setModification(modification, 'background.parallax', backgroundParallaxFactorValues.value[0].value);
         canvasManager.setBackground(currentBackground.value.path, backgroundParallaxFactorValues.value[0].value)
+        persistCurrentActionData();
     });
 }
 
@@ -245,32 +409,65 @@ const addCharacter = () => {
         const key = getCharacterResourceKey(res);
         // 添加角色
         canvasManager.addCharacterSpine(key, obj);
+
+        const runtimeCharacter = action.maxCharacter[action.maxCharacter.length - 1];
+        if (runtimeCharacter) {
+            sceneCharactersState.value.push(toStoredSceneCharacter(runtimeCharacter));
+            persistCurrentActionData();
+        }
     })
 }
 
 const onSelectAnimation = (index: number) => {
     const char = action.maxCharacter[index];
-    const ani = char.animationOption[char.selectAnimation].label;
+    const storedCharacter = sceneCharactersState.value[index];
+    if (!char || !storedCharacter) {
+        return;
+    }
+
+    char.selectAnimation = storedCharacter.selectAnimation;
+    const ani = char.animationOption[char.selectAnimation]?.label;
+
+    if (!ani) {
+        return;
+    }
 
     console.log("选择的动画：", ani);
     char.spine.state.setAnimation(0, ani, true);
+    storedCharacter.selectAnimation = char.selectAnimation;
+    storedCharacter.animationOption = char.animationOption.map((option) => ({ ...option }));
+    persistCurrentActionData();
 }
 
 const onInitShowChange = (index: number, value: boolean) => {
     const character = action.maxCharacter[index];
     character.isInitShow = value;
+    if (sceneCharactersState.value[index]) {
+        sceneCharactersState.value[index].isInitShow = value;
+    }
 
     // 确保角色存在且有Spine对象
     if (character && character.spine) {
         // 设置角色是否可见
         character.spine.visible = value;
     }
+
+    persistCurrentActionData();
 }
 
 
 // 更新角色位置的函数（替换原来的 onChangeX 和 onChangeY）
 const updateCharacterPosition = (index: number) => {
     const character = action.maxCharacter[index];
+    const storedCharacter = sceneCharactersState.value[index];
+    if (!character || !storedCharacter) {
+        return;
+    }
+
+    if (!isDragging) {
+        character.x = storedCharacter.x;
+        character.y = storedCharacter.y;
+    }
 
     // 确保值为数字并四舍五入到一位小数
     character.x = Math.round(character.x * 10) / 10;
@@ -282,11 +479,19 @@ const updateCharacterPosition = (index: number) => {
         character.spine.y = character.y; // 保持与原来的偏移一致
     }
 
+    storedCharacter.x = character.x;
+    storedCharacter.y = character.y;
+    storedCharacter.scale = character.scale;
+
     // 修改值
     const characterKey = getCharacterId(character.character);
     setModification(modification, `characters.${characterKey}.x`, character.x);
     setModification(modification, `characters.${characterKey}.y`, character.y);
     setModification(modification, `characters.${characterKey}.scale`, character.scale);
+
+    if (!isDragging) {
+        persistCurrentActionData();
+    }
 }
 
 // 拖拽相关变量
@@ -467,6 +672,8 @@ const stopDrag = (event?: MouseEvent) => {
     document.removeEventListener('keydown', onKeyDown);
     document.removeEventListener('keyup', onKeyUp);
 
+    persistCurrentActionData();
+
     // 防止事件冒泡和默认行为
     if (event) {
         event.preventDefault();
@@ -487,6 +694,7 @@ const reLoad = () => {
     viewport.setZoom(1);
     viewport.moveCenter(canvasManager.worldCenter.x, canvasManager.worldCenter.y);
     viewport.emit('moved')
+    persistCurrentActionData();
 }
 
 
@@ -505,6 +713,7 @@ const handleParallaxFactorBlur = () => {
 
     setModification(modification, 'background.parallax', backgroundParallaxFactorValues.value[0].value);
     canvasManager.setBackground(currentBackground.value.path, backgroundParallaxFactorValues.value[0].value)
+    persistCurrentActionData();
 
 }
 
@@ -525,12 +734,16 @@ const valueChange = (updateIndex: number) => {
         viewport.scale.set(cameraValues.value[updateIndex].value);
         setModification(modification, 'camera.zoom', cameraValues.value[updateIndex].value);
     }
+
+    persistCurrentActionData();
 }
 
 
 // 这个方法是用于将原状态过渡到目标状态的操作，用于播放模式或预览模式
 // e.g 我预览当前节点就需要执行这个方法从状态到这个状态之间要经历什么
 const targetAction = async () => {
+    syncRuntimeCharactersFromStoredState();
+
     // 先初始化角色的一些属性
     action.maxCharacter.forEach(character => {
         character.spine.visible = character.isInitShow;
@@ -619,14 +832,16 @@ const serialization = () => {
             type: setting.type,
             disabled: setting.disabled
         })),
-        maxCharacter: action.maxCharacter.map(character => ({
+        maxCharacter: getStoredSceneCharacters().map(character => ({
             character: character.character,
+            characterKey: character.characterKey,
+            spineResourceKey: character.spineResourceKey,
             x: character.x,
             y: character.y,
             scale: character.scale,
             isInitShow: character.isInitShow,
             selectAnimation: character.selectAnimation,
-            animationOption: character.animationOption
+            animationOption: character.animationOption.map((option) => ({ ...option }))
         }))
     };
 };
@@ -680,22 +895,9 @@ const deserialization = (data: ActionItems) => {
         }
 
         if (Array.isArray(actionData.maxCharacter)) {
-            // 恢复角色数据到action.maxCharacter
-            actionData.maxCharacter.forEach((charData: any, index: number) => {
-                if (action.maxCharacter[index]) {
-                    action.maxCharacter[index].character = charData.character;
-                    action.maxCharacter[index].x = charData.x || viewport.worldWidth / 2;
-                    action.maxCharacter[index].y = charData.y || viewport.worldHeight + 200;
-                    action.maxCharacter[index].scale = charData.scale || 1;
-                    action.maxCharacter[index].isInitShow = charData.isInitShow !== undefined ? charData.isInitShow : true;
-                    action.maxCharacter[index].selectAnimation = charData.selectAnimation || 0;
-                    if (charData.animationOption) {
-                        action.maxCharacter[index].animationOption = charData.animationOption;
-                    }
-                    onSelectAnimation(index);
-                    onInitShowChange(index, action.maxCharacter[index].isInitShow);
-                }
-            });
+            sceneCharactersState.value = actionData.maxCharacter
+                .map((charData: any) => normalizeStoredSceneCharacter(charData))
+                .filter((charData: StoredSceneCharacter | null): charData is StoredSceneCharacter => charData !== null);
         }
 
         // 需要重新设置背景 parallax 因子
@@ -706,8 +908,8 @@ const deserialization = (data: ActionItems) => {
 onMounted(() => {
     // 向action中注册回调和序列化方法
     const actionIndex = action.getAction(props.title).as.findIndex((item) => item.id === props.id);
-    action.getAction(props.title).as[actionIndex].action = targetAction;
-    action.getAction(props.title).as[actionIndex].serialize = serialization;
+    actionItem.action = targetAction;
+    actionItem.serialize = serialization;
 
     modification = action.getCurrentModification(props.title, props.id);
     setModification(modification, 'camera.x', cameraValues.value[0].value);
@@ -731,6 +933,7 @@ onMounted(() => {
             cameraValues.value[1].value = newY;
             setModification(modification, 'camera.x', newX);
             setModification(modification, 'camera.y', newY);
+            persistCurrentActionData();
 
             // actionItem.action?.();
         }
@@ -760,13 +963,32 @@ onMounted(() => {
             setModification(modification, 'camera.x', newX);
             setModification(modification, 'camera.y', newY);
             setModification(modification, 'camera.zoom', viewport.scale.x);
+            persistCurrentActionData();
         }
         // actionItem.action?.();
     })
 
     // 反序列化数据
     deserialization(action.getAction(props.title).as[actionIndex]);
+
+    if (sceneCharactersState.value.length === 0) {
+        sceneCharactersState.value = action.maxCharacter.map(toStoredSceneCharacter);
+    }
+
+    if (isCurrentSceneItemSelected.value) {
+        syncRuntimeCharactersFromStoredState();
+    }
 })
+
+watch(isCurrentSceneItemSelected, (selected) => {
+    if (selected) {
+        syncRuntimeCharactersFromStoredState();
+    }
+});
+
+watch(fade, () => {
+    persistCurrentActionData();
+});
 
 // 清理事件监听器
 onUnmounted(() => {
