@@ -132,18 +132,18 @@ onUnmounted(() => {
 }
 
 .arrow {
-    font-size: 10px;
-    opacity: 0.5;
-    width: 20px;
-    height: 20px;
+    font-size: 11px;
+    line-height: 1;
+    color: var(--floating-panel-text, var(--text-color));
+    opacity: 0.65;
+    width: 16px;
+    height: 16px;
     display: flex;
     justify-content: center;
     align-items: center;
-    border-left: 2px solid var(--floating-panel-text, var(--text-color));
-    border-bottom: 2px solid var(--floating-panel-text, var(--text-color));
     transform: rotate(0deg);
     transform-origin: center;
-    transition: all .06s linear;
+    transition: transform 0.06s linear, color 0.2s ease, opacity 0.2s ease;
 }
 
 .arrow-open {
@@ -200,8 +200,6 @@ onUnmounted(() => {
 }
 
 .dropdown-container.disabled .arrow {
-    border-left-color: var(--ui-disabled-text);
-    border-bottom-color: var(--ui-disabled-text);
     opacity: 0.85;
 }
 
