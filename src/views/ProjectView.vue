@@ -1982,76 +1982,43 @@ const handleResetShader = () => {
     }
 }
 
-.animation-selector {
+.animation-selector,
+.skin-selector,
+.character-type-selector {
     position: absolute;
-    top: 10px;
     right: 10px;
     z-index: 10;
     min-width: 220px;
-    background: rgba(0, 0, 0, 0.78);
+    background: var(--floating-panel-bg);
     padding: 10px 12px;
     border-radius: 10px;
-    border: 1px solid rgba(255, 255, 255, 0.08);
+    border: 1px solid var(--floating-panel-border);
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
-    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.28);
+    box-shadow: var(--floating-panel-shadow);
     display: flex;
     align-items: center;
     gap: 10px;
 }
 
-.animation-selector label {
-    color: rgba(255, 255, 255, 0.86);
+.animation-selector {
+    top: 10px;
+}
+
+.animation-selector label,
+.skin-selector label,
+.character-type-selector label {
+    color: var(--floating-panel-soft-text);
     font-size: 13px;
     white-space: nowrap;
 }
 
 .skin-selector {
-    position: absolute;
     top: 70px;
-    right: 10px;
-    z-index: 10;
-    min-width: 220px;
-    background: rgba(0, 0, 0, 0.78);
-    padding: 10px 12px;
-    border-radius: 10px;
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.28);
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
-
-.skin-selector label {
-    color: rgba(255, 255, 255, 0.86);
-    font-size: 13px;
-    white-space: nowrap;
 }
 
 .character-type-selector {
-    position: absolute;
     top: 130px;
-    right: 10px;
-    z-index: 10;
-    min-width: 220px;
-    background: rgba(0, 0, 0, 0.78);
-    padding: 10px 12px;
-    border-radius: 10px;
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.28);
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
-
-.character-type-selector label {
-    color: rgba(255, 255, 255, 0.86);
-    font-size: 13px;
-    white-space: nowrap;
 }
 
 .slot-batch-panel {
@@ -2064,11 +2031,11 @@ const handleResetShader = () => {
     overflow-y: auto;
     padding: 14px;
     border-radius: 10px;
-    background: rgba(0, 0, 0, 0.84);
+    background: var(--floating-panel-bg);
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    box-shadow: 0 16px 32px rgba(0, 0, 0, 0.3);
+    border: 1px solid var(--floating-panel-border);
+    box-shadow: var(--floating-panel-shadow);
 }
 
 .slot-batch-header {
@@ -2079,14 +2046,14 @@ const handleResetShader = () => {
 }
 
 .slot-batch-title {
-    color: #fff;
+    color: var(--floating-panel-text);
     font-size: 15px;
     font-weight: 600;
 }
 
 .slot-batch-subtitle {
     margin-top: 4px;
-    color: rgba(255, 255, 255, 0.56);
+    color: var(--floating-panel-muted-text);
     font-size: 12px;
     line-height: 1.45;
 }
@@ -2101,9 +2068,9 @@ const handleResetShader = () => {
 .slot-selection-chip {
     padding: 4px 8px;
     border-radius: 999px;
-    background: rgba(255, 255, 255, 0.08);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    color: #fff;
+    background: var(--floating-panel-chip-bg);
+    border: 1px solid var(--floating-panel-chip-border);
+    color: var(--floating-panel-chip-text);
     font-size: 11px;
 }
 
@@ -2112,28 +2079,28 @@ const handleResetShader = () => {
     align-items: center;
     gap: 10px;
     margin-top: 12px;
-    color: #fff;
+    color: var(--floating-panel-text);
 }
 
 .slot-batch-control label {
     min-width: 56px;
     font-size: 12px;
-    color: rgba(255, 255, 255, 0.7);
+    color: var(--floating-panel-soft-text);
 }
 
 .slot-batch-control input[type="range"] {
     flex: 1;
-    accent-color: #4caf50;
+    accent-color: var(--accent-color);
 }
 
 .slot-batch-control input[type="checkbox"] {
-    accent-color: #4caf50;
+    accent-color: var(--accent-color);
 }
 
 .slot-batch-value {
     min-width: 40px;
     text-align: right;
-    color: rgba(255, 255, 255, 0.58);
+    color: var(--floating-panel-muted-text);
     font-size: 12px;
 }
 
@@ -2147,43 +2114,44 @@ const handleResetShader = () => {
 .slot-panel-button {
     appearance: none;
     padding: 8px 12px;
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    border: 1px solid var(--floating-panel-border);
     border-radius: 7px;
-    background: rgba(255, 255, 255, 0.08);
-    color: #fff;
+    background: var(--floating-panel-subtle-bg);
+    color: var(--floating-panel-text);
     font-size: 12px;
     cursor: pointer;
     transition: background-color 0.2s ease, border-color 0.2s ease, transform 0.2s ease, opacity 0.2s ease;
 }
 
 .slot-panel-button:hover {
-    background: rgba(255, 255, 255, 0.14);
-    border-color: rgba(255, 255, 255, 0.2);
+    background: var(--floating-panel-subtle-hover-bg);
+    border-color: var(--floating-panel-input-border-focus);
     transform: translateY(-1px);
 }
 
 .slot-panel-button-primary {
-    background: rgba(76, 175, 80, 0.22);
-    border-color: rgba(76, 175, 80, 0.38);
+    background: var(--floating-panel-accent-bg);
+    border-color: var(--floating-panel-accent-border);
 }
 
 .slot-panel-button-primary:hover {
-    background: rgba(76, 175, 80, 0.32);
-    border-color: rgba(76, 175, 80, 0.48);
+    background: var(--floating-panel-subtle-hover-bg);
+    border-color: var(--accent-color);
 }
 
 .slot-panel-button-danger {
-    background: rgba(244, 67, 54, 0.18);
-    border-color: rgba(244, 67, 54, 0.32);
+    background: var(--floating-panel-danger-bg);
+    border-color: var(--floating-panel-danger-border);
+    color: var(--floating-panel-danger-text);
 }
 
 .slot-panel-button-danger:hover {
-    background: rgba(244, 67, 54, 0.28);
-    border-color: rgba(244, 67, 54, 0.44);
+    background: var(--floating-panel-subtle-hover-bg);
+    border-color: var(--danger-color);
 }
 
 .slot-panel-button-ghost {
-    background: rgba(255, 255, 255, 0.04);
+    background: var(--floating-panel-input-bg);
 }
 
 .slot-panel-button-compact {
@@ -2194,8 +2162,8 @@ const handleResetShader = () => {
 .slot-save-section {
     margin-top: 16px;
     padding-top: 16px;
-    border-top: 1px solid rgba(255, 255, 255, 0.08);
-    color: #fff;
+    border-top: 1px solid var(--floating-panel-divider);
+    color: var(--floating-panel-text);
 }
 
 .slot-save-section label,
@@ -2203,33 +2171,33 @@ const handleResetShader = () => {
     display: block;
     margin-bottom: 8px;
     font-size: 12px;
-    color: rgba(255, 255, 255, 0.7);
+    color: var(--floating-panel-soft-text);
 }
 
 .slot-name-input {
     width: 100%;
     padding: 10px 12px;
-    border: 1px solid rgba(255, 255, 255, 0.08);
+    border: 1px solid var(--floating-panel-input-border);
     border-radius: 7px;
-    background: rgba(255, 255, 255, 0.06);
-    color: #fff;
+    background: var(--floating-panel-input-bg);
+    color: var(--floating-panel-text);
     outline: none;
     transition: border-color 0.2s ease, background-color 0.2s ease;
 }
 
 .slot-name-input::placeholder {
-    color: rgba(255, 255, 255, 0.34);
+    color: var(--floating-panel-muted-text);
 }
 
 .slot-name-input:focus {
-    border-color: rgba(255, 255, 255, 0.2);
-    background: rgba(255, 255, 255, 0.1);
+    border-color: var(--floating-panel-input-border-focus);
+    background: var(--floating-panel-input-bg-focus);
 }
 
 .slot-custom-list {
     margin-top: 16px;
     padding-top: 16px;
-    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    border-top: 1px solid var(--floating-panel-divider);
 }
 
 .slot-custom-item {
@@ -2240,41 +2208,41 @@ const handleResetShader = () => {
     padding: 10px;
     margin-top: 8px;
     border-radius: 8px;
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    color: #fff;
+    background: var(--floating-panel-chip-bg);
+    border: 1px solid var(--floating-panel-chip-border);
+    color: var(--floating-panel-text);
     font-size: 12px;
 }
 
 .slot-custom-delete {
-    border: 1px solid rgba(244, 67, 54, 0.1);
+    border: 1px solid var(--floating-panel-danger-border);
     border-radius: 6px;
-    background: rgba(244, 67, 54, 0.08);
-    color: #ff9d95;
+    background: var(--floating-panel-danger-bg);
+    color: var(--floating-panel-danger-text);
     padding: 4px 8px;
     cursor: pointer;
     transition: background-color 0.2s ease, border-color 0.2s ease;
 }
 
 .slot-custom-delete:hover {
-    background: rgba(244, 67, 54, 0.16);
-    border-color: rgba(244, 67, 54, 0.24);
+    background: var(--floating-panel-subtle-hover-bg);
+    border-color: var(--danger-color);
 }
 
 .bulk-select-dialog {
     width: min(460px, 92vw);
     padding: 0 16px 16px;
     border-radius: 12px;
-    background: rgba(0, 0, 0, 0.88);
+    background: var(--floating-panel-bg-strong);
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    box-shadow: 0 16px 32px rgba(0, 0, 0, 0.32);
+    border: 1px solid var(--floating-panel-border);
+    box-shadow: var(--floating-panel-shadow);
 }
 
 .bulk-select-helper {
     margin-top: 10px;
-    color: rgba(255, 255, 255, 0.56);
+    color: var(--floating-panel-muted-text);
     font-size: 12px;
     line-height: 1.45;
 }
@@ -2306,21 +2274,21 @@ const handleResetShader = () => {
 .bulk-select-results::-webkit-scrollbar-thumb,
 .shader-floating-body::-webkit-scrollbar-thumb {
     border-radius: 999px;
-    background: rgba(255, 255, 255, 0.16);
+    background: var(--floating-panel-scrollbar);
 }
 
 .slot-batch-panel::-webkit-scrollbar-thumb:hover,
 .bulk-select-results::-webkit-scrollbar-thumb:hover,
 .shader-floating-body::-webkit-scrollbar-thumb:hover {
-    background: rgba(255, 255, 255, 0.28);
+    background: var(--floating-panel-scrollbar-hover);
 }
 
 .bulk-select-result {
     appearance: none;
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    border: 1px solid var(--floating-panel-chip-border);
     border-radius: 999px;
-    background: rgba(255, 255, 255, 0.08);
-    color: #fff;
+    background: var(--floating-panel-chip-bg);
+    color: var(--floating-panel-chip-text);
     padding: 6px 10px;
     font-size: 12px;
     cursor: pointer;
@@ -2328,8 +2296,8 @@ const handleResetShader = () => {
 }
 
 .bulk-select-result:hover {
-    background: rgba(255, 255, 255, 0.14);
-    border-color: rgba(255, 255, 255, 0.22);
+    background: var(--floating-panel-subtle-hover-bg);
+    border-color: var(--accent-color);
     transform: translateY(-1px);
 }
 
@@ -2529,16 +2497,16 @@ const handleResetShader = () => {
     flex-direction: column;
     overflow: hidden;
     resize: both;
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    border: 1px solid var(--floating-panel-border);
     border-radius: 12px;
-    background: rgba(0, 0, 0, 0.88);
+    background: var(--floating-panel-bg-strong);
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
-    box-shadow: 0 16px 32px rgba(0, 0, 0, 0.32);
+    box-shadow: var(--floating-panel-shadow);
 }
 
 .shader-floating-window.dragging {
-    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+    box-shadow: var(--floating-panel-shadow-drag);
 }
 
 .shader-floating-header,
@@ -2548,8 +2516,8 @@ const handleResetShader = () => {
     align-items: center;
     gap: 12px;
     padding: 12px 14px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-    background: rgba(255, 255, 255, 0.04);
+    border-bottom: 1px solid var(--floating-panel-divider);
+    background: var(--floating-panel-header-bg);
 }
 
 .shader-floating-header {
@@ -2563,7 +2531,7 @@ const handleResetShader = () => {
 
 .shader-floating-title-group h3,
 .shader-editor-header h3 {
-    color: #fff;
+    color: var(--floating-panel-text);
     margin: 0;
     font-size: 14px;
     font-weight: 600;
@@ -2581,16 +2549,18 @@ const handleResetShader = () => {
 .shader-floating-chip {
     padding: 3px 8px;
     border-radius: 999px;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    background: rgba(255, 255, 255, 0.08);
-    color: rgba(255, 255, 255, 0.66);
+    border: 1px solid var(--floating-panel-chip-border);
+    background: var(--floating-panel-chip-bg);
+    color: var(--floating-panel-muted-text);
     font-size: 11px;
     line-height: 1;
     white-space: nowrap;
 }
 
 .shader-floating-count {
-    color: #fff;
+    background: var(--floating-panel-accent-bg);
+    border-color: var(--floating-panel-accent-border);
+    color: var(--floating-panel-text);
 }
 
 .shader-floating-body {
@@ -2605,7 +2575,7 @@ const handleResetShader = () => {
     left: 0;
     right: 0;
     bottom: 0;
-    background: rgba(10, 12, 18, 0.6);
+    background: var(--floating-panel-overlay);
     z-index: 1000;
     display: flex;
     align-items: center;
@@ -2614,24 +2584,28 @@ const handleResetShader = () => {
 }
 
 .close-btn {
-    background: rgba(255, 255, 255, 0.08);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    color: #fff;
-    font-size: 20px;
+    background: var(--floating-panel-close-bg);
+    border: 1px solid var(--floating-panel-close-border);
+    color: var(--floating-panel-close-text);
+    box-shadow: var(--floating-panel-close-shadow);
+    font-size: 21px;
+    font-weight: 700;
     cursor: pointer;
     padding: 0;
-    width: 32px;
-    height: 32px;
+    width: 34px;
+    height: 34px;
     display: flex;
     align-items: center;
     justify-content: center;
     border-radius: 8px;
-    transition: background-color 0.2s, border-color 0.2s;
+    transition: background-color 0.2s, border-color 0.2s, color 0.2s, transform 0.2s;
 }
 
 .close-btn:hover {
-    background: rgba(255, 255, 255, 0.14);
-    border-color: rgba(255, 255, 255, 0.18);
+    background: var(--floating-panel-close-hover-bg);
+    border-color: var(--floating-panel-close-hover-border);
+    color: var(--floating-panel-close-hover-text);
+    transform: translateY(-1px);
 }
 
 /* Shader 编辑器动画 */

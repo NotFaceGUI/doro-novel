@@ -5,6 +5,7 @@ import './main.css';
 import { createPinia } from "pinia";
 import piniaPluginPersistedstate from 'pinia-plugin-persistedstate';
 import { i18n, initializeI18n, restoreLocaleFromStorage } from "./locales/i18n";
+import { useThemeStore } from "./stores/theme-store";
 
 // 创建应用实例
 const app = createApp(App);
@@ -12,6 +13,7 @@ const app = createApp(App);
 // 创建pinia实例并添加持久化插件
 const pinia = createPinia();
 pinia.use(piniaPluginPersistedstate);
+const themeStore = useThemeStore(pinia);
 
 // 配置应用
 app.use(i18n)
@@ -25,6 +27,9 @@ async function initializeApp() {
     
     // 恢复用户的语言设置
     restoreLocaleFromStorage()
+
+    // 恢复用户的主题设置
+    themeStore.initialize()
     
     // 挂载应用
     app.mount("#app");
@@ -32,6 +37,8 @@ async function initializeApp() {
     console.log('Application initialized successfully')
   } catch (error) {
     console.error('Failed to initialize application:', error)
+
+    themeStore.initialize()
     
     // 即使初始化失败，也要挂载应用
     app.mount("#app");

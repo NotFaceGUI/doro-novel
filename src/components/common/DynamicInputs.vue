@@ -103,10 +103,25 @@ input:focus {
     outline: none;
 }
 
-.disable {
-    background-color: #36364D;
+input:disabled {
+    background: var(--ui-disabled-bg);
+    border-color: var(--ui-disabled-border);
+    color: var(--ui-disabled-text);
+    box-shadow: var(--ui-disabled-shadow);
     cursor: not-allowed;
-    border: 1px solid #ddd;
-    opacity: 0.6;
+    opacity: var(--ui-disabled-opacity);
+}
+
+input:disabled::placeholder {
+    color: var(--ui-disabled-placeholder);
+}
+
+.disable {
+    background: var(--ui-disabled-bg);
+    border-color: var(--ui-disabled-border);
+    color: var(--ui-disabled-text);
+    box-shadow: var(--ui-disabled-shadow);
+    cursor: not-allowed;
+    opacity: var(--ui-disabled-opacity);
 }
 </style>

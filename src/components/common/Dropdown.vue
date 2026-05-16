@@ -115,20 +115,20 @@ onUnmounted(() => {
     justify-content: space-between;
     align-items: center;
     padding: 5px 10px;
-    background-color: var(--secondary-bg);
-    border: 1px solid var(--high-hover-bg);
+    background-color: var(--floating-panel-input-bg, var(--secondary-bg));
+    border: 1px solid var(--floating-panel-input-border, var(--high-hover-bg));
     border-radius: 5px;
-    transition: background-color 0.3s;
+    transition: background-color 0.2s ease, border-color 0.2s ease;
     cursor: pointer;
 }
 
 .selected-option {
     font-size: 14px;
-    color: var(--primary-text);
+    color: var(--floating-panel-text, var(--text-color));
 }
 
 .selected-option.placeholder {
-    color: var(--sec-text-color);
+    color: var(--floating-panel-muted-text, var(--sec-text-color));
 }
 
 .arrow {
@@ -139,8 +139,8 @@ onUnmounted(() => {
     display: flex;
     justify-content: center;
     align-items: center;
-    border-left: 2px solid var(--primary-text);
-    border-bottom: 2px solid var(--primary-text);
+    border-left: 2px solid var(--floating-panel-text, var(--text-color));
+    border-bottom: 2px solid var(--floating-panel-text, var(--text-color));
     transform: rotate(0deg);
     transform-origin: center;
     transition: all .06s linear;
@@ -152,13 +152,13 @@ onUnmounted(() => {
 
 .dropdown-options {
     position: absolute;
-    background-color: var(--secondary-bg);
-    border: 1px solid var(--high-hover-bg);
+    background-color: var(--floating-panel-bg-strong, var(--secondary-bg));
+    border: 1px solid var(--floating-panel-border, var(--high-hover-bg));
     border-radius: 5px;
     max-height: 150px;
     overflow-y: auto;
     z-index: 9999;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    box-shadow: var(--floating-panel-shadow, 0 2px 8px rgba(0, 0, 0, 0.2));
 
 }
 
@@ -166,7 +166,8 @@ onUnmounted(() => {
     font-size: 14px;
     padding: 5px 10px;
     cursor: pointer;
-    transition: background-color 0.3s;
+    color: var(--floating-panel-text, var(--text-color));
+    transition: background-color 0.2s ease;
 }
 
 /* transition 动画 */
@@ -182,16 +183,30 @@ onUnmounted(() => {
 }
 
 .dropdown-option:hover {
-    background-color: var(--high-hover-bg);
+    background-color: var(--floating-panel-subtle-hover-bg, var(--high-hover-bg));
 }
 
 .dropdown-container.disabled .dropdown {
     cursor: not-allowed;
-    opacity: 0.5;
+    opacity: var(--ui-disabled-opacity, 1);
+    background-color: var(--ui-disabled-bg);
+    border-color: var(--ui-disabled-border);
+    box-shadow: var(--ui-disabled-shadow);
+}
+
+.dropdown-container.disabled .selected-option,
+.dropdown-container.disabled .arrow {
+    color: var(--ui-disabled-text);
+}
+
+.dropdown-container.disabled .arrow {
+    border-left-color: var(--ui-disabled-text);
+    border-bottom-color: var(--ui-disabled-text);
+    opacity: 0.85;
 }
 
 .dropdown-options:hover::-webkit-scrollbar-thumb {
-    background-color: var(--deep-border-color);
+    background-color: var(--floating-panel-scrollbar-hover, var(--deep-border-color));
 }
 
 
@@ -211,6 +226,6 @@ onUnmounted(() => {
 }
 
 .dropdown-options::-webkit-scrollbar-thumb:hover {
-    background-color: var(--high-hover-bg);
+    background-color: var(--floating-panel-scrollbar-hover, var(--high-hover-bg));
 }
 </style>

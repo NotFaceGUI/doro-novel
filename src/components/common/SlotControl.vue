@@ -202,13 +202,13 @@ const filteredSlots = computed(() => {
   width: min(240px, calc(100vw - 32px));
   min-width: 200px;
   max-width: 280px;
-  background: rgba(0, 0, 0, 0.84);
+  background: var(--floating-panel-bg);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
   border-radius: 10px;
   transition: all 0.3s ease;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  box-shadow: 0 16px 32px rgba(0, 0, 0, 0.28);
+  border: 1px solid var(--floating-panel-border);
+  box-shadow: var(--floating-panel-shadow);
 }
 
 .slot-control-header {
@@ -218,7 +218,7 @@ const filteredSlots = computed(() => {
   padding: 12px 14px;
   cursor: pointer;
   user-select: none;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  border-bottom: 1px solid var(--floating-panel-divider);
 }
 
 .header-main {
@@ -228,19 +228,19 @@ const filteredSlots = computed(() => {
 }
 
 .header-title {
-  color: #fff;
+  color: var(--floating-panel-text);
   font-size: 14px;
   font-weight: 600;
 }
 
 .header-count {
-  color: rgba(255, 255, 255, 0.56);
+  color: var(--floating-panel-muted-text);
   font-size: 11px;
   line-height: 1;
 }
 
 .expand-icon {
-  color: rgba(255, 255, 255, 0.62);
+  color: var(--floating-panel-muted-text);
   transition: transform 0.3s ease;
 }
 
@@ -261,22 +261,22 @@ const filteredSlots = computed(() => {
   width: 100%;
   height: 32px;
   padding: 0 10px;
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  border: 1px solid var(--floating-panel-input-border);
   border-radius: 6px;
-  background: rgba(255, 255, 255, 0.06);
-  color: #fff;
+  background: var(--floating-panel-input-bg);
+  color: var(--floating-panel-text);
   outline: none;
   transition: border-color 0.2s ease, background-color 0.2s ease, box-shadow 0.2s ease;
 }
 
 .slot-search-input::placeholder {
-  color: rgba(255, 255, 255, 0.36);
+  color: var(--floating-panel-muted-text);
 }
 
 .slot-search-input:focus {
-  border-color: rgba(255, 255, 255, 0.2);
-  background: rgba(255, 255, 255, 0.09);
-  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.08);
+  border-color: var(--floating-panel-input-border-focus);
+  background: var(--floating-panel-input-bg-focus);
+  box-shadow: 0 0 0 1px var(--floating-panel-divider);
 }
 
 .slot-list {
@@ -285,10 +285,10 @@ const filteredSlots = computed(() => {
 
 .slot-empty {
   padding: 12px;
-  border: 1px dashed rgba(255, 255, 255, 0.12);
+  border: 1px dashed var(--floating-panel-divider);
   border-radius: 8px;
-  background: rgba(255, 255, 255, 0.04);
-  color: rgba(255, 255, 255, 0.5);
+  background: var(--floating-panel-subtle-bg);
+  color: var(--floating-panel-muted-text);
   font-size: 12px;
   text-align: center;
 }
@@ -297,13 +297,13 @@ const filteredSlots = computed(() => {
   margin-bottom: 8px;
   padding: 9px 10px;
   border-radius: 8px;
-  background: rgba(255, 255, 255, 0.05);
+  background: var(--floating-panel-subtle-bg);
   transition: all 0.2s ease;
   border: 1px solid transparent;
 }
 
 .slot-item:hover {
-  background: rgba(255, 255, 255, 0.08);
+  background: var(--floating-panel-subtle-hover-bg);
 }
 
 .slot-item.disabled {
@@ -311,20 +311,18 @@ const filteredSlots = computed(() => {
 }
 
 .slot-item.highlighted {
-  background: rgba(76, 175, 80, 0.18);
-  border: 1px solid rgba(76, 175, 80, 0.42);
-  box-shadow: 0 0 10px rgba(76, 175, 80, 0.18);
+  background: var(--floating-panel-success-bg);
+  border: 1px solid var(--floating-panel-success-border);
 }
 
 .slot-item.selected {
-  background: rgba(91, 153, 255, 0.18);
-  border: 1px solid rgba(91, 153, 255, 0.42);
-  box-shadow: 0 0 10px rgba(91, 153, 255, 0.14);
+  background: var(--floating-panel-accent-bg);
+  border: 1px solid var(--floating-panel-accent-border);
 }
 
 .slot-item.selected.highlighted {
-  background: rgba(88, 177, 140, 0.2);
-  border-color: rgba(88, 177, 140, 0.5);
+  background: var(--floating-panel-accent-bg);
+  border-color: var(--accent-color);
 }
 
 .slot-label {
@@ -341,18 +339,18 @@ const filteredSlots = computed(() => {
 .checkbox-custom {
   width: 16px;
   height: 16px;
-  border: 1px solid rgba(255, 255, 255, 0.22);
+  border: 1px solid var(--floating-panel-input-border-focus);
   border-radius: 4px;
   margin-right: 8px;
   position: relative;
   transition: all 0.2s ease;
   flex-shrink: 0;
-  background: rgba(255, 255, 255, 0.06);
+  background: var(--floating-panel-input-bg);
 }
 
 .slot-checkbox:checked + .checkbox-custom {
-  background: #4caf50;
-  border-color: #4caf50;
+  background: var(--accent-color);
+  border-color: var(--accent-color);
 }
 
 .slot-checkbox:checked + .checkbox-custom::after {
@@ -368,7 +366,7 @@ const filteredSlots = computed(() => {
 }
 
 .slot-name {
-  color: #fff;
+  color: var(--floating-panel-text);
   font-size: 13px;
   flex: 1;
 }
@@ -383,17 +381,17 @@ const filteredSlots = computed(() => {
 .opacity-slider {
   flex: 1;
   height: 4px;
-  background: rgba(255, 255, 255, 0.12);
+  background: var(--floating-panel-divider);
   border-radius: 2px;
   outline: none;
-  accent-color: #4caf50;
+  accent-color: var(--accent-color);
 }
 
 .opacity-slider::-webkit-slider-thumb {
   -webkit-appearance: none;
   width: 14px;
   height: 14px;
-  background: #4caf50;
+  background: var(--accent-color);
   border-radius: 50%;
   cursor: pointer;
 }
@@ -401,14 +399,14 @@ const filteredSlots = computed(() => {
 .opacity-slider::-moz-range-thumb {
   width: 14px;
   height: 14px;
-  background: #4caf50;
+  background: var(--accent-color);
   border-radius: 50%;
   cursor: pointer;
   border: none;
 }
 
 .opacity-value {
-  color: rgba(255, 255, 255, 0.58);
+  color: var(--floating-panel-muted-text);
   font-size: 11px;
   min-width: 35px;
   text-align: right;
@@ -418,7 +416,7 @@ const filteredSlots = computed(() => {
   display: flex;
   gap: 8px;
   padding: 12px;
-  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  border-top: 1px solid var(--floating-panel-divider);
 }
 
 .control-btn {
@@ -432,27 +430,28 @@ const filteredSlots = computed(() => {
   border-radius: 7px;
   font-size: 12px;
   cursor: pointer;
-  color: #fff;
+  color: var(--floating-panel-text);
   transition: background-color 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
 }
 
 .show-all {
-  background: rgba(76, 175, 80, 0.18);
-  border-color: rgba(76, 175, 80, 0.32);
+  background: var(--floating-panel-accent-bg);
+  border-color: var(--floating-panel-accent-border);
 }
 
 .show-all:hover {
-  background: rgba(76, 175, 80, 0.28);
+  background: var(--floating-panel-subtle-hover-bg);
   transform: translateY(-1px);
 }
 
 .hide-all {
-  background: rgba(244, 67, 54, 0.18);
-  border-color: rgba(244, 67, 54, 0.32);
+  background: var(--floating-panel-danger-bg);
+  border-color: var(--floating-panel-danger-border);
+  color: var(--floating-panel-danger-text);
 }
 
 .hide-all:hover {
-  background: rgba(244, 67, 54, 0.28);
+  background: var(--floating-panel-subtle-hover-bg);
   transform: translateY(-1px);
 }
 
@@ -467,12 +466,12 @@ const filteredSlots = computed(() => {
 }
 
 .slot-control-content::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.16);
+  background: var(--floating-panel-scrollbar);
   border-radius: 3px;
 }
 
 .slot-control-content::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.28);
+  background: var(--floating-panel-scrollbar-hover);
 }
 
 /* 响应式设计 */

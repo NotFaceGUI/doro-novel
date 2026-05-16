@@ -38,8 +38,24 @@
                     <li @click.stop="showAboutDialog">{{ t('menu.about') }}</li>
                 </ul>
             </li>
-            <li @click.stop="toggleDropdown(3)">{{ t('language.menu') }}
+            <li @click.stop="toggleDropdown(3)">{{ t('menu.theme') }}
                 <ul v-show="dropdowns[3]" class="dropdown dropdown-right" @click.stop>
+                    <li
+                        v-for="themeOption in themeOptions"
+                        :key="themeOption.value"
+                        @click.stop="changeTheme(themeOption.value, $event)"
+                        :class="['theme-option', { selected: currentTheme === themeOption.value }]"
+                    >
+                        <span class="theme-option-label">
+                            <span :class="['theme-swatch', `theme-swatch--${themeOption.swatch}`]"></span>
+                            {{ themeOption.label }}
+                        </span>
+                        <span class="keyword">{{ currentTheme === themeOption.value ? '●' : '' }}</span>
+                    </li>
+                </ul>
+            </li>
+            <li @click.stop="toggleDropdown(4)">{{ t('language.menu') }}
+                <ul v-show="dropdowns[4]" class="dropdown dropdown-right" @click.stop>
                     <li
                         v-for="locale in localeOptions"
                         :key="locale.value"
@@ -82,14 +98,31 @@ import massage from '../script/common/massage';
 import { getCurrentLocale, setLocale } from '../locales/i18n';
 import { SUPPORTED_LOCALES, type SupportedLocale } from '../utils/i18n-loader';
 import { getCharacterId, getCharacterResourceKey } from '../utils/character';
+import { APP_THEMES, useThemeStore, type AppTheme } from '../stores/theme-store';
 
 const { t } = useI18n();
-const dropdowns = reactive([false, false, false, false]);
+const dropdowns = reactive([false, false, false, false, false]);
 const currentLocale = ref<SupportedLocale>(getCurrentLocale());
 const localeOptions = computed(() => SUPPORTED_LOCALES.map((value) => ({
     value,
     label: t(`language.${value.replace('-', '')}`),
 })));
+const themeStore = useThemeStore();
+const THEME_LABEL_KEY_MAP: Record<AppTheme, string> = {
+    dark: 'menu.themeDark',
+    light: 'menu.themeLight',
+    sakura: 'menu.themeSakura',
+    mint: 'menu.themeMint',
+    ocean: 'menu.themeOcean',
+    sunset: 'menu.themeSunset',
+    system: 'menu.themeSystem',
+};
+const themeOptions = computed(() => APP_THEMES.map((value) => ({
+    value,
+    label: t(THEME_LABEL_KEY_MAP[value]),
+    swatch: value,
+})));
+const currentTheme = computed<AppTheme>(() => themeStore.theme);
 
 // 关于我们弹窗状态
 const isAboutDialogVisible = ref(false);
@@ -102,10 +135,9 @@ const branchStore = useBranchStore();
 const projectStore = useProjectStore();
 
 const closeAllDropdowns = () => {
-    dropdowns[0] = false;
-    dropdowns[1] = false;
-    dropdowns[2] = false;
-    dropdowns[3] = false;
+    for (let i = 0; i < dropdowns.length; i++) {
+        dropdowns[i] = false;
+    }
 };
 
 const toggleDropdown = (menuIndex: number) => {
@@ -484,6 +516,14 @@ const changeLocale = (locale: SupportedLocale) => {
     closeAllDropdowns();
 };
 
+const changeTheme = async (theme: AppTheme, event: MouseEvent) => {
+    try {
+        await themeStore.setThemeWithTransition(theme, event);
+    } finally {
+        closeAllDropdowns();
+    }
+};
+
 const handleClickOutside = (event: MouseEvent) => {
     const menu = document.querySelector('.project-menu');
     if (menu && !menu.contains(event.target as Node)) {
@@ -667,6 +707,48 @@ const handleKeyDown = (event: KeyboardEvent) => {
     background-color: var(--high-hover-bg);
 }
 
+.theme-option-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.theme-swatch {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.12);
+    flex-shrink: 0;
+}
+
+.theme-swatch--dark {
+    background: linear-gradient(135deg, #1e1e2e 0%, #36364d 100%);
+}
+
+.theme-swatch--light {
+    background: linear-gradient(135deg, #f8f9fa 0%, #ced4da 100%);
+}
+
+.theme-swatch--sakura {
+    background: linear-gradient(135deg, #fff6fa 0%, #e889ac 100%);
+}
+
+.theme-swatch--mint {
+    background: linear-gradient(135deg, #f4fffb 0%, #45b79a 100%);
+}
+
+.theme-swatch--ocean {
+    background: linear-gradient(135deg, #0f1d2b 0%, #3bb4e6 100%);
+}
+
+.theme-swatch--sunset {
+    background: linear-gradient(135deg, #322126 0%, #f08f58 100%);
+}
+
+.theme-swatch--system {
+    background: linear-gradient(135deg, #1e1e2e 0%, #1e1e2e 48%, #f8f9fa 52%, #f8f9fa 100%);
+}
+
 .dropdown hr {
     border: none;
     border-top: 1px solid var(--main-border-color);
@@ -675,7 +757,8 @@ const handleKeyDown = (event: KeyboardEvent) => {
 
 .keyword {
     font-size: 11px;
-    color: rgba(255, 255, 255, 0.35);
+    color: var(--sec-text-color);
+    opacity: .55;
     margin-left: 40px;
 }
 </style>

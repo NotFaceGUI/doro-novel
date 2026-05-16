@@ -616,7 +616,7 @@ onMounted(() => {
 .shader-editor {
   height: 100%;
   padding: 12px;
-  color: #fff;
+  color: var(--floating-panel-text);
   overflow-y: auto;
   overflow-x: hidden;
 }
@@ -651,39 +651,40 @@ onMounted(() => {
 .btn {
   appearance: none;
   padding: 8px 12px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid var(--floating-panel-border);
   border-radius: 7px;
-  background: rgba(255, 255, 255, 0.08);
-  color: #fff;
+  background: var(--floating-panel-subtle-bg);
+  color: var(--floating-panel-text);
   cursor: pointer;
   font-size: 12px;
   transition: background-color 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
 }
 
 .btn:hover {
-  background: rgba(255, 255, 255, 0.14);
-  border-color: rgba(255, 255, 255, 0.2);
+  background: var(--floating-panel-subtle-hover-bg);
+  border-color: var(--floating-panel-input-border-focus);
   transform: translateY(-1px);
 }
 
 .btn-primary {
-  background: rgba(76, 175, 80, 0.22);
-  color: #fff;
-  border-color: rgba(76, 175, 80, 0.38);
+  background: var(--floating-panel-accent-bg);
+  color: var(--floating-panel-text);
+  border-color: var(--floating-panel-accent-border);
 }
 
 .btn-primary:hover {
-  background: rgba(76, 175, 80, 0.32);
-  border-color: rgba(76, 175, 80, 0.48);
+  background: var(--floating-panel-subtle-hover-bg);
+  border-color: var(--accent-color);
 }
 
 .btn-secondary {
-  background: rgba(255, 255, 255, 0.04);
+  background: var(--floating-panel-input-bg);
 }
 
 .btn-danger {
-  background: rgba(244, 67, 54, 0.18);
-  border-color: rgba(244, 67, 54, 0.3);
+  background: var(--floating-panel-danger-bg);
+  border-color: var(--floating-panel-danger-border);
+  color: var(--floating-panel-danger-text);
 }
 
 .btn-small {
@@ -694,7 +695,7 @@ onMounted(() => {
 .editor-section-label {
   font-size: 12px;
   font-weight: 600;
-  color: rgba(255, 255, 255, 0.68);
+  color: var(--floating-panel-soft-text);
   margin-bottom: 6px;
 }
 
@@ -706,28 +707,28 @@ onMounted(() => {
 .switch-chip {
   appearance: none;
   padding: 7px 12px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid var(--floating-panel-border);
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.06);
-  color: #fff;
+  background: var(--floating-panel-input-bg);
+  color: var(--floating-panel-text);
   cursor: pointer;
   font-size: 12px;
   transition: background-color 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
 }
 
 .switch-chip:hover {
-  background: rgba(255, 255, 255, 0.12);
-  border-color: rgba(255, 255, 255, 0.2);
+  background: var(--floating-panel-subtle-hover-bg);
+  border-color: var(--floating-panel-input-border-focus);
 }
 
 .switch-chip.active {
-  background: rgba(76, 175, 80, 0.24);
-  border-color: rgba(76, 175, 80, 0.4);
-  color: #fff;
+  background: var(--floating-panel-accent-bg);
+  border-color: var(--floating-panel-accent-border);
+  color: var(--floating-panel-text);
 }
 
 .animation-hint {
-  color: rgba(255, 255, 255, 0.58);
+  color: var(--floating-panel-muted-text);
   font-size: 12px;
 }
 
@@ -738,8 +739,8 @@ onMounted(() => {
 }
 
 .editor-surface {
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: var(--floating-panel-subtle-bg);
+  border: 1px solid var(--floating-panel-divider);
   border-radius: 10px;
   padding: 12px;
   min-height: 0;
@@ -754,21 +755,21 @@ onMounted(() => {
   width: 100%;
   height: 36px;
   padding: 0 10px;
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  border: 1px solid var(--floating-panel-input-border);
   border-radius: 7px;
-  background: rgba(255, 255, 255, 0.06);
-  color: #fff;
+  background: var(--floating-panel-input-bg);
+  color: var(--floating-panel-text);
   outline: none;
   transition: border-color 0.2s ease, background-color 0.2s ease;
 }
 
 .field-input:focus {
-  border-color: rgba(255, 255, 255, 0.2);
-  background: rgba(255, 255, 255, 0.1);
+  border-color: var(--floating-panel-input-border-focus);
+  background: var(--floating-panel-input-bg-focus);
 }
 
 .field-input::placeholder {
-  color: rgba(255, 255, 255, 0.34);
+  color: var(--floating-panel-muted-text);
 }
 
 .preset-toolbar {
@@ -796,24 +797,24 @@ onMounted(() => {
   min-height: 220px;
   font-family: 'Courier New', monospace;
   font-size: 12px;
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  border: 1px solid var(--floating-panel-input-border);
   border-radius: 7px;
   padding: 12px;
   resize: vertical;
-  background: rgba(255, 255, 255, 0.06);
-  color: #fff;
+  background: var(--floating-panel-input-bg);
+  color: var(--floating-panel-text);
   line-height: 1.55;
   overflow: auto;
 }
 
 .shader-textarea:focus {
   outline: none;
-  border-color: rgba(255, 255, 255, 0.2);
-  background: rgba(255, 255, 255, 0.1);
+  border-color: var(--floating-panel-input-border-focus);
+  background: var(--floating-panel-input-bg-focus);
 }
 
 .shader-textarea::placeholder {
-  color: rgba(255, 255, 255, 0.34);
+  color: var(--floating-panel-muted-text);
 }
 
 .uniforms-list {
@@ -827,9 +828,9 @@ onMounted(() => {
 
 .uniform-item {
   padding: 8px;
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  border: 1px solid var(--floating-panel-divider);
   border-radius: 8px;
-  background: rgba(255, 255, 255, 0.05);
+  background: var(--floating-panel-subtle-bg);
 }
 
 .uniform-header {
@@ -848,7 +849,7 @@ onMounted(() => {
 
 .uniform-slider {
   flex: 1;
-  accent-color: #4caf50;
+  accent-color: var(--accent-color);
 }
 
 .uniform-number-input {
@@ -874,10 +875,10 @@ onMounted(() => {
   align-items: center;
   justify-content: center;
   min-height: 84px;
-  border: 1px dashed rgba(255, 255, 255, 0.12);
+  border: 1px dashed var(--floating-panel-divider);
   border-radius: 10px;
-  background: rgba(255, 255, 255, 0.04);
-  color: rgba(255, 255, 255, 0.52);
+  background: var(--floating-panel-subtle-bg);
+  color: var(--floating-panel-muted-text);
   font-size: 12px;
 }
 
@@ -898,13 +899,13 @@ onMounted(() => {
 .shader-textarea::-webkit-scrollbar-thumb,
 .uniforms-list::-webkit-scrollbar-thumb {
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.16);
+  background: var(--floating-panel-scrollbar);
 }
 
 .shader-editor::-webkit-scrollbar-thumb:hover,
 .shader-textarea::-webkit-scrollbar-thumb:hover,
 .uniforms-list::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.28);
+  background: var(--floating-panel-scrollbar-hover);
 }
 
 @media (min-width: 760px) {
