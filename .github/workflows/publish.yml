@@ -3,73 +3,58 @@ name: 'publish'
 on:
   push:
     tags:
-      - 'v*' # 推送以 v 开头的标签时触发，如 v1.0.0
-
-# This workflow will trigger on each push to the `main` or `release` branch to create or update a GitHub release, build your app, and upload the artifacts to the release.
-
+      - 'v*'
 
 jobs:
   publish-tauri:
     permissions:
       contents: write
+
     strategy:
       fail-fast: false
       matrix:
         include:
-          # - platform: 'macos-latest'
-          #   args: '--target aarch64-apple-darwin'
-          # - platform: 'macos-latest'
-          #   args: '--target x86_64-apple-darwin'
-          # - platform: 'ubuntu-22.04'
-          #   args: ''
           - platform: 'windows-latest'
             args: ''
 
     runs-on: ${{ matrix.platform }}
+
     env:
       TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
       TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
+
     steps:
       - uses: actions/checkout@v4
         with:
-            fetch-depth: 0
-            fetch-tags: true
+          fetch-depth: 0
+          fetch-tags: true
 
       - name: setup node
         uses: actions/setup-node@v4
         with:
           node-version: lts/*
+          cache: pnpm
 
       - name: install pnpm
-        uses: pnpm/action-setup@v2
+        uses: pnpm/action-setup@v4
         with:
-          version: latest
+          version: 10
 
       - name: install Rust stable
         uses: dtolnay/rust-toolchain@stable
-        with:
-          # Those targets are only used on macos runners so it's in an `if` to slightly speed up windows and linux builds.
-          targets: ${{ matrix.platform == 'macos-latest' && 'aarch64-apple-darwin,x86_64-apple-darwin' || '' }}
-
-      - name: install dependencies (ubuntu only)
-        if: matrix.platform == 'ubuntu-22.04'
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf
-
-      - name: install frontend dependencies
-        run: pnpm install
-
-      - name: apply patches
-        run: pnpm run postinstall
 
       - name: Cache pnpm store
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: ~/.pnpm-store
-          key: ${{ runner.os }}-pnpm-${{ hashFiles('**/pnpm-lock.yaml') }}
+          key: ${{ runner.os }}-pnpm-${{ hashFiles('pnpm-lock.yaml') }}
           restore-keys: |
             ${{ runner.os }}-pnpm-
+
+      - name: install frontend dependencies
+        run: pnpm install --no-frozen-lockfile
+        env:
+          CI: false
 
       - name: Debug environment variables
         run: |
@@ -90,38 +75,28 @@ jobs:
       - name: Generate release notes
         id: release_notes
         run: |
-          # 获取当前标签（从GitHub ref获取，更可靠）
-          # 确保拉取完整历史和所有 tags
           git fetch --tags --prune --unshallow || true
-          
-          # 获取当前标签（从 GitHub ref 获取，更可靠）
+
           CURRENT_TAG=${GITHUB_REF#refs/tags/}
           echo "Current tag: $CURRENT_TAG"
-          
-          # 获取上一个标签（排除当前标签）
+
           PREVIOUS_TAG=$(git tag --sort=-version:refname | grep -v "^${CURRENT_TAG}$" | head -n 1 2>/dev/null || echo "")
           echo "Previous tag: $PREVIOUS_TAG"
-          
+
           if [ -z "$PREVIOUS_TAG" ]; then
-            # 如果没有上一个标签，获取所有提交
-            echo "No previous tag found, getting all commits"
             RELEASE_NOTES=$(git log --pretty=format:"- %s" --reverse)
           else
-            # 获取从上一个标签到当前标签的提交
-            echo "Getting commits from $PREVIOUS_TAG to $CURRENT_TAG"
             RELEASE_NOTES=$(git log ${PREVIOUS_TAG}..${CURRENT_TAG} --pretty=format:"- %s" --reverse)
           fi
-          
-          # 生成精简的发布说明
+
           cat << EOF > release_notes.md
           ## What's Changed
-          
+
           $RELEASE_NOTES
-          
+
           **Full Changelog**: https://github.com/NotFaceGUI/doro-novel/compare/${PREVIOUS_TAG}...${CURRENT_TAG}
           EOF
-          
-          # 输出到 GitHub Actions 变量
+
           echo "RELEASE_NOTES<<EOF" >> $GITHUB_OUTPUT
           cat release_notes.md >> $GITHUB_OUTPUT
           echo "EOF" >> $GITHUB_OUTPUT
@@ -131,7 +106,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tagName: v__VERSION__ # the action automatically replaces __VERSION__ with the app version.
+          tagName: v__VERSION__
           releaseName: 'Doro Novel v__VERSION__'
           releaseBody: ${{ steps.release_notes.outputs.RELEASE_NOTES }}
           releaseDraft: false
