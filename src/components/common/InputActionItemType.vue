@@ -7,8 +7,7 @@
                 autocapitalize="off">
             <div class="type-selection" v-if="mode === 'res'">
                 <div class="type-action-content" v-for="(option, index) in options" :key="`${option.value}-${option.label}-${index}`">
-                    <div v-if="option.value === DIVIDER_VALUE"
-                        style="height: 30px;width: 100%;padding: 5px 0;margin-bottom: 10px;border-bottom: 1px dashed var(--placeholder-color);font-size: 14px;">
+                    <div v-if="option.value === DIVIDER_VALUE" class="type-divider">
                         {{ option.label }}
                     </div>
                     <div v-else class="type-action-item" @click="selectType(option.value as ASIType)">
@@ -29,7 +28,7 @@
                     </div>
                 </template>
                 <template v-else>
-                    <div style="color: #ccc; text-shadow: 0 0 10px var(--error-color); text-align: center; opacity: 1;">
+                    <div class="type-empty-state">
                         ❓ {{ t('inputActionType.noCharacterResources') }} ❓
                     </div>
                 </template>
@@ -49,7 +48,7 @@
                     </div>
                 </template>
                 <template v-else>
-                    <div style="color: #ccc; text-shadow: 0 0 10px var(--error-color); text-align: center; opacity: 1;">
+                    <div class="type-empty-state">
                         ❓ {{ t('inputActionType.noSceneCharacters') }} ❓
                     </div>
                 </template>
@@ -66,7 +65,7 @@
                     </div>
                 </template>
                 <template v-else>
-                    <div style="color: #ccc; text-shadow: 0 0 10px var(--error-color); text-align: center; opacity: 1;">
+                    <div class="type-empty-state">
                         ❓ {{ t('inputActionType.noImageResources') }} ❓
                     </div>
                 </template>
@@ -193,7 +192,7 @@ onMounted(() => {
     top: 35px;
     width: 100dvw;
     height: calc(100dvh - 35px);
-    background-color: rgba(0, 0, 0, 0.2);
+    background-color: var(--node-picker-overlay);
     z-index: 100;
 }
 
@@ -209,7 +208,9 @@ onMounted(() => {
     justify-content: center;
     align-items: center;
     flex-direction: column;
-    background-color: rgba(29, 29, 42, 0.78);
+    background-color: var(--node-picker-bg);
+    border: 1px solid var(--node-picker-border);
+    box-shadow: var(--node-picker-shadow);
     padding: 20px;
     padding-top: 10px;
     border-radius: 10px;
@@ -229,19 +230,14 @@ onMounted(() => {
     flex-direction: column;
 }
 
-
 .type-selection:hover::-webkit-scrollbar-thumb {
-    background-color: transparent;
-
-
+    background-color: var(--node-picker-scrollbar-hover);
 }
-
 
 .type-selection::-webkit-scrollbar {
     background-color: transparent;
     width: 8px;
     height: 8px;
-
 }
 
 .type-selection::-webkit-scrollbar-track {
@@ -251,13 +247,12 @@ onMounted(() => {
 .type-selection::-webkit-scrollbar-thumb {
     border-radius: 10px;
     border: 2px solid transparent;
+    background-color: var(--node-picker-scrollbar);
 }
 
 .type-selection::-webkit-scrollbar-thumb:hover {
-    background-color: transparent;
-
+    background-color: var(--node-picker-scrollbar-hover);
 }
-
 
 .type-action-item {
     width: 100%;
@@ -269,12 +264,13 @@ onMounted(() => {
     transition: all .1s ease-in-out;
     display: flex;
     justify-content: space-between;
-    /* background-color: var(--high-bg); */
+    color: var(--node-picker-text);
+    border: 1px solid transparent;
 }
 
 .type-action-item-desc {
     font-size: 12px;
-    color: var(--placeholder-color);
+    color: var(--node-picker-muted-text);
     margin-top: 3px;
     opacity: 0;
     transition: all .2s ease-in-out;
@@ -287,21 +283,24 @@ onMounted(() => {
 }
 
 .type-action-content {
-
     display: flex;
     align-items: center;
     vertical-align: middle;
     gap: 5px;
-
-
 }
 
 .type-action-item:hover {
     border-radius: 5px;
-    background-color: var(--high-hover-bg);
-    color: white;
+    background-color: var(--node-picker-item-hover-bg);
+    color: var(--node-picker-item-hover-text);
     transform: translateX(2px);
+}
 
+.type-action-item:hover .character-position,
+.type-action-item:hover .character-scale,
+.type-action-item:hover .type-action-item-desc {
+    color: var(--node-picker-item-hover-text);
+    opacity: 0.78;
 }
 
 input[type="text"] {
@@ -359,8 +358,27 @@ input[type="text"]:focus {
 
 .type-selection-title {
     padding: 2px;
-    border-bottom: 1px dashed var(--placeholder-color);
+    border-bottom: 1px dashed var(--node-picker-muted-text);
     margin-bottom: 5px;
+    color: var(--node-picker-text);
+}
+
+.type-divider {
+    height: 30px;
+    width: 100%;
+    padding: 5px 0;
+    margin-bottom: 10px;
+    border-bottom: 1px dashed var(--node-picker-muted-text);
+    font-size: 14px;
+    color: var(--node-picker-muted-text);
+}
+
+.type-empty-state {
+    color: var(--node-picker-empty-text);
+    text-shadow: 0 0 10px var(--error-color);
+    text-align: center;
+    opacity: 1;
+    padding: 12px 8px;
 }
 
 .type-image-content {
@@ -378,11 +396,12 @@ input[type="text"]:focus {
 .character-name {
     font-weight: bold;
     font-size: 14px;
+    color: inherit;
 }
 
 .character-position,
 .character-scale {
     font-size: 12px;
-    color: var(--placeholder-color);
+    color: var(--node-picker-muted-text);
 }
 </style>
