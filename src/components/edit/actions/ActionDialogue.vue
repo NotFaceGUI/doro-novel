@@ -44,7 +44,7 @@
                             @update:modelValue="updateSpeakerColor(messageIndex, $event)" />
                     </div>
                     <div class="character-name" v-if="!editing[messageIndex]" @click="editName(messageIndex)">
-                        {{ getSpeakerDisplay(message).split('：')[0] }}
+                        {{ getSpeakerTitle(message) }}
                         <span class="dialogue-type-tag" :class="getDialogueTypeClass(message.mode)">
                             {{ getDialogueTypeLabel(message.mode) }}
                         </span>
@@ -377,8 +377,62 @@ const cameraStandOptions = computed<DropdownOption[]>(() => [
 // 获取缓动函数选项
 const easingOptions = computed<DropdownOption[]>(() => getEasingFunctionOptions());
 
-const getSpeakerDisplay = (message: DialogTextData) => getDialogueSpeakerDisplay(message.speaker, message.mode);
+const getSpeakerDisplay = (message: DialogTextData) => getDialogueSpeakerDisplay(message.speaker, message.mode, {
+    character: message.parms?.character,
+    characterName: message.parms?.CharacterName,
+});
+const getSpeakerTitle = (message: DialogTextData) => getSpeakerDisplay(message).split(/[:：]/)[0];
 const isPlaceholderSpeaker = (speaker: string) => isDialoguePlaceholderSpeaker(speaker);
+
+const restoreSpeakerFromSerializedMessage = (message: any) => {
+    const normalizedSpeaker = normalizeDialogueSpeaker(
+        typeof message?.speaker === 'string' ? message.speaker : '',
+        message.mode
+    );
+    const legacySpeakerDisplayName = normalizeDialogueSpeaker(
+        typeof message?.speakerDisplayName === 'string' ? message.speakerDisplayName : '',
+        message.mode
+    );
+    const fallbackSpeaker = normalizedSpeaker || createDialogueSpeaker(message.mode);
+
+    if (!legacySpeakerDisplayName || message.mode !== DialogueType.NORMAL) {
+        return fallbackSpeaker;
+    }
+
+    const boundCharacterName = typeof message?.parms?.CharacterName === 'string'
+        ? message.parms.CharacterName
+        : '';
+
+    if (
+        boundCharacterName &&
+        legacySpeakerDisplayName !== boundCharacterName &&
+        !isDialoguePlaceholderSpeaker(legacySpeakerDisplayName)
+    ) {
+        return legacySpeakerDisplayName;
+    }
+
+    if (!boundCharacterName && !isDialoguePlaceholderSpeaker(legacySpeakerDisplayName)) {
+        return legacySpeakerDisplayName;
+    }
+
+    return fallbackSpeaker;
+};
+
+const getMessageCharacterConfigKey = (message: DialogTextData) => {
+    if (message.mode !== DialogueType.NORMAL) {
+        return undefined;
+    }
+
+    if (message.isBind && message.parms?.CharacterName) {
+        return message.parms.CharacterName;
+    }
+
+    if (!isDialoguePlaceholderSpeaker(message.speaker)) {
+        return message.speaker;
+    }
+
+    return undefined;
+};
 
 // 显示对话类型选择器
 const showDialogueTypeSelector = () => {
@@ -651,9 +705,10 @@ const updateSpeakerColor = (messageIndex: number, color: number) => {
     message.speakerColor = color;
 
     // 如果是绑定了角色的对话，保存颜色到store
-    if (message.speaker && !isDialoguePlaceholderSpeaker(message.speaker)) {
+    const configKey = getMessageCharacterConfigKey(message);
+    if (configKey) {
         characterConfigStore.saveCharacterConfig({
-            characterName: message.speaker,
+            characterName: configKey,
             speakerColor: color,
             yOffSet: message.parms?.yOffSet || 0,
             xOffSet: message.parms?.xOffSet || 0
@@ -661,19 +716,32 @@ const updateSpeakerColor = (messageIndex: number, color: number) => {
     }
 };
 
-// 监听messages变化，自动保存角色配置
-watch(messages, (newMessages) => {
-    newMessages.forEach(message => {
-        if (message.mode === DialogueType.NORMAL && message.isBind && !isDialoguePlaceholderSpeaker(message.speaker)) {
-            // 更新store中的角色配置
-            characterConfigStore.updateCharacterConfig(message.speaker, {
+const syncCharacterConfigsFromMessages = (targetMessages: DialogTextData[]) => {
+    targetMessages.forEach(message => {
+        const configKey = getMessageCharacterConfigKey(message);
+        if (message.mode === DialogueType.NORMAL && configKey) {
+            characterConfigStore.updateCharacterConfig(configKey, {
                 speakerColor: message.speakerColor,
                 yOffSet: message.parms?.yOffSet,
                 xOffSet: message.parms?.xOffSet
             });
         }
     });
-}, { deep: true });
+};
+
+// 只监听角色配置相关字段，避免编辑文本时触发整份 messages 的深度持久化
+watch(
+    () => messages.value.map(message => ({
+        mode: message.mode,
+        configKey: getMessageCharacterConfigKey(message),
+        speakerColor: message.speakerColor,
+        xOffSet: message.parms?.xOffSet,
+        yOffSet: message.parms?.yOffSet,
+    })),
+    () => {
+        syncCharacterConfigsFromMessages(messages.value);
+    }
+);
 
 let modification: Map<PropertyPath, Modification>;
 
@@ -681,7 +749,6 @@ const targetAction = async () => {
     handleSceneState(canvasManager, props);
 
     const ui = canvasManager.uiRender;
-    console.log("previewSnapshot", action.previewSnapshot)
 
     // viewport.setZoom(action.previewSnapshot.camera.zoom);
     // viewport.moveCenter(action.previewSnapshot.camera.x, action.previewSnapshot.camera.y);
@@ -795,7 +862,7 @@ const deserialization = (data: ActionItems) => {
     if (actionData.messages) {
         messages.value = actionData.messages.map((message: any) => ({
             ...message,
-            speaker: normalizeDialogueSpeaker(message.speaker, message.mode),
+            speaker: restoreSpeakerFromSerializedMessage(message),
             parms: message.parms ? {
                 ...message.parms,
                 // 根据spineResourceKey重新获取spine实例

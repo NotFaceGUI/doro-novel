@@ -1,6 +1,6 @@
 import { i18n } from '../locales/i18n'
-import { DialogueType } from '../types/app'
-import { getCharacterDisplayName } from './character-name'
+import { CharacterType, DialogueType } from '../types/app'
+import { getCharacterDirectDisplayName, getCharacterDisplayName } from './character-name'
 
 export const DIALOGUE_SPEAKER_PLACEHOLDER = '__dialogue_select_character__'
 export const DIALOGUE_SPEAKER_VOICEOVER = '__dialogue_voiceover__'
@@ -49,20 +49,55 @@ export function normalizeDialogueSpeaker(speaker: string, mode: DialogueType): s
   return speaker
 }
 
-export function getDialogueSpeakerDisplay(speaker: string, mode: DialogueType): string {
+export function getDialogueSpeakerDisplay(
+  speaker: string,
+  mode: DialogueType,
+  options?: {
+    character?: CharacterType | null
+    characterName?: string
+  }
+): string {
   const t = i18n.global.t
+  const normalizedSpeaker = typeof speaker === 'string' ? speaker.trim() : ''
 
-  if (mode === DialogueType.NORMAL && isDialoguePlaceholderSpeaker(speaker)) {
+  if (mode === DialogueType.NORMAL && isDialoguePlaceholderSpeaker(normalizedSpeaker)) {
     return t('actionDialogue.systemSpeakers.selectCharacter')
   }
 
-  if (mode === DialogueType.VOICEOVER && isDialogueVoiceoverSpeaker(speaker)) {
+  if (mode === DialogueType.VOICEOVER && isDialogueVoiceoverSpeaker(normalizedSpeaker)) {
     return t('actionDialogue.systemSpeakers.voiceover')
   }
 
-  if (mode === DialogueType.COMMANDER && isDialogueCommanderSpeaker(speaker)) {
+  if (mode === DialogueType.COMMANDER && isDialogueCommanderSpeaker(normalizedSpeaker)) {
     return t('actionDialogue.systemSpeakers.commander')
   }
 
-  return getCharacterDisplayName(speaker)
+  const boundCharacterName = (options?.character?.characterName || options?.characterName || '').trim()
+
+  // 对话里手动填写的名称优先级最高
+  if (
+    boundCharacterName &&
+    normalizedSpeaker &&
+    normalizedSpeaker !== boundCharacterName &&
+    !isDialoguePlaceholderSpeaker(normalizedSpeaker)
+  ) {
+    return normalizedSpeaker
+  }
+
+  if (boundCharacterName) {
+    return getCharacterDisplayName(options?.character ?? boundCharacterName)
+  }
+
+  if (normalizedSpeaker) {
+    return getCharacterDirectDisplayName(normalizedSpeaker)
+  }
+
+  switch (mode) {
+    case DialogueType.VOICEOVER:
+      return t('actionDialogue.systemSpeakers.voiceover')
+    case DialogueType.COMMANDER:
+      return t('actionDialogue.systemSpeakers.commander')
+    default:
+      return t('actionDialogue.systemSpeakers.selectCharacter')
+  }
 }

@@ -332,6 +332,10 @@
       "shader": "Shader を編集",
       "clearShader": "Shader をクリア",
       "clearSelection": "選択解除",
+      "characterAlias": "キャラクター別名",
+      "characterAliasPlaceholder": "このキャラクターの表示名を入力。空欄なら翻訳名を使用",
+      "saveAlias": "別名を保存",
+      "clearAlias": "別名をクリア",
       "saveAsCharacter": "新しいキャラクターとして保存",
       "characterNamePlaceholder": "新しいキャラクター名を入力",
       "save": "キャラクターを保存",
@@ -340,6 +344,8 @@
       "messages": {
         "selectSlotFirst": "先に少なくとも 1 つのパーツを選択してください",
         "enterCharacterName": "新しいキャラクター名を入力してください",
+        "aliasSaved": "キャラクターの別名を保存しました: {name}",
+        "aliasCleared": "キャラクターの別名をクリアしました",
         "saved": "カスタムキャラクターを保存しました: {name}",
         "deleted": "カスタムキャラクターを削除しました",
         "noSlotMatched": "{keyword} に一致するパーツがありません"

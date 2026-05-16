@@ -1,5 +1,6 @@
 import type { CharacterType } from '../types/app';
 import { ASSET_CHARACTER } from '../script/var';
+import { getCharacterDisplayName } from './character-name';
 
 export const CUSTOM_CHARACTER_PREFIX = 'custom:';
 
@@ -24,7 +25,7 @@ export function getCharacterDisplayLabel(character?: CharacterType | null): stri
         return '';
     }
 
-    return character.displayName || character.characterName;
+    return getCharacterDisplayName(character);
 }
 
 export function getCharacterResourceKey(

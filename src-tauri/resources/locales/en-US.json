@@ -332,6 +332,10 @@
       "shader": "Edit Shader",
       "clearShader": "Clear Shader",
       "clearSelection": "Clear Selection",
+      "characterAlias": "Character Alias",
+      "characterAliasPlaceholder": "Enter the display name for this character. Leave empty to use the translation",
+      "saveAlias": "Save Alias",
+      "clearAlias": "Clear Alias",
       "saveAsCharacter": "Save As New Character",
       "characterNamePlaceholder": "Enter a new character name",
       "save": "Save Character",
@@ -340,6 +344,8 @@
       "messages": {
         "selectSlotFirst": "Select at least one part first",
         "enterCharacterName": "Enter a new character name",
+        "aliasSaved": "Saved character alias: {name}",
+        "aliasCleared": "Character alias cleared",
         "saved": "Custom character saved: {name}",
         "deleted": "Custom character deleted",
         "noSlotMatched": "No parts matched keyword {keyword}"

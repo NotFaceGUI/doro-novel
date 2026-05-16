@@ -33,7 +33,7 @@
                 <li v-for="char in customCharacters" :key="char.id || char.characterName">
                     <div @click="toggleSpine(char)" class="el no-wrap" draggable="true"
                         @dragstart="handleDragStart($event, char)">
-                        {{ char.displayName || char.characterName }}
+                        {{ getCharacterDisplayName(char) }}
                     </div>
                 </li>
             </ul>
@@ -51,7 +51,7 @@
                 <li v-for="char in gameCharacters" :key="char.id || char.characterName">
                     <div @click="toggleSpine(char)" class="el no-wrap" draggable="true"
                         @dragstart="handleDragStart($event, char)">
-                        {{ char.displayName || getCharacterDisplayName(char.characterName) }} <span
+                        {{ getCharacterDisplayName(char) }} <span
                             style="font-size: 10px;color: #888;" v-if="char.characterName.startsWith('c') && getCharacterTranslatedName(char.characterName) !== char.characterName">{{
                                 getCharacterTranslatedName(char.characterName) }}</span>
                     </div>
@@ -71,7 +71,7 @@
                 <li v-for="char in otherCharacters" :key="char.id || char.characterName">
                     <div @click="toggleSpine(char)" class="el no-wrap" draggable="true"
                         @dragstart="handleDragStart($event, char)">
-                        {{ char.displayName || getCharacterDisplayName(char.characterName) }}
+                        {{ getCharacterDisplayName(char) }}
                     </div>
                 </li>
             </ul>

@@ -7,6 +7,7 @@ export interface CharacterConfig {
   speakerColor: number
   yOffSet: number
   xOffSet: number
+  alias?: string
 }
 
 export const useCharacterConfigStore = defineStore('character-config', () => {
@@ -20,13 +21,18 @@ export const useCharacterConfigStore = defineStore('character-config', () => {
 
   // 保存角色配置
   const saveCharacterConfig = (config: CharacterConfig) => {
-    characterConfigs.value.set(config.characterName, config)
+    const existingConfig = characterConfigs.value.get(config.characterName)
+    characterConfigs.value.set(config.characterName, {
+      ...existingConfig,
+      ...config,
+      alias: config.alias ?? existingConfig?.alias ?? ''
+    })
   }
 
   // 更新角色配置的特定字段
   const updateCharacterConfig = (
     characterName: string, 
-    updates: Partial<Pick<CharacterConfig, 'speakerColor' | 'yOffSet' | 'xOffSet'>>
+    updates: Partial<Pick<CharacterConfig, 'speakerColor' | 'yOffSet' | 'xOffSet' | 'alias'>>
   ) => {
     const existingConfig = characterConfigs.value.get(characterName)
     if (existingConfig) {
@@ -38,7 +44,8 @@ export const useCharacterConfigStore = defineStore('character-config', () => {
         characterName,
         speakerColor: updates.speakerColor ?? 0xfaaaaa,
         yOffSet: updates.yOffSet ?? 0,
-        xOffSet: updates.xOffSet ?? 0
+        xOffSet: updates.xOffSet ?? 0,
+        alias: updates.alias ?? ''
       }
       characterConfigs.value.set(characterName, newConfig)
     }

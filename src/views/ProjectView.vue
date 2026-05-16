@@ -153,6 +153,28 @@
                         </button>
                     </div>
 
+                    <div v-if="currentPreviewCharacter" class="slot-save-section">
+                        <label>{{ t('projectView.customizer.characterAlias') }}</label>
+                        <input
+                            v-model="previewCharacterAlias"
+                            class="slot-name-input"
+                            :placeholder="t('projectView.customizer.characterAliasPlaceholder')"
+                            @keydown.enter.prevent="savePreviewCharacterAlias"
+                        />
+                        <div class="slot-batch-actions">
+                            <button class="slot-panel-button slot-panel-button-primary" @click="savePreviewCharacterAlias">
+                                {{ t('projectView.customizer.saveAlias') }}
+                            </button>
+                            <button
+                                class="slot-panel-button slot-panel-button-ghost"
+                                :disabled="!previewCharacterAlias.trim()"
+                                @click="clearPreviewCharacterAlias"
+                            >
+                                {{ t('projectView.customizer.clearAlias') }}
+                            </button>
+                        </div>
+                    </div>
+
                     <template v-if="selectedSlotNames.length > 0">
                         <div class="slot-selection-chip-list">
                             <span class="slot-selection-chip" v-for="name in selectedSlotNames" :key="name">{{ name }}</span>
@@ -223,7 +245,7 @@
                     <div class="slot-custom-list" v-if="customCharacters.length > 0">
                         <div class="slot-custom-list-title">{{ t('projectView.customizer.customCharacters') }}</div>
                         <div class="slot-custom-item" v-for="item in customCharacters" :key="item.id">
-                            <span>{{ item.displayName || item.characterName }}</span>
+                            <span>{{ getCharacterDisplayName(item) }}</span>
                             <button class="slot-custom-delete" @click="deleteCustomCharacter(item.id || '')">
                                 {{ t('common.delete') }}
                             </button>
@@ -384,7 +406,9 @@ import { getCurrentWindow } from '@tauri-apps/api/window';
 import massage from '../script/common/massage';
 import CustomCharacterService from '../script/custom-character-service';
 import { applySlotRuntimeColor, applySpineCustomization, cloneCustomization, type ApplySpineCustomizationOptions } from '../script/spine-customization';
+import { useCharacterConfigStore } from '../stores/character-config-store';
 import { getCharacterId, getCharacterResourceKey } from '../utils/character';
+import { getCharacterDisplayName } from '../utils/character-name';
 
 const { t } = useI18n();
 
@@ -397,6 +421,7 @@ const wm = useWatermarkStore();
 wm.initialize();
 const dialogueUiStore = useDialogueUiStore();
 dialogueUiStore.initialize();
+const characterConfigStore = useCharacterConfigStore();
 
 // 计算四角水印的样式
 const cornerStyle = computed(() => {
@@ -471,6 +496,7 @@ const slotOptions = ref<SlotData[]>([]);
 const hoveredSlotName = ref<string | null>(null);
 const selectedSlotNames = ref<string[]>([]);
 const customCharacterName = ref('');
+const previewCharacterAlias = ref('');
 const currentPreviewCharacter = ref<CharacterType | null>(null);
 const customCharacters = ref<CharacterType[]>([]);
 const currentCustomization = ref<SpineCharacterCustomization>({ slots: {} });
@@ -516,6 +542,7 @@ interface SlotOutlineOverlay {
 }
 
 const slotOutlineOverlays = new Map<string, SlotOutlineOverlay>();
+let slotOutlineTickerAttached = false;
 
 // Shader编辑器状态保存
 const savedShaderState = ref<{
@@ -537,6 +564,8 @@ watch(activeTab, (tab) => {
     if (tab !== 'canvas') {
         showDialogueUiPanel.value = false;
     }
+
+    updateSlotOutlineTickerBinding(true);
 });
 const actionStore = useActionStore();
 const shaderFloatingStyle = computed(() => ({
@@ -559,6 +588,15 @@ const resetPreviewInteraction = () => {
 
 const loadCustomCharacters = async () => {
     customCharacters.value = await CustomCharacterService.getInstance().list();
+};
+
+const syncPreviewCharacterAlias = (character?: CharacterType | null) => {
+    if (!character?.characterName) {
+        previewCharacterAlias.value = '';
+        return;
+    }
+
+    previewCharacterAlias.value = characterConfigStore.getCharacterConfig(character.characterName)?.alias || '';
 };
 
 const getDefaultCustomization = (): SpineCharacterCustomization => ({
@@ -618,7 +656,7 @@ const getInteractiveSlotTint = (slotName: string) => {
 
 const syncSlotInteractiveState = () => {
     if (!previewSpine.value?.skeleton) {
-        syncSlotOutlineOverlay();
+        updateSlotOutlineTickerBinding(true);
         return;
     }
 
@@ -630,7 +668,37 @@ const syncSlotInteractiveState = () => {
         );
     });
 
-    syncSlotOutlineOverlay();
+    updateSlotOutlineTickerBinding(true);
+};
+
+const shouldSyncSlotOutlineOverlay = () => {
+    return (
+        activeTab.value === 'preview' &&
+        showCanvas.value &&
+        !!previewSpine.value?.skeleton &&
+        (!!hoveredSlotName.value || selectedSlotNames.value.length > 0)
+    );
+};
+
+const updateSlotOutlineTickerBinding = (forceSync: boolean = false) => {
+    const app = previewAPP.value?.application;
+    if (!app) {
+        slotOutlineTickerAttached = false;
+        return;
+    }
+
+    const shouldAttach = shouldSyncSlotOutlineOverlay();
+    if (shouldAttach && !slotOutlineTickerAttached) {
+        app.ticker.add(syncSlotOutlineOverlay);
+        slotOutlineTickerAttached = true;
+    } else if (!shouldAttach && slotOutlineTickerAttached) {
+        app.ticker.remove(syncSlotOutlineOverlay);
+        slotOutlineTickerAttached = false;
+    }
+
+    if (forceSync) {
+        syncSlotOutlineOverlay();
+    }
 };
 
 const destroySlotOutlineOverlay = (slotName: string) => {
@@ -770,22 +838,26 @@ const updateSlotOutlineTexture = (slotName: string, padding: number) => {
 };
 
 const syncSlotOutlineOverlay = () => {
-    const outlineContainer = ensureSlotOutlineContainer();
-    if (!outlineContainer) {
-        return;
-    }
-
     if (activeTab.value !== 'preview' || !showCanvas.value || !previewSpine.value?.skeleton) {
-        clearSlotOutlineOverlays();
-        outlineContainer.visible = false;
+        if (slotOutlineContainer) {
+            clearSlotOutlineOverlays();
+            slotOutlineContainer.visible = false;
+        }
         return;
     }
 
     const hasHovered = !!hoveredSlotName.value;
     const hasSelected = selectedSlotNames.value.length > 0;
     if (!hasHovered && !hasSelected) {
-        clearSlotOutlineOverlays();
-        outlineContainer.visible = false;
+        if (slotOutlineContainer) {
+            clearSlotOutlineOverlays();
+            slotOutlineContainer.visible = false;
+        }
+        return;
+    }
+
+    const outlineContainer = ensureSlotOutlineContainer();
+    if (!outlineContainer) {
         return;
     }
 
@@ -877,6 +949,7 @@ const handleRenderType = async (data: { url: string, type: ResType, characterUrl
     activeTab.value = 'preview';
     currentPreviewCharacter.value = data.character || null;
     customCharacterName.value = data.character?.displayName || data.character?.characterName || '';
+    syncPreviewCharacterAlias(data.character);
     currentCustomization.value = cloneCustomization(data.character?.customization) || getDefaultCustomization();
     switch (data.type) {
         case ResType.Image:
@@ -1081,7 +1154,6 @@ onMounted(() => {
     if (projectView.value) {
         console.log("proView-width", projectView.value.offsetHeight);
         previewAPP.value = createPixiApp(projectView.value.offsetWidth, projectView.value.offsetHeight - 5);
-        previewAPP.value.application.ticker.add(syncSlotOutlineOverlay);
         handelResizeCanvasToPreview();
     }
 
@@ -1130,6 +1202,7 @@ onUnmounted(() => {
         cleanup();
     }
     previewAPP.value?.application.ticker.remove(syncSlotOutlineOverlay);
+    slotOutlineTickerAttached = false;
     clearSlotOutlineOverlays();
     slotOutlineContainer?.destroy({ children: true });
     slotOutlineContainer = null;
@@ -1507,6 +1580,44 @@ const saveCustomCharacter = async () => {
     massage(t('projectView.customizer.messages.saved', { name }), 'success', 2000);
 };
 
+const savePreviewCharacterAlias = () => {
+    const character = currentPreviewCharacter.value;
+    if (!character?.characterName) {
+        return;
+    }
+
+    const alias = previewCharacterAlias.value.trim();
+    if (!alias) {
+        clearPreviewCharacterAlias();
+        return;
+    }
+
+    characterConfigStore.updateCharacterConfig(character.characterName, {
+        alias,
+    });
+
+    previewCharacterAlias.value = alias;
+    window.dispatchEvent(new CustomEvent('custom-characters-updated'));
+    massage(t('projectView.customizer.messages.aliasSaved', {
+        name: alias || getCharacterDisplayName(character),
+    }), 'success', 2000);
+};
+
+const clearPreviewCharacterAlias = () => {
+    const character = currentPreviewCharacter.value;
+    if (!character?.characterName) {
+        return;
+    }
+
+    characterConfigStore.updateCharacterConfig(character.characterName, {
+        alias: '',
+    });
+
+    previewCharacterAlias.value = '';
+    window.dispatchEvent(new CustomEvent('custom-characters-updated'));
+    massage(t('projectView.customizer.messages.aliasCleared'), 'success', 2000);
+};
+
 const deleteCustomCharacter = async (characterId: string) => {
     if (!characterId) {
         return;
@@ -1519,6 +1630,7 @@ const deleteCustomCharacter = async (characterId: string) => {
     if (currentPreviewCharacter.value?.id === characterId) {
         currentPreviewCharacter.value = null;
         customCharacterName.value = '';
+        previewCharacterAlias.value = '';
     }
     window.dispatchEvent(new CustomEvent('custom-characters-updated'));
     massage(t('projectView.customizer.messages.deleted'), 'success', 2000);

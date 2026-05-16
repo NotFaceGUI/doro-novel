@@ -332,6 +332,10 @@
       "shader": "编辑 Shader",
       "clearShader": "清除 Shader",
       "clearSelection": "清空选择",
+      "characterAlias": "角色别名",
+      "characterAliasPlaceholder": "输入当前角色显示名称，不填则使用翻译名",
+      "saveAlias": "保存别名",
+      "clearAlias": "清除别名",
       "saveAsCharacter": "保存为新角色",
       "characterNamePlaceholder": "输入新角色名称",
       "save": "保存角色",
@@ -340,6 +344,8 @@
       "messages": {
         "selectSlotFirst": "请先选中至少一个部件",
         "enterCharacterName": "请输入新角色名称",
+        "aliasSaved": "已保存角色别名：{name}",
+        "aliasCleared": "已清除角色别名",
         "saved": "已保存自定义角色：{name}",
         "deleted": "已删除自定义角色",
         "noSlotMatched": "没有匹配到包含 {keyword} 的部件"

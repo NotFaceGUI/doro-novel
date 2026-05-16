@@ -332,6 +332,10 @@
       "shader": "Shader 편집",
       "clearShader": "Shader 지우기",
       "clearSelection": "선택 해제",
+      "characterAlias": "캐릭터 별칭",
+      "characterAliasPlaceholder": "이 캐릭터의 표시 이름을 입력하세요. 비워 두면 번역명을 사용합니다",
+      "saveAlias": "별칭 저장",
+      "clearAlias": "별칭 지우기",
       "saveAsCharacter": "새 캐릭터로 저장",
       "characterNamePlaceholder": "새 캐릭터 이름 입력",
       "save": "캐릭터 저장",
@@ -340,6 +344,8 @@
       "messages": {
         "selectSlotFirst": "먼저 하나 이상의 부품을 선택하세요",
         "enterCharacterName": "새 캐릭터 이름을 입력하세요",
+        "aliasSaved": "캐릭터 별칭이 저장되었습니다: {name}",
+        "aliasCleared": "캐릭터 별칭이 지워졌습니다",
         "saved": "커스텀 캐릭터 저장됨: {name}",
         "deleted": "커스텀 캐릭터가 삭제되었습니다",
         "noSlotMatched": "{keyword} 와 일치하는 부품이 없습니다"
