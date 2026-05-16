@@ -329,6 +329,21 @@
       "visible": "显示",
       "alpha": "透明",
       "tint": "着色",
+      "customSkinImage": "自定义 Skin 图片",
+      "currentSkinAtlas": "当前 Skin 图集",
+      "currentSkinImage": "当前图片",
+      "currentSkinAtlasEmpty": "未检测到当前皮肤",
+      "currentSkinAtlasMultiPage": "{skin}，共 {count} 张图",
+      "currentSkinPageFallback": "图集页 {index}",
+      "customSkinVariantFallback": "自定义皮肤",
+      "noCustomSkinImage": "未设置",
+      "mixedCustomSkinImage": "已应用 {count} 张不同图片",
+      "skinImageSharedHint": "当前选中的 {count} 个部件会共用这张图片",
+      "exportSkinImage": "导出当前 Skin 图",
+      "pickSkinAtlasImage": "导入图集图",
+      "clearSkinAtlasImage": "清除图集图",
+      "pickSkinImage": "导入图片",
+      "clearSkinImage": "清除图片",
       "shader": "编辑 Shader",
       "clearShader": "清除 Shader",
       "clearSelection": "清空选择",
@@ -341,6 +356,11 @@
       "save": "保存角色",
       "deleteCurrent": "删除当前角色",
       "customCharacters": "自定义角色",
+      "processing": {
+        "importingSkinAtlas": "正在导入并应用 Skin 图集...",
+        "clearingSkinAtlas": "正在清除 Skin 图集...",
+        "exportingSkinAtlas": "正在导出 Skin 图..."
+      },
       "messages": {
         "selectSlotFirst": "请先选中至少一个部件",
         "enterCharacterName": "请输入新角色名称",
@@ -348,7 +368,16 @@
         "aliasCleared": "已清除角色别名",
         "saved": "已保存自定义角色：{name}",
         "deleted": "已删除自定义角色",
-        "noSlotMatched": "没有匹配到包含 {keyword} 的部件"
+        "noSlotMatched": "没有匹配到包含 {keyword} 的部件",
+        "customSkinApplied": "已为 {count} 个部件应用自定义图片",
+        "customSkinCleared": "已清除所选部件的自定义图片",
+        "customSkinFailed": "导入自定义图片失败",
+        "noSkinAtlasToExport": "当前没有可导出的 Skin 图",
+        "skinAtlasApplied": "已应用 Skin 图集图片",
+        "skinAtlasCleared": "已清除 Skin 图集图片",
+        "skinAtlasImportFailed": "导入 Skin 图集图片失败",
+        "skinAtlasExported": "已导出当前 Skin 图，共 {count} 张",
+        "skinAtlasExportFailed": "导出当前 Skin 图失败"
       }
     }
   },

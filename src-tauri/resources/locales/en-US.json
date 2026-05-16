@@ -329,6 +329,21 @@
       "visible": "Visible",
       "alpha": "Alpha",
       "tint": "Tint",
+      "customSkinImage": "Custom Skin Image",
+      "currentSkinAtlas": "Current Skin Atlas",
+      "currentSkinImage": "Current Image",
+      "currentSkinAtlasEmpty": "No active skin detected",
+      "currentSkinAtlasMultiPage": "{skin}, {count} page(s)",
+      "currentSkinPageFallback": "Atlas Page {index}",
+      "customSkinVariantFallback": "Custom Skin",
+      "noCustomSkinImage": "Not Set",
+      "mixedCustomSkinImage": "{count} different images applied",
+      "skinImageSharedHint": "The selected {count} parts will share this image",
+      "exportSkinImage": "Export Current Skin",
+      "pickSkinAtlasImage": "Import Atlas Image",
+      "clearSkinAtlasImage": "Clear Atlas Image",
+      "pickSkinImage": "Import Image",
+      "clearSkinImage": "Clear Image",
       "shader": "Edit Shader",
       "clearShader": "Clear Shader",
       "clearSelection": "Clear Selection",
@@ -341,6 +356,11 @@
       "save": "Save Character",
       "deleteCurrent": "Delete Current Character",
       "customCharacters": "Custom Characters",
+      "processing": {
+        "importingSkinAtlas": "Importing and applying the skin atlas...",
+        "clearingSkinAtlas": "Clearing the skin atlas...",
+        "exportingSkinAtlas": "Exporting the current skin..."
+      },
       "messages": {
         "selectSlotFirst": "Select at least one part first",
         "enterCharacterName": "Enter a new character name",
@@ -348,7 +368,16 @@
         "aliasCleared": "Character alias cleared",
         "saved": "Custom character saved: {name}",
         "deleted": "Custom character deleted",
-        "noSlotMatched": "No parts matched keyword {keyword}"
+        "noSlotMatched": "No parts matched keyword {keyword}",
+        "customSkinApplied": "Applied the custom image to {count} part(s)",
+        "customSkinCleared": "Cleared the custom image from the selected parts",
+        "customSkinFailed": "Failed to import the custom image",
+        "noSkinAtlasToExport": "There is no skin atlas to export",
+        "skinAtlasApplied": "Applied the skin atlas image",
+        "skinAtlasCleared": "Cleared the skin atlas image",
+        "skinAtlasImportFailed": "Failed to import the skin atlas image",
+        "skinAtlasExported": "Exported the current skin atlas, {count} page(s) total",
+        "skinAtlasExportFailed": "Failed to export the current skin atlas"
       }
     }
   },

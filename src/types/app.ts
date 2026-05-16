@@ -72,16 +72,32 @@ export interface SlotShaderConfig {
     uniforms: ShaderUniformMap;
 }
 
+export interface SlotTextureOverride {
+    assetPath: string;
+    fileName: string;
+}
+
+export interface SpineCustomSkinVariant {
+    id: string;
+    label: string;
+    baseSkinName: string;
+    atlasOverrides: Record<string, SlotTextureOverride>;
+}
+
 export interface SlotCustomization {
     visible?: boolean;
     alpha?: number;
     tint?: number;
     shader?: SlotShaderConfig | null;
+    textureOverride?: SlotTextureOverride | null;
 }
 
 export interface SpineCharacterCustomization {
     selectedAnimationName?: string;
     selectedSkinName?: string;
+    selectedSkinVariantId?: string;
+    atlasOverrides?: Record<string, SlotTextureOverride>;
+    customSkinVariants?: SpineCustomSkinVariant[];
     slots: Record<string, SlotCustomization>;
 }
 

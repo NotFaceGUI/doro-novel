@@ -329,6 +329,21 @@
       "visible": "표시",
       "alpha": "투명도",
       "tint": "색상",
+      "customSkinImage": "커스텀 Skin 이미지",
+      "currentSkinAtlas": "현재 Skin 아틀라스",
+      "currentSkinImage": "현재 이미지",
+      "currentSkinAtlasEmpty": "현재 스킨을 찾지 못했습니다",
+      "currentSkinAtlasMultiPage": "{skin}, 총 {count}장",
+      "currentSkinPageFallback": "아틀라스 페이지 {index}",
+      "customSkinVariantFallback": "커스텀 Skin",
+      "noCustomSkinImage": "설정되지 않음",
+      "mixedCustomSkinImage": "{count}개의 서로 다른 이미지가 적용됨",
+      "skinImageSharedHint": "현재 선택된 {count}개 부품이 이 이미지를 함께 사용합니다",
+      "exportSkinImage": "현재 Skin 내보내기",
+      "pickSkinAtlasImage": "아틀라스 이미지 가져오기",
+      "clearSkinAtlasImage": "아틀라스 이미지 지우기",
+      "pickSkinImage": "이미지 가져오기",
+      "clearSkinImage": "이미지 지우기",
       "shader": "Shader 편집",
       "clearShader": "Shader 지우기",
       "clearSelection": "선택 해제",
@@ -341,6 +356,11 @@
       "save": "캐릭터 저장",
       "deleteCurrent": "현재 캐릭터 삭제",
       "customCharacters": "커스텀 캐릭터",
+      "processing": {
+        "importingSkinAtlas": "Skin 아틀라스를 불러오고 적용하는 중...",
+        "clearingSkinAtlas": "Skin 아틀라스를 지우는 중...",
+        "exportingSkinAtlas": "현재 Skin 을 내보내는 중..."
+      },
       "messages": {
         "selectSlotFirst": "먼저 하나 이상의 부품을 선택하세요",
         "enterCharacterName": "새 캐릭터 이름을 입력하세요",
@@ -348,7 +368,16 @@
         "aliasCleared": "캐릭터 별칭이 지워졌습니다",
         "saved": "커스텀 캐릭터 저장됨: {name}",
         "deleted": "커스텀 캐릭터가 삭제되었습니다",
-        "noSlotMatched": "{keyword} 와 일치하는 부품이 없습니다"
+        "noSlotMatched": "{keyword} 와 일치하는 부품이 없습니다",
+        "customSkinApplied": "{count}개 부품에 커스텀 이미지를 적용했습니다",
+        "customSkinCleared": "선택된 부품의 커스텀 이미지를 지웠습니다",
+        "customSkinFailed": "커스텀 이미지를 가져오지 못했습니다",
+        "noSkinAtlasToExport": "내보낼 Skin 이미지가 없습니다",
+        "skinAtlasApplied": "Skin 아틀라스 이미지를 적용했습니다",
+        "skinAtlasCleared": "Skin 아틀라스 이미지를 지웠습니다",
+        "skinAtlasImportFailed": "Skin 아틀라스 이미지 가져오기에 실패했습니다",
+        "skinAtlasExported": "현재 Skin 이미지를 내보냈습니다. 총 {count}장입니다",
+        "skinAtlasExportFailed": "현재 Skin 이미지 내보내기에 실패했습니다"
       }
     }
   },

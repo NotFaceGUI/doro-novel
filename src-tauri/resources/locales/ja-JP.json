@@ -329,6 +329,21 @@
       "visible": "表示",
       "alpha": "透明度",
       "tint": "色付け",
+      "customSkinImage": "カスタム Skin 画像",
+      "currentSkinAtlas": "現在の Skin アトラス",
+      "currentSkinImage": "現在の画像",
+      "currentSkinAtlasEmpty": "現在のスキンが検出されていません",
+      "currentSkinAtlasMultiPage": "{skin}、全 {count} 枚",
+      "currentSkinPageFallback": "アトラス {index}",
+      "customSkinVariantFallback": "カスタム Skin",
+      "noCustomSkinImage": "未設定",
+      "mixedCustomSkinImage": "{count} 枚の異なる画像を適用済み",
+      "skinImageSharedHint": "選択中の {count} パーツでこの画像を共有します",
+      "exportSkinImage": "現在の Skin を書き出す",
+      "pickSkinAtlasImage": "アトラス画像を読み込む",
+      "clearSkinAtlasImage": "アトラス画像をクリア",
+      "pickSkinImage": "画像を読み込む",
+      "clearSkinImage": "画像をクリア",
       "shader": "Shader を編集",
       "clearShader": "Shader をクリア",
       "clearSelection": "選択解除",
@@ -341,6 +356,11 @@
       "save": "キャラクターを保存",
       "deleteCurrent": "現在のキャラクターを削除",
       "customCharacters": "カスタムキャラクター",
+      "processing": {
+        "importingSkinAtlas": "Skin アトラスを読み込み、適用しています...",
+        "clearingSkinAtlas": "Skin アトラスをクリアしています...",
+        "exportingSkinAtlas": "現在の Skin を出力しています..."
+      },
       "messages": {
         "selectSlotFirst": "先に少なくとも 1 つのパーツを選択してください",
         "enterCharacterName": "新しいキャラクター名を入力してください",
@@ -348,7 +368,16 @@
         "aliasCleared": "キャラクターの別名をクリアしました",
         "saved": "カスタムキャラクターを保存しました: {name}",
         "deleted": "カスタムキャラクターを削除しました",
-        "noSlotMatched": "{keyword} に一致するパーツがありません"
+        "noSlotMatched": "{keyword} に一致するパーツがありません",
+        "customSkinApplied": "{count} 個のパーツにカスタム画像を適用しました",
+        "customSkinCleared": "選択中のパーツからカスタム画像をクリアしました",
+        "customSkinFailed": "カスタム画像の読み込みに失敗しました",
+        "noSkinAtlasToExport": "書き出せる Skin 画像がありません",
+        "skinAtlasApplied": "Skin アトラス画像を適用しました",
+        "skinAtlasCleared": "Skin アトラス画像をクリアしました",
+        "skinAtlasImportFailed": "Skin アトラス画像の読み込みに失敗しました",
+        "skinAtlasExported": "現在の Skin 画像を出力しました。合計 {count} 枚です",
+        "skinAtlasExportFailed": "現在の Skin 画像の出力に失敗しました"
       }
     }
   },

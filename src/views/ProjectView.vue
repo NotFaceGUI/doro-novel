@@ -175,6 +175,53 @@
                         </div>
                     </div>
 
+                    <div v-if="previewSpine" class="slot-save-section slot-skin-section">
+                        <label>{{ t('projectView.customizer.currentSkinAtlas') }}</label>
+                        <div v-if="skinAtlasProcessing" class="slot-skin-processing" aria-live="polite">
+                            <span class="slot-skin-spinner"></span>
+                            <span class="slot-skin-processing-text">{{ skinAtlasProcessingText }}</span>
+                        </div>
+                        <div class="slot-skin-summary">
+                            <span class="slot-skin-summary-label">{{ t('projectView.customizer.currentSkinImage') }}</span>
+                            <span class="slot-skin-summary-value" :title="currentSkinAtlasSummary">
+                                {{ currentSkinAtlasSummary }}
+                            </span>
+                        </div>
+                        <div class="slot-skin-page-list" v-if="currentSkinAtlasPages.length > 0">
+                            <div class="slot-skin-page-item" v-for="page in currentSkinAtlasPages" :key="page.key">
+                                <div class="slot-skin-page-header">
+                                    <span class="slot-skin-page-name" :title="getSkinAtlasPageDisplayName(page)">
+                                        {{ getSkinAtlasPageDisplayName(page) }}
+                                    </span>
+                                    <span class="slot-skin-page-file" :title="getSkinAtlasOverrideSummary(page.key)">
+                                        {{ getSkinAtlasOverrideSummary(page.key) }}
+                                    </span>
+                                </div>
+                                <div class="slot-batch-actions slot-batch-actions-compact">
+                                    <button class="slot-panel-button slot-panel-button-primary" :disabled="skinAtlasProcessing" @click="applySkinAtlasOverride(page.key)">
+                                        {{ t('projectView.customizer.pickSkinAtlasImage') }}
+                                    </button>
+                                    <button
+                                        class="slot-panel-button slot-panel-button-ghost"
+                                        :disabled="skinAtlasProcessing || !hasSkinAtlasOverride(page.key)"
+                                        @click="clearSkinAtlasOverride(page.key)"
+                                    >
+                                        {{ t('projectView.customizer.clearSkinAtlasImage') }}
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="slot-batch-actions">
+                            <button
+                                class="slot-panel-button"
+                                :disabled="skinAtlasProcessing || currentSkinAtlasPages.length === 0"
+                                @click="exportCurrentSkinAtlasImage"
+                            >
+                                {{ t('projectView.customizer.exportSkinImage') }}
+                            </button>
+                        </div>
+                    </div>
+
                     <template v-if="selectedSlotNames.length > 0">
                         <div class="slot-selection-chip-list">
                             <span class="slot-selection-chip" v-for="name in selectedSlotNames" :key="name">{{ name }}</span>
@@ -207,6 +254,31 @@
                             <ColorPicker trigger-variant="panel"
                                 :model-value="selectedSlotPrimary?.tint ?? 0xffffff"
                                 @update:modelValue="applySelectedTint" />
+                        </div>
+
+                        <div class="slot-save-section slot-skin-section">
+                            <label>{{ t('projectView.customizer.customSkinImage') }}</label>
+                            <div class="slot-skin-summary">
+                                <span class="slot-skin-summary-label">{{ t('projectView.customizer.currentSkinImage') }}</span>
+                                <span class="slot-skin-summary-value" :title="selectedTextureOverrideSummary">
+                                    {{ selectedTextureOverrideSummary }}
+                                </span>
+                            </div>
+                            <div class="slot-skin-summary slot-skin-summary-hint" v-if="selectedSlotNames.length > 1">
+                                {{ t('projectView.customizer.skinImageSharedHint', { count: selectedSlotNames.length }) }}
+                            </div>
+                            <div class="slot-batch-actions">
+                                <button class="slot-panel-button slot-panel-button-primary" @click="applySelectedTextureOverride">
+                                    {{ t('projectView.customizer.pickSkinImage') }}
+                                </button>
+                                <button
+                                    class="slot-panel-button slot-panel-button-ghost"
+                                    :disabled="!hasSelectedTextureOverride"
+                                    @click="clearSelectedTextureOverride"
+                                >
+                                    {{ t('projectView.customizer.clearSkinImage') }}
+                                </button>
+                            </div>
                         </div>
 
                         <div class="slot-batch-actions">
@@ -398,14 +470,18 @@ import { OutlineFilter } from 'pixi-filters';
 import CanvasManager from '../script/render/canvas-manager';
 import AssetManager from '../script/asset-manager';
 import { useActionStore } from '../stores/action-store';
-import type { CharacterType, CharacterUrls, DropdownOption, SlotCustomization, SpineCharacterCustomization } from '../types/app';
+import type { CharacterType, CharacterUrls, DropdownOption, SlotCustomization, SlotTextureOverride, SpineCharacterCustomization, SpineCustomSkinVariant } from '../types/app';
 import { applyUIAnimationConfig, type UIAnimationConfig } from '../script/render/animation-config';
 import { useWatermarkStore } from '../stores/watermark-store';
 import { useDialogueUiStore } from '../stores/dialogue-ui-store';
+import { basename as pathBasename, dirname as pathDirname, extname as pathExtname, join as pathJoin } from '@tauri-apps/api/path';
 import { getCurrentWindow } from '@tauri-apps/api/window';
+import { open, save } from '@tauri-apps/plugin-dialog';
+import { writeFile } from '@tauri-apps/plugin-fs';
 import massage from '../script/common/massage';
 import CustomCharacterService from '../script/custom-character-service';
 import { applySlotRuntimeColor, applySpineCustomization, cloneCustomization, type ApplySpineCustomizationOptions } from '../script/spine-customization';
+import { collectSpineAtlasPages, importCustomSkinImage, type SpineAtlasPageInfo } from '../script/spine-skin-service';
 import { useCharacterConfigStore } from '../stores/character-config-store';
 import { getCharacterId, getCharacterResourceKey } from '../utils/character';
 import { getCharacterDisplayName } from '../utils/character-name';
@@ -472,7 +548,13 @@ const animationOptions = ref<DropdownOption[]>([]);
 const selectedAnimationIndex = ref<number>(0);
 
 // 皮肤选择相关的响应式数据
-const skinOptions = ref<DropdownOption[]>([]);
+interface PreviewSkinOption extends DropdownOption {
+    skinName: string;
+    skinVariantId?: string;
+    isCustomVariant?: boolean;
+}
+
+const skinOptions = ref<PreviewSkinOption[]>([]);
 const selectedSkinIndex = ref<number>(0);
 
 // 角色类型切换相关的响应式数据
@@ -491,6 +573,7 @@ interface SlotData {
     alpha: number;
     tint: number;
     shader: SlotCustomization['shader'] | null;
+    textureOverride: SlotCustomization['textureOverride'] | null;
 }
 const slotOptions = ref<SlotData[]>([]);
 const hoveredSlotName = ref<string | null>(null);
@@ -499,7 +582,13 @@ const customCharacterName = ref('');
 const previewCharacterAlias = ref('');
 const currentPreviewCharacter = ref<CharacterType | null>(null);
 const customCharacters = ref<CharacterType[]>([]);
-const currentCustomization = ref<SpineCharacterCustomization>({ slots: {} });
+const currentCustomization = ref<SpineCharacterCustomization>({
+    atlasOverrides: {},
+    customSkinVariants: [],
+    slots: {},
+});
+const skinAtlasProcessing = ref(false);
+const skinAtlasProcessingText = ref('');
 const showBulkSelectDialog = ref(false);
 const bulkSelectKeyword = ref('');
 const bulkSelectInputRef = ref<HTMLInputElement | null>(null);
@@ -520,6 +609,53 @@ const selectedSlotPrimary = computed(() => {
     }
 
     return slotOptions.value.find((slot) => slot.name === selectedSlotNames.value[0]) || null;
+});
+const hasSelectedTextureOverride = computed(() =>
+    selectedSlotNames.value.some((slotName) => !!currentCustomization.value.slots[slotName]?.textureOverride?.assetPath)
+);
+const currentSkinAtlasPages = computed<SpineAtlasPageInfo[]>(() => {
+    const selectedSkinName = currentCustomization.value.selectedSkinName
+        || skinOptions.value[selectedSkinIndex.value]?.skinName;
+    return collectSpineAtlasPages(previewSpine.value, selectedSkinName);
+});
+const getSkinAtlasOverride = (pageKey: string) => currentCustomization.value.atlasOverrides?.[pageKey] || null;
+const hasSkinAtlasOverride = (pageKey: string) => !!getSkinAtlasOverride(pageKey)?.assetPath;
+const getSkinAtlasPageDisplayName = (page: SpineAtlasPageInfo) => {
+    return page.name || t('projectView.customizer.currentSkinPageFallback', { index: page.index + 1 });
+};
+const getSkinAtlasOverrideSummary = (pageKey: string) => {
+    return getSkinAtlasOverride(pageKey)?.fileName || t('projectView.customizer.noCustomSkinImage');
+};
+const selectedTextureOverrideSummary = computed(() => {
+    const overrides = selectedSlotNames.value
+        .map((slotName) => currentCustomization.value.slots[slotName]?.textureOverride)
+        .filter((item): item is NonNullable<SlotCustomization['textureOverride']> => !!item?.assetPath);
+
+    if (overrides.length === 0) {
+        return t('projectView.customizer.noCustomSkinImage');
+    }
+
+    const uniqueOverrides = [...new Map(overrides.map((item) => [item.assetPath, item])).values()];
+    if (uniqueOverrides.length === 1) {
+        return uniqueOverrides[0].fileName || t('projectView.customizer.noCustomSkinImage');
+    }
+
+    return t('projectView.customizer.mixedCustomSkinImage', { count: uniqueOverrides.length });
+});
+const currentSkinAtlasSummary = computed(() => {
+    const skinName = skinOptions.value[selectedSkinIndex.value]?.label
+        || currentCustomization.value.selectedSkinName
+        || t('projectView.customizer.currentSkinAtlasEmpty');
+    const pageCount = currentSkinAtlasPages.value.length;
+
+    if (pageCount <= 1) {
+        return skinName;
+    }
+
+    return t('projectView.customizer.currentSkinAtlasMultiPage', {
+        skin: skinName,
+        count: pageCount,
+    });
 });
 const shaderSelectedSlotPreview = computed(() => selectedSlotNames.value.slice(0, 3));
 
@@ -602,19 +738,26 @@ const syncPreviewCharacterAlias = (character?: CharacterType | null) => {
 const getDefaultCustomization = (): SpineCharacterCustomization => ({
     selectedAnimationName: undefined,
     selectedSkinName: undefined,
+    selectedSkinVariantId: undefined,
+    atlasOverrides: {},
+    customSkinVariants: [],
     slots: {},
 });
 
 const refreshCurrentCustomization = () => {
     currentCustomization.value = {
         selectedAnimationName: animationOptions.value[selectedAnimationIndex.value]?.label,
-        selectedSkinName: skinOptions.value[selectedSkinIndex.value]?.label,
+        selectedSkinName: skinOptions.value[selectedSkinIndex.value]?.skinName,
+        selectedSkinVariantId: skinOptions.value[selectedSkinIndex.value]?.skinVariantId,
+        atlasOverrides: { ...(currentCustomization.value.atlasOverrides || {}) },
+        customSkinVariants: JSON.parse(JSON.stringify(currentCustomization.value.customSkinVariants || [])),
         slots: slotOptions.value.reduce<Record<string, SlotCustomization>>((acc, slot) => {
             acc[slot.name] = {
                 visible: slot.visible,
                 alpha: slot.alpha,
                 tint: slot.tint,
                 shader: slot.shader ?? null,
+                textureOverride: slot.textureOverride ? { ...slot.textureOverride } : null,
             };
             return acc;
         }, {}),
@@ -899,13 +1042,18 @@ const syncSlotOutlineOverlay = () => {
     }
 };
 
-const applyCurrentCustomization = (options: ApplySpineCustomizationOptions = {}) => {
+const setSkinAtlasProcessing = (active: boolean, text: string = '') => {
+    skinAtlasProcessing.value = active;
+    skinAtlasProcessingText.value = active ? text : '';
+};
+
+const applyCurrentCustomization = async (options: ApplySpineCustomizationOptions = {}) => {
     if (!previewSpine.value) {
         return;
     }
 
     const shaderFilterArea = options.filterArea ?? previewAPP.value?.application.screen?.clone?.() ?? null;
-    applySpineCustomization(previewSpine.value, currentCustomization.value, {
+    await applySpineCustomization(previewSpine.value, currentCustomization.value, {
         ...options,
         filterArea: shaderFilterArea,
     });
@@ -919,15 +1067,141 @@ const setSlotCustomization = (slotName: string, patch: Partial<SlotCustomization
     };
 };
 
+const setSkinAtlasOverride = (pageKey: string, override: SlotTextureOverride | null) => {
+    const nextOverrides = { ...(currentCustomization.value.atlasOverrides || {}) };
+    if (override?.assetPath) {
+        nextOverrides[pageKey] = { ...override };
+    } else {
+        delete nextOverrides[pageKey];
+    }
+
+    currentCustomization.value.atlasOverrides = nextOverrides;
+};
+
+const getCustomSkinVariants = () => currentCustomization.value.customSkinVariants || [];
+
+const hasAtlasOverrides = (atlasOverrides?: Record<string, SlotTextureOverride>) => {
+    return Object.values(atlasOverrides || {}).some((override) => !!override?.assetPath?.trim());
+};
+
+const ensureLegacySkinVariantMigration = () => {
+    if (currentCustomization.value.selectedSkinVariantId?.trim()) {
+        return;
+    }
+
+    if (getCustomSkinVariants().length > 0 || !hasAtlasOverrides(currentCustomization.value.atlasOverrides)) {
+        return;
+    }
+
+    const baseSkinName = currentCustomization.value.selectedSkinName?.trim()
+        || previewSpine.value?.skeleton?.skin?.name
+        || 'default';
+    const firstOverride = Object.values(currentCustomization.value.atlasOverrides || {})
+        .find((override) => !!override?.assetPath?.trim());
+    const variantId = `legacy-custom-skin:${Date.now()}`;
+
+    currentCustomization.value.customSkinVariants = [
+        {
+            id: variantId,
+            label: `${baseSkinName} · ${firstOverride?.fileName || t('projectView.customizer.customSkinVariantFallback')}`,
+            baseSkinName,
+            atlasOverrides: JSON.parse(JSON.stringify(currentCustomization.value.atlasOverrides || {})),
+        },
+    ];
+    currentCustomization.value.selectedSkinName = baseSkinName;
+    currentCustomization.value.selectedSkinVariantId = variantId;
+};
+
+const getDefaultPreviewSkinIndex = (spine: Spine) => {
+    const skins = spine.spineData?.skins || [];
+    if (skins.length === 0) {
+        return 0;
+    }
+
+    const nonDefaultSkinIndex = skins.findIndex((skin: any, index: number) =>
+        index > 0 &&
+        !skin.name.toLowerCase().includes('default') &&
+        !skin.name.toLowerCase().includes('默认')
+    );
+
+    return nonDefaultSkinIndex !== -1 ? nonDefaultSkinIndex : 0;
+};
+
+const buildPreviewSkinOptions = (spine: Spine): PreviewSkinOption[] => {
+    const baseOptions: PreviewSkinOption[] = (spine.spineData?.skins || []).map((skin: any, index: number) => ({
+        label: skin.name,
+        value: index,
+        skinName: skin.name,
+    }));
+
+    const customOptions: PreviewSkinOption[] = getCustomSkinVariants().map((variant, index) => ({
+        label: variant.label,
+        value: baseOptions.length + index,
+        skinName: variant.baseSkinName,
+        skinVariantId: variant.id,
+        isCustomVariant: true,
+    }));
+
+    return [...baseOptions, ...customOptions];
+};
+
+const syncSelectedSkinOption = () => {
+    if (skinOptions.value.length === 0) {
+        selectedSkinIndex.value = 0;
+        return;
+    }
+
+    const selectedVariantId = currentCustomization.value.selectedSkinVariantId?.trim();
+    if (selectedVariantId) {
+        const customVariantIndex = skinOptions.value.findIndex((option) => option.skinVariantId === selectedVariantId);
+        if (customVariantIndex >= 0) {
+            selectedSkinIndex.value = customVariantIndex;
+            return;
+        }
+    }
+
+    const selectedSkinName = currentCustomization.value.selectedSkinName?.trim();
+    if (!selectedSkinName) {
+        selectedSkinIndex.value = Math.min(Math.max(selectedSkinIndex.value, 0), skinOptions.value.length - 1);
+        return;
+    }
+
+    const skinIndex = skinOptions.value.findIndex((option) => option.skinName === selectedSkinName && !option.skinVariantId);
+    if (skinIndex >= 0) {
+        selectedSkinIndex.value = skinIndex;
+        return;
+    }
+
+    selectedSkinIndex.value = 0;
+};
+
+const applySelectedSkinOptionState = () => {
+    const selectedOption = skinOptions.value[selectedSkinIndex.value];
+    if (!selectedOption) {
+        return;
+    }
+
+    currentCustomization.value.selectedSkinName = selectedOption.skinName;
+    currentCustomization.value.selectedSkinVariantId = selectedOption.skinVariantId;
+
+    if (selectedOption.skinVariantId) {
+        const selectedVariant = getCustomSkinVariants().find((variant) => variant.id === selectedOption.skinVariantId);
+        currentCustomization.value.atlasOverrides = JSON.parse(JSON.stringify(selectedVariant?.atlasOverrides || {}));
+    } else {
+        currentCustomization.value.atlasOverrides = {};
+    }
+};
+
 const applySlotCustomizationBatch = (slotNames: string[]) => {
     const uniqueSlotNames = [...new Set(slotNames)];
     if (uniqueSlotNames.length === 0) {
         return;
     }
 
-    applyCurrentCustomization({
+    void applyCurrentCustomization({
         includeAnimation: false,
         includeSkin: false,
+        includeAtlasOverrides: false,
         slotNames: uniqueSlotNames,
     });
 };
@@ -1063,12 +1337,9 @@ const handleRenderType = async (data: { url: string, type: ResType, characterUrl
                         }
                     }
 
-                    const skinIndex = skinOptions.value.findIndex((option) => option.label === currentCustomization.value.selectedSkinName);
-                    if (skinIndex >= 0) {
-                        selectedSkinIndex.value = skinIndex;
-                    }
+                    syncSelectedSkinOption();
 
-                    applyCurrentCustomization();
+                    void applyCurrentCustomization();
 
                     if (previewSpine.value && previewAPP.value) {
                         cleanup = setupSpineInteraction(previewSpine.value, previewAPP.value.application, {
@@ -1185,9 +1456,10 @@ const handelResizeCanvasToPreview = () => {
             layoutPreviewSpine(previewSpine.value, app);
             const customizedSlots = Object.keys(currentCustomization.value.slots || {});
             if (customizedSlots.length > 0) {
-                applyCurrentCustomization({
+                void applyCurrentCustomization({
                     includeAnimation: false,
                     includeSkin: false,
+                    includeAtlasOverrides: false,
                     slotNames: customizedSlots,
                 });
             }
@@ -1250,28 +1522,27 @@ const updateAnimationOptions = (spine: Spine | undefined) => {
 const updateSkinOptions = (spine: Spine | undefined) => {
     if (spine && spine.spineData && spine.spineData.skins) {
         const skins = spine.spineData.skins;
-        skinOptions.value = skins.map((skin: any, index: number) => ({
-            label: skin.name,
-            value: index
-        }));
+        ensureLegacySkinVariantMigration();
+        skinOptions.value = buildPreviewSkinOptions(spine);
 
-        // 如果有非默认的皮肤就用非默认的，否则使用第一个
         if (skins.length > 0) {
-            let selectedIndex = 0;
-
-            // 查找非默认皮肤（通常默认皮肤名为 "default" 或包含 "default"）
-            const nonDefaultSkinIndex = skins.findIndex((skin: any, index: number) =>
-                index > 0 && // 跳过第一个皮肤（通常是默认的）
-                !skin.name.toLowerCase().includes('default') &&
-                !skin.name.toLowerCase().includes('默认')
-            );
-
-            if (nonDefaultSkinIndex !== -1) {
-                selectedIndex = nonDefaultSkinIndex;
+            if (!currentCustomization.value.selectedSkinName && !currentCustomization.value.selectedSkinVariantId) {
+                selectedSkinIndex.value = getDefaultPreviewSkinIndex(spine);
+            } else {
+                syncSelectedSkinOption();
             }
 
-            selectedSkinIndex.value = selectedIndex;
-            spine.skeleton.setSkinByName(skins[selectedIndex].name);
+            const selectedOption = skinOptions.value[selectedSkinIndex.value];
+            const appliedSkinName = selectedOption?.skinName || skins[getDefaultPreviewSkinIndex(spine)]?.name || skins[0].name;
+            currentCustomization.value.selectedSkinName = appliedSkinName;
+            currentCustomization.value.selectedSkinVariantId = selectedOption?.skinVariantId;
+            if (selectedOption?.skinVariantId) {
+                const selectedVariant = getCustomSkinVariants().find((variant) => variant.id === selectedOption.skinVariantId);
+                currentCustomization.value.atlasOverrides = JSON.parse(JSON.stringify(selectedVariant?.atlasOverrides || {}));
+            } else {
+                currentCustomization.value.atlasOverrides = {};
+            }
+            spine.skeleton.setSkinByName(appliedSkinName);
             spine.skeleton.setSlotsToSetupPose();
             spine.update(0);
 
@@ -1289,9 +1560,10 @@ const handleAnimationChange = (animationIndex: number) => {
         const animations = previewSpine.value.spineData.animations;
         if (animations[animationIndex]) {
             currentCustomization.value.selectedAnimationName = animations[animationIndex].name;
-            applyCurrentCustomization({
+            void applyCurrentCustomization({
                 includeAnimation: true,
                 includeSkin: false,
+                includeAtlasOverrides: false,
             });
         }
     }
@@ -1300,15 +1572,14 @@ const handleAnimationChange = (animationIndex: number) => {
 // 处理皮肤选择变化
 const handleSkinChange = (skinIndex: number) => {
     selectedSkinIndex.value = skinIndex;
-    if (previewSpine.value && previewSpine.value.spineData && previewSpine.value.spineData.skins) {
-        const skins = previewSpine.value.spineData.skins;
-        if (skins[skinIndex]) {
-            currentCustomization.value.selectedSkinName = skins[skinIndex].name;
-            applyCurrentCustomization({
-                includeAnimation: false,
-                includeSkin: true,
-            });
-        }
+    const selectedOption = skinOptions.value[skinIndex];
+    if (previewSpine.value && selectedOption) {
+        applySelectedSkinOptionState();
+        void applyCurrentCustomization({
+            includeAnimation: false,
+            includeSkin: true,
+            includeAtlasOverrides: true,
+        });
     }
 };
 
@@ -1383,9 +1654,10 @@ const handleCharacterTypeChange = (typeIndex: number) => {
 
         // 重新初始化动画、皮肤和插槽选项
         updateAnimationOptions(targetSpine);
-        applyCurrentCustomization({
+        void applyCurrentCustomization({
             includeAnimation: true,
             includeSkin: true,
+            includeAtlasOverrides: true,
         });
 
         console.log(`切换到角色类型: ${characterType}`);
@@ -1419,6 +1691,7 @@ const updateSlotOptions = (spine: Spine | undefined) => {
             alpha: currentCustomization.value.slots[slot.data.name]?.alpha ?? 1.0,
             tint: currentCustomization.value.slots[slot.data.name]?.tint ?? 0xffffff,
             shader: currentCustomization.value.slots[slot.data.name]?.shader ?? null,
+            textureOverride: currentCustomization.value.slots[slot.data.name]?.textureOverride ?? null,
         }));
 
         selectedSlotNames.value = selectedSlotNames.value.filter((slotName) =>
@@ -1513,6 +1786,258 @@ const applySelectedTint = (tint: number) => {
         }
     });
     applySlotCustomizationBatch(selectedSlotNames.value);
+};
+
+const exportCurrentSkinAtlasImage = async () => {
+    if (!previewSpine.value || !previewAPP.value) {
+        massage(t('projectView.customizer.messages.noSkinAtlasToExport'), 'error', 2200);
+        return;
+    }
+
+    const pages = currentSkinAtlasPages.value;
+    if (pages.length === 0) {
+        massage(t('projectView.customizer.messages.noSkinAtlasToExport'), 'error', 2200);
+        return;
+    }
+
+    const defaultCharacterName = currentPreviewCharacter.value?.displayName
+        || currentPreviewCharacter.value?.characterName
+        || 'spine';
+    const skinName = skinOptions.value[selectedSkinIndex.value]?.label
+        || currentCustomization.value.selectedSkinName
+        || 'skin';
+    const targetPath = await save({
+        title: t('projectView.customizer.exportSkinImage'),
+        defaultPath: `${defaultCharacterName}-${skinName}.png`,
+        filters: [
+            {
+                name: 'PNG',
+                extensions: ['png'],
+            },
+        ],
+    });
+
+    if (!targetPath) {
+        return;
+    }
+
+    const normalizedTargetPath = targetPath.toLowerCase().endsWith('.png')
+        ? targetPath
+        : `${targetPath}.png`;
+    const targetDir = await pathDirname(normalizedTargetPath);
+    const targetExt = (await pathExtname(normalizedTargetPath)) || 'png';
+    const normalizedExt = targetExt.replace(/^\./, '') || 'png';
+    const targetBaseName = await pathBasename(normalizedTargetPath, `.${normalizedExt}`);
+
+    try {
+        setSkinAtlasProcessing(true, t('projectView.customizer.processing.exportingSkinAtlas'));
+        await nextTick();
+
+        for (let index = 0; index < pages.length; index += 1) {
+            const page = pages[index];
+            const frame = new PIXI.Rectangle(0, 0, page.baseTexture.realWidth, page.baseTexture.realHeight);
+            const texture = new PIXI.Texture(page.baseTexture, frame, frame.clone(), undefined, 0);
+            const sprite = new PIXI.Sprite(texture);
+            const outputPath = index === 0
+                ? normalizedTargetPath
+                : await pathJoin(targetDir, `${targetBaseName}-${index + 1}.${normalizedExt}`);
+
+            try {
+                const canvas = previewAPP.value.application.renderer.extract.canvas(sprite) as HTMLCanvasElement;
+                const blob = await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, 'image/png'));
+                if (!blob) {
+                    throw new Error('canvas.toBlob returned null');
+                }
+
+                const buffer = await blob.arrayBuffer();
+                await writeFile(outputPath, new Uint8Array(buffer));
+            } finally {
+                sprite.destroy();
+                texture.destroy(false);
+            }
+
+            if (index + 1 < pages.length) {
+                await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
+            }
+        }
+
+        massage(
+            t('projectView.customizer.messages.skinAtlasExported', { count: pages.length }),
+            'success',
+            2200
+        );
+    } catch (error) {
+        console.error('导出 Spine skin atlas 失败:', error);
+        massage(t('projectView.customizer.messages.skinAtlasExportFailed'), 'error', 2200);
+    } finally {
+        setSkinAtlasProcessing(false);
+    }
+};
+
+const applySkinAtlasOverride = async (pageKey: string) => {
+    if (!previewSpine.value) {
+        return;
+    }
+
+    const selected = await open({
+        filters: [
+            {
+                name: 'Image',
+                extensions: ['png', 'jpg', 'jpeg', 'webp'],
+            },
+        ],
+        multiple: false,
+    });
+
+    if (!selected || Array.isArray(selected)) {
+        return;
+    }
+
+    try {
+        setSkinAtlasProcessing(true, t('projectView.customizer.processing.importingSkinAtlas'));
+        await nextTick();
+        const textureOverride = await importCustomSkinImage(selected);
+        const currentOption = skinOptions.value[selectedSkinIndex.value];
+        const baseSkinName = currentOption?.skinName || currentCustomization.value.selectedSkinName || previewSpine.value.skeleton?.skin?.name || 'default';
+        const currentVariant = currentOption?.skinVariantId
+            ? getCustomSkinVariants().find((variant) => variant.id === currentOption.skinVariantId)
+            : null;
+        const variantId = currentVariant?.id || `custom-skin:${Date.now()}`;
+        const nextAtlasOverrides = { ...(currentVariant?.atlasOverrides || {}) };
+        nextAtlasOverrides[pageKey] = { ...textureOverride };
+
+        const nextVariant: SpineCustomSkinVariant = {
+            id: variantId,
+            label: currentVariant?.label || `${baseSkinName} · ${textureOverride.fileName || t('projectView.customizer.customSkinVariantFallback')}`,
+            baseSkinName,
+            atlasOverrides: nextAtlasOverrides,
+        };
+
+        currentCustomization.value.customSkinVariants = currentVariant
+            ? getCustomSkinVariants().map((variant) => variant.id === currentVariant.id ? nextVariant : variant)
+            : [...getCustomSkinVariants(), nextVariant];
+        skinOptions.value = buildPreviewSkinOptions(previewSpine.value);
+        const nextSkinIndex = skinOptions.value.findIndex((option) => option.skinVariantId === variantId);
+        if (nextSkinIndex >= 0) {
+            selectedSkinIndex.value = nextSkinIndex;
+        }
+        applySelectedSkinOptionState();
+        await applyCurrentCustomization({
+            includeAnimation: false,
+            includeSkin: true,
+            includeAtlasOverrides: true,
+        });
+        massage(t('projectView.customizer.messages.skinAtlasApplied'), 'success', 2000);
+    } catch (error) {
+        console.error('导入 Spine skin atlas 失败:', error);
+        massage(t('projectView.customizer.messages.skinAtlasImportFailed'), 'error', 2000);
+    } finally {
+        setSkinAtlasProcessing(false);
+    }
+};
+
+const clearSkinAtlasOverride = async (pageKey: string) => {
+    const currentOption = skinOptions.value[selectedSkinIndex.value];
+    if (!currentOption?.skinVariantId && !hasSkinAtlasOverride(pageKey)) {
+        return;
+    }
+
+    setSkinAtlasProcessing(true, t('projectView.customizer.processing.clearingSkinAtlas'));
+    await nextTick();
+
+    try {
+        if (currentOption?.skinVariantId) {
+            const currentVariant = getCustomSkinVariants().find((variant) => variant.id === currentOption.skinVariantId);
+            const nextAtlasOverrides = { ...(currentVariant?.atlasOverrides || {}) };
+            delete nextAtlasOverrides[pageKey];
+            const hasRemainingOverrides = Object.values(nextAtlasOverrides)
+                .some((override) => !!override?.assetPath);
+
+            currentCustomization.value.customSkinVariants = hasRemainingOverrides
+                ? getCustomSkinVariants().map((variant) => variant.id === currentOption.skinVariantId
+                    ? { ...variant, atlasOverrides: nextAtlasOverrides }
+                    : variant)
+                : getCustomSkinVariants().filter((variant) => variant.id !== currentOption.skinVariantId);
+            skinOptions.value = buildPreviewSkinOptions(previewSpine.value!);
+            const nextSkinIndex = hasRemainingOverrides
+                ? skinOptions.value.findIndex((option) => option.skinVariantId === currentOption.skinVariantId)
+                : skinOptions.value.findIndex((option) => option.skinName === currentOption.skinName && !option.skinVariantId);
+            selectedSkinIndex.value = nextSkinIndex >= 0 ? nextSkinIndex : 0;
+            applySelectedSkinOptionState();
+        } else {
+            setSkinAtlasOverride(pageKey, null);
+        }
+
+        await applyCurrentCustomization({
+            includeAnimation: false,
+            includeSkin: true,
+            includeAtlasOverrides: true,
+        });
+    } finally {
+        setSkinAtlasProcessing(false);
+    }
+
+    massage(t('projectView.customizer.messages.skinAtlasCleared'), 'success', 2000);
+};
+
+const applySelectedTextureOverride = async () => {
+    if (selectedSlotNames.value.length === 0) {
+        massage(t('projectView.customizer.messages.selectSlotFirst'), 'error', 2000);
+        return;
+    }
+
+    const selected = await open({
+        filters: [
+            {
+                name: 'Image',
+                extensions: ['png', 'jpg', 'jpeg', 'webp'],
+            },
+        ],
+        multiple: false,
+    });
+
+    if (!selected || Array.isArray(selected)) {
+        return;
+    }
+
+    try {
+        const textureOverride = await importCustomSkinImage(selected);
+        selectedSlotNames.value.forEach((slotName) => {
+            const slotData = slotOptions.value.find((slot) => slot.name === slotName);
+            const nextOverride = { ...textureOverride };
+            if (slotData) {
+                slotData.textureOverride = nextOverride;
+            }
+            setSlotCustomization(slotName, { textureOverride: nextOverride });
+        });
+
+        applySlotCustomizationBatch(selectedSlotNames.value);
+        massage(
+            t('projectView.customizer.messages.customSkinApplied', { count: selectedSlotNames.value.length }),
+            'success',
+            2000
+        );
+    } catch (error) {
+        console.error('导入自定义 Spine 贴图失败:', error);
+        massage(t('projectView.customizer.messages.customSkinFailed'), 'error', 2000);
+    }
+};
+
+const clearSelectedTextureOverride = () => {
+    if (selectedSlotNames.value.length === 0) {
+        return;
+    }
+
+    selectedSlotNames.value.forEach((slotName) => {
+        const slotData = slotOptions.value.find((slot) => slot.name === slotName);
+        if (slotData) {
+            slotData.textureOverride = null;
+        }
+        setSlotCustomization(slotName, { textureOverride: null });
+    });
+
+    applySlotCustomizationBatch(selectedSlotNames.value);
+    massage(t('projectView.customizer.messages.customSkinCleared'), 'success', 2000);
 };
 
 const openBulkSelectDialog = () => {
@@ -2284,6 +2809,121 @@ const handleResetShader = () => {
     margin-bottom: 8px;
     font-size: 12px;
     color: var(--floating-panel-soft-text);
+}
+
+.slot-skin-section {
+    margin-top: 14px;
+}
+
+.slot-skin-processing {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+    padding: 8px 10px;
+    border-radius: 8px;
+    border: 1px solid var(--floating-panel-chip-border);
+    background: var(--floating-panel-chip-bg);
+    color: var(--floating-panel-text);
+    font-size: 12px;
+}
+
+.slot-skin-processing-text {
+    color: var(--floating-panel-muted-text);
+}
+
+.slot-skin-spinner {
+    width: 14px;
+    height: 14px;
+    flex-shrink: 0;
+    border-radius: 50%;
+    border: 2px solid color-mix(in srgb, var(--floating-panel-accent-border) 60%, transparent);
+    border-top-color: var(--floating-panel-text);
+    animation: slot-skin-spin 0.7s linear infinite;
+}
+
+@keyframes slot-skin-spin {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.slot-skin-summary {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+    color: var(--floating-panel-text);
+    font-size: 12px;
+    line-height: 1.5;
+}
+
+.slot-skin-summary + .slot-skin-summary {
+    margin-top: 6px;
+}
+
+.slot-skin-summary-label {
+    flex-shrink: 0;
+    color: var(--floating-panel-soft-text);
+}
+
+.slot-skin-summary-value {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    color: var(--floating-panel-text);
+}
+
+.slot-skin-summary-hint {
+    color: var(--floating-panel-muted-text);
+}
+
+.slot-skin-page-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 12px;
+}
+
+.slot-skin-page-item {
+    padding: 10px;
+    border-radius: 8px;
+    background: var(--floating-panel-chip-bg);
+    border: 1px solid var(--floating-panel-chip-border);
+}
+
+.slot-skin-page-header {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 0;
+}
+
+.slot-skin-page-name {
+    color: var(--floating-panel-text);
+    font-size: 12px;
+    font-weight: 600;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.slot-skin-page-file {
+    color: var(--floating-panel-muted-text);
+    font-size: 11px;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.slot-batch-actions-compact {
+    margin-top: 10px;
 }
 
 .slot-name-input {

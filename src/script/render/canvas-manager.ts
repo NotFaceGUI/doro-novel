@@ -474,7 +474,7 @@ class CanvasManager {
         }
 
         if (characterInfo.character.customization) {
-            applySpineCustomization(spine, characterInfo.character.customization);
+            void applySpineCustomization(spine, characterInfo.character.customization);
         }
 
         console.log("所有动画：", spine.state.data.skeletonData.animations);
