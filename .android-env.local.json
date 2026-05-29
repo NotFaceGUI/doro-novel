@@ -1,0 +1,8 @@
+{
+  "androidHome": "E:\\Software\\Android",
+  "androidSdkRoot": "E:\\Software\\Android",
+  "javaHome": "C:\\Program Files\\Android\\Android Studio\\jbr",
+  "ndkHome": "E:\\Software\\Android\\ndk\\27.0.12077973",
+  "rustupHome": "E:\\RustAscii\\.rustup",
+  "cargoHome": "E:\\RustAscii\\.cargo"
+}
