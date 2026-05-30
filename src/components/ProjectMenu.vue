@@ -28,8 +28,16 @@
                     <li>{{ t('menu.importResource') }}<span class="keyword">Shift + Space</span></li>
                 </ul>
             </li>
-            <li @click.stop="toggleDropdown(2)">{{ t('menu.help') }}
+            <li @click.stop="toggleDropdown(2)">{{ t('menu.operation') }}
                 <ul v-show="dropdowns[2]" class="dropdown" @click.stop>
+                    <li @click.stop="requestPlay">{{ t('menu.play') }}<span class="keyword">Ctrl + Enter</span></li>
+                    <li @click.stop="requestToggleFullscreen">{{ t('menu.toggleFullscreen') }}<span class="keyword">F11</span></li>
+                    <hr />
+                    <li @click.stop="requestBulkSelect">{{ t('menu.bulkSelect') }}<span class="keyword">Ctrl + Shift + F</span></li>
+                </ul>
+            </li>
+            <li @click.stop="toggleDropdown(3)">{{ t('menu.help') }}
+                <ul v-show="dropdowns[3]" class="dropdown" @click.stop>
                     <li>{{ t('menu.viewHelp') }}</li>
                     <li>{{ t('menu.onlineDocs') }}</li>
                     <li>{{ t('menu.faq') }}</li>
@@ -38,8 +46,8 @@
                     <li @click.stop="showAboutDialog">{{ t('menu.about') }}</li>
                 </ul>
             </li>
-            <li @click.stop="toggleDropdown(3)">{{ t('menu.theme') }}
-                <ul v-show="dropdowns[3]" class="dropdown dropdown-right" @click.stop>
+            <li @click.stop="toggleDropdown(4)">{{ t('menu.theme') }}
+                <ul v-show="dropdowns[4]" class="dropdown dropdown-right" @click.stop>
                     <li
                         v-for="themeOption in themeOptions"
                         :key="themeOption.value"
@@ -54,8 +62,8 @@
                     </li>
                 </ul>
             </li>
-            <li @click.stop="toggleDropdown(4)">{{ t('language.menu') }}
-                <ul v-show="dropdowns[4]" class="dropdown dropdown-right" @click.stop>
+            <li @click.stop="toggleDropdown(5)">{{ t('language.menu') }}
+                <ul v-show="dropdowns[5]" class="dropdown dropdown-right" @click.stop>
                     <li
                         v-for="locale in localeOptions"
                         :key="locale.value"
@@ -99,9 +107,10 @@ import { getCurrentLocale, setLocale } from '../locales/i18n';
 import { SUPPORTED_LOCALES, type SupportedLocale } from '../utils/i18n-loader';
 import { getCharacterId, getCharacterResourceKey } from '../utils/character';
 import { APP_THEMES, useThemeStore, type AppTheme } from '../stores/theme-store';
+import { dispatchOperation } from '../script/ui/operation-events';
 
 const { t } = useI18n();
-const dropdowns = reactive([false, false, false, false, false]);
+const dropdowns = reactive([false, false, false, false, false, false]);
 const currentLocale = ref<SupportedLocale>(getCurrentLocale());
 const localeOptions = computed(() => SUPPORTED_LOCALES.map((value) => ({
     value,
@@ -524,6 +533,21 @@ const changeTheme = async (theme: AppTheme, event: MouseEvent) => {
     }
 };
 
+const requestPlay = () => {
+    dispatchOperation('play');
+    closeAllDropdowns();
+};
+
+const requestToggleFullscreen = () => {
+    dispatchOperation('toggleFullscreen');
+    closeAllDropdowns();
+};
+
+const requestBulkSelect = () => {
+    dispatchOperation('bulkSelect');
+    closeAllDropdowns();
+};
+
 const handleClickOutside = (event: MouseEvent) => {
     const menu = document.querySelector('.project-menu');
     if (menu && !menu.contains(event.target as Node)) {
@@ -535,7 +559,7 @@ const handleClickOutside = (event: MouseEvent) => {
 const showAboutDialog = () => {
     isAboutDialogVisible.value = true;
     // 关闭下拉菜单
-    dropdowns[2] = false;
+    dropdowns[3] = false;
 };
 
 // 关闭关于我们弹窗
@@ -547,7 +571,7 @@ const closeAboutDialog = () => {
 const showWatermarkDialog = () => {
     isWatermarkDialogVisible.value = true;
     // 关闭下拉菜单
-    dropdowns[2] = false;
+    dropdowns[3] = false;
 };
 
 // 关闭水印设置弹窗
@@ -567,7 +591,7 @@ const executeUpdateSpine = async () => {
     }
 
     // 关闭下拉菜单
-    dropdowns[2] = false;
+    dropdowns[3] = false;
 };
 
 onMounted(() => {

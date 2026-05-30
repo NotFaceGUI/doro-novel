@@ -434,7 +434,7 @@
                 ⚙️
             </div>
 
-            <div class="full-screen" v-if="activeTab != 'script'" :style="'opacity:' + (isFullScreen ? 0.2 : 0.8)"
+            <div class="full-screen" v-if="activeTab != 'script'" title="F11" :style="'opacity:' + (isFullScreen ? 0.2 : 0.8)"
                 @click="fullScreen">
                 🔲
             </div>
@@ -485,6 +485,7 @@ import { collectSpineAtlasPages, importCustomSkinImage, type SpineAtlasPageInfo 
 import { useCharacterConfigStore } from '../stores/character-config-store';
 import { getCharacterId, getCharacterResourceKey } from '../utils/character';
 import { getCharacterDisplayName } from '../utils/character-name';
+import { OPERATION_EVENTS } from '../script/ui/operation-events';
 
 const { t } = useI18n();
 
@@ -1407,7 +1408,17 @@ const fullScreen = async () => {
     }
 }
 
-const handlePreviewShortcuts = (event: KeyboardEvent) => {
+const handleProjectShortcuts = (event: KeyboardEvent) => {
+    if (event.key === 'F11' || event.code === 'F11') {
+        event.preventDefault();
+        event.stopPropagation();
+
+        if (!event.repeat && !event.ctrlKey && !event.metaKey && !event.altKey && !event.shiftKey) {
+            void fullScreen();
+        }
+        return;
+    }
+
     if (activeTab.value !== 'preview' || !showCanvas.value) {
         return;
     }
@@ -1416,6 +1427,18 @@ const handlePreviewShortcuts = (event: KeyboardEvent) => {
         event.preventDefault();
         openBulkSelectDialog();
     }
+};
+
+const handleToggleFullscreenRequest = () => {
+    void fullScreen();
+};
+
+const handleBulkSelectRequest = () => {
+    if (activeTab.value !== 'preview' || !showCanvas.value) {
+        return;
+    }
+
+    openBulkSelectDialog();
 };
 
 onMounted(() => {
@@ -1430,7 +1453,9 @@ onMounted(() => {
 
     // 监听窗口大小变化，动态更新 Pixi 应用大小
     window.addEventListener('resize', handelResizeCanvasToPreview);
-    window.addEventListener('keydown', handlePreviewShortcuts);
+    window.addEventListener('keydown', handleProjectShortcuts, true);
+    window.addEventListener(OPERATION_EVENTS.toggleFullscreen, handleToggleFullscreenRequest);
+    window.addEventListener(OPERATION_EVENTS.bulkSelect, handleBulkSelectRequest);
 })
 
 watch(() => actionStore.isEditMode, () => {
@@ -1480,7 +1505,9 @@ onUnmounted(() => {
     slotOutlineContainer = null;
     stopShaderWindowDrag();
     window.removeEventListener('resize', handelResizeCanvasToPreview)
-    window.removeEventListener('keydown', handlePreviewShortcuts)
+    window.removeEventListener('keydown', handleProjectShortcuts, true)
+    window.removeEventListener(OPERATION_EVENTS.toggleFullscreen, handleToggleFullscreenRequest)
+    window.removeEventListener(OPERATION_EVENTS.bulkSelect, handleBulkSelectRequest)
 });
 
 // 更新动画选项列表

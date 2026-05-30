@@ -148,58 +148,61 @@ export const useActionStore = defineStore('action', () => {
     gameMode.value = GameMode.PLAY;
     CanvasManager.getInstance().setMode(GameMode.PLAY);
 
-    let nextActionKey = null;  // 跟踪下一个 action 的 key
-    let nextActionItemId: string | null = null;  // 跟踪下一个 actionItem 的 id
+    try {
+      let nextActionKey = null;  // 跟踪下一个 action 的 key
+      let nextActionItemId: string | null = null;  // 跟踪下一个 actionItem 的 id
 
-    // 遍历 actionMap 中所有 Actions
-    for (const key in actionMap.value) {
-      // 如果指定了 nextActionKey，就跳过不相关的 actions
-      if (nextActionKey && nextActionKey !== key) {
-        continue;
-      }
-
-      nextActionKey = null
-
-      const actions: Actions = actionMap.value[key];
-      if (!actions) continue;
-
-      // 遍历当前 Actions 的每个 ActionItems
-      for (const item of actions.as) {
-        // 如果指定了 nextActionItemId，就跳过不相关的 actionItems
-        if (nextActionItemId !== null && item.id.toString() != nextActionItemId) {
+      // 遍历 actionMap 中所有 Actions
+      for (const key in actionMap.value) {
+        // 如果指定了 nextActionKey，就跳过不相关的 actions
+        if (nextActionKey && nextActionKey !== key) {
           continue;
         }
 
-        nextActionItemId = null;
+        nextActionKey = null
 
-        if (typeof item.action === 'function') {
-          const result = item.action();
-          console.log("当前ActionItem:", item)
-          console.log("当前ActionItem的结果:", result)
+        const actions: Actions = actionMap.value[key];
+        if (!actions) continue;
 
-          if (item.wait) {
-            await Promise.resolve(result);
-          } else {
-            // fire-and-forget，不等待
-            Promise.resolve(result);
+        // 遍历当前 Actions 的每个 ActionItems
+        for (const item of actions.as) {
+          // 如果指定了 nextActionItemId，就跳过不相关的 actionItems
+          if (nextActionItemId !== null && item.id.toString() != nextActionItemId) {
+            continue;
           }
 
-          if (item.nextActionTitle) {
-            console.log("切换到下一个 Action:", item.nextActionTitle);
-            nextActionKey = item.nextActionTitle;
-            break;
-          }
+          nextActionItemId = null;
 
-          if (item.next) {
-            console.log("跳出当前 Action，继续下一个 ActionItem:", item.next);
-            nextActionItemId = item.next;
+          if (typeof item.action === 'function') {
+            const result = item.action();
+            console.log("当前ActionItem:", item)
+            console.log("当前ActionItem的结果:", result)
 
+            if (item.wait) {
+              await Promise.resolve(result);
+            } else {
+              // fire-and-forget，不等待
+              Promise.resolve(result);
+            }
+
+            if (item.nextActionTitle) {
+              console.log("切换到下一个 Action:", item.nextActionTitle);
+              nextActionKey = item.nextActionTitle;
+              break;
+            }
+
+            if (item.next) {
+              console.log("跳出当前 Action，继续下一个 ActionItem:", item.next);
+              nextActionItemId = item.next;
+
+            }
           }
         }
       }
+    } finally {
+      // 播放结束，设置播放状态为 false
+      isPlaying.value = false;
     }
-    // 播放结束，设置播放状态为 false
-    isPlaying.value = false;
   }
 
   function setPreviewSnapshot(modification: Modification) {

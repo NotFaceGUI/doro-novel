@@ -24,6 +24,7 @@
   "menu": {
     "project": "Project (P)",
     "edit": "Edit (E)",
+    "operation": "Operation (O)",
     "help": "Help (H)",
     "theme": "Theme (T)",
     "themeDark": "Dark",
@@ -47,6 +48,9 @@
     "replace": "Replace",
     "openResourceFolder": "Open Resource Folder",
     "importResource": "Import Resource",
+    "play": "Play",
+    "toggleFullscreen": "Toggle Fullscreen",
+    "bulkSelect": "Batch Select Parts",
     "viewHelp": "View Help",
     "onlineDocs": "Online Docs",
     "faq": "FAQ",

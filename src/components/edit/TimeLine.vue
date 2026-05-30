@@ -10,7 +10,7 @@
             </span>
             <!-- <div>播放</div> -->
             <button class="play-button" @click="handlePlay">
-                <span class="play-icon">▶</span> {{ t('timeLine.play') }} <span class="shortcut-hint">[CTRL + Space]</span>
+                <span class="play-icon">▶</span> {{ t('timeLine.play') }} <span class="shortcut-hint">[Ctrl + Enter]</span>
             </button>
         </div>
         <Action @hover="handleTitle" v-for="(item, title) in actionStore.actionMap" @click="selectAction(title)"
@@ -42,6 +42,7 @@ import { useActionStore } from '../../stores/action-store';
 import ToggleSwitch from '../common/ToggleSwitch.vue';
 import CanvasManager from '../../script/render/canvas-manager';
 import { getCharacterId, getCharacterResourceKey } from '../../utils/character';
+import { OPERATION_EVENTS } from '../../script/ui/operation-events';
 
 const initAction = ref("Init Load Action")
 
@@ -85,10 +86,14 @@ const handlePlay = async () => {
     // showMessage("开始播放", "success", 1500);
     console.log("开始播放");
 
-    // 取消一些内容的显示如切换 
-    await actionStore.runAllActions();
-    // showMessage("播放借宿", "success", 1500);
-    console.log("播放结束");
+    try {
+        // 取消一些内容的显示如切换 
+        await actionStore.runAllActions();
+        // showMessage("播放借宿", "success", 1500);
+        console.log("播放结束");
+    } catch (err) {
+        console.error("播放失败:", err);
+    }
 };
 
 const handleDrop = async (event: DragEvent) => {
@@ -189,15 +194,37 @@ const createAction = () => {
     // }
 }
 
+const isEditableTarget = (target: EventTarget | null) => {
+    const element = target as HTMLElement | null;
+
+    return !!element && (
+        element.tagName === 'INPUT' ||
+        element.tagName === 'TEXTAREA' ||
+        element.tagName === 'SELECT' ||
+        element.isContentEditable
+    );
+};
+
+const isPlayShortcut = (event: KeyboardEvent) => {
+    const primaryModifier = event.ctrlKey || event.metaKey;
+    const isEnter = event.code === 'Enter' || event.key === 'Enter';
+
+    return primaryModifier && !event.altKey && !event.shiftKey && isEnter;
+};
+
 // 处理键盘快捷键
 const handleKeyDown = (event: KeyboardEvent) => {
-    // Ctrl + 空格作为播放快捷键
-
-    if (event.code === 'Space' && event.ctrlKey && !event.altKey && !event.shiftKey) {
-        console.log("Ctrl + Space 被按下");
-        event.preventDefault(); // 防止滚动或其他默认行为
-        handlePlay();
+    if (event.repeat || isEditableTarget(event.target) || !isPlayShortcut(event)) {
+        return;
     }
+
+    event.preventDefault(); // 防止滚动或其他默认行为
+    event.stopPropagation();
+    void handlePlay();
+};
+
+const handlePlayRequest = () => {
+    void handlePlay();
 };
 
 
@@ -205,13 +232,15 @@ const handleKeyDown = (event: KeyboardEvent) => {
 onMounted(() => {
     createAction();
     // 添加键盘事件监听器
-    window.addEventListener('keydown', handleKeyDown);
+    window.addEventListener('keydown', handleKeyDown, true);
+    window.addEventListener(OPERATION_EVENTS.play, handlePlayRequest);
 
 });
 
 onUnmounted(() => {
     // 移除键盘事件监听器
-    window.removeEventListener('keydown', handleKeyDown);
+    window.removeEventListener('keydown', handleKeyDown, true);
+    window.removeEventListener(OPERATION_EVENTS.play, handlePlayRequest);
 });
 
 </script>

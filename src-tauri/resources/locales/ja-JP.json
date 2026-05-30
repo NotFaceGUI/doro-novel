@@ -24,6 +24,7 @@
   "menu": {
     "project": "プロジェクト(P)",
     "edit": "編集(E)",
+    "operation": "操作(O)",
     "help": "ヘルプ(H)",
     "theme": "テーマ(T)",
     "themeDark": "ダーク",
@@ -47,6 +48,9 @@
     "replace": "置換",
     "openResourceFolder": "リソースフォルダを開く",
     "importResource": "リソースをインポート",
+    "play": "再生",
+    "toggleFullscreen": "全画面切り替え",
+    "bulkSelect": "パーツ一括選択",
     "viewHelp": "ヘルプを見る",
     "onlineDocs": "オンラインドキュメント",
     "faq": "よくある質問",

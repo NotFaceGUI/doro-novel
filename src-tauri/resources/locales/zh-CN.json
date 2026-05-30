@@ -24,6 +24,7 @@
   "menu": {
     "project": "项目(P)",
     "edit": "编辑(E)",
+    "operation": "操作(O)",
     "help": "帮助(H)",
     "theme": "主题(T)",
     "themeDark": "深色",
@@ -47,6 +48,9 @@
     "replace": "替换",
     "openResourceFolder": "打开资源文件夹",
     "importResource": "导入资源",
+    "play": "播放",
+    "toggleFullscreen": "切换全屏",
+    "bulkSelect": "批量选择部件",
     "viewHelp": "查看帮助",
     "onlineDocs": "在线文档",
     "faq": "常见问题",
