@@ -290,6 +290,199 @@ export const WaitTagHandler: TagHandler = {
 };
 
 /**
+ * 动画标签处理器
+ * 在对话过程中控制场景中任意角色的 Spine 动画，可控制循环与非循环、延迟播放、承接上一个同角色动画。
+ * 非循环动画播放完毕后会自动恢复该角色在标签触发前的循环动画（无则恢复 idle）。
+ *
+ * 用法(位置参数): <anim:角色名,动画名,循环,延迟ms/>
+ * 用法(键值参数): <anim:char:角色名,animation:动画名,loop:false,delay:500,queue:true,prev:idle/>
+ * 示例:
+ *   <anim:红冬,idle/>                       -> 让红冬循环播放 idle
+ *   <anim:红冬,attack,false/>                -> 让红冬播放一次 attack 后恢复
+ *   <anim:红冬,attack,false,500/>            -> 延迟500ms后播放一次 attack
+ *   <anim:红冬,attack2,false,queue:true/>    -> 等上一个同角色 anim 动画播完后再播 attack2
+ *   <anim:char:c030,animation:delight,loop:false/>  -> c030 播放一次 delight 后恢复
+ *   <anim:char:c030,animation:delight,loop:false,prev:idle/> -> 播完后恢复到指定 idle
+ *   <anim:char:红冬,animation:attack,loop:false,delay:500,queue:true/>
+ *
+ * 参数说明:
+ *   loop  : 省略或非 "false" 均视为循环播放。非循环动画播完恢复基础动画(idle)。
+ *   delay : 延迟播放的毫秒数，默认 0。
+ *   queue : true 时承接上一个同角色的 anim 标签动画播放完毕后再播放(仅对上一个非循环动画有效)。
+ *   prev  : 指定非循环动画播放完毕后恢复到的动画名，覆盖默认的"标签触发前的当前动画"。
+ *
+ * 角色匹配: 依次用 显示名(别名/翻译) / characterName / characterId 匹配场景角色。
+ */
+export const AnimTagHandler: TagHandler = {
+    name: 'anim',
+    wait: false,
+    async execute(attributes: string, _context: TagExecutionContext): Promise<void> {
+        const { useActionStore } = await import('../../stores/action-store');
+        const { getCharacterDisplayName } = await import('../../utils/character-name');
+        const { getCharacterId } = await import('../../utils/character');
+
+        const actionStore = useActionStore();
+
+        // 解析参数：兼容位置参数与键值参数混合
+        // 键值键白名单（避免把角色名/动画名中的冒号误判为键值）
+        const KV_KEYS = ['char', 'animation', 'loop', 'delay', 'queue', 'prev'];
+        const parts = attributes.split(',').map(v => v.trim()).filter(v => v);
+        const kvMap = new Map<string, string>();
+        const positional: string[] = [];
+
+        for (const part of parts) {
+            const colonIdx = part.indexOf(':');
+            const key = colonIdx !== -1 ? part.substring(0, colonIdx).trim() : '';
+            if (key && KV_KEYS.includes(key)) {
+                kvMap.set(key, part.substring(colonIdx + 1).trim());
+            } else {
+                positional.push(part);
+            }
+        }
+
+        const charName = (kvMap.get('char') || positional[0] || '').trim();
+        const animationName = (kvMap.get('animation') || positional[1] || '').trim();
+        const loop = (kvMap.get('loop') || positional[2] || 'true').toLowerCase() !== 'false';
+        const delayMs = parseInt(kvMap.get('delay') || positional[3] || '0') || 0;
+        const queue = (kvMap.get('queue') || 'false').toLowerCase() === 'true';
+        const prevAnim = (kvMap.get('prev') || '').trim();
+
+        if (!charName || !animationName) {
+            console.warn('[anim标签] 缺少角色名或动画名');
+            return;
+        }
+
+        // 在场景角色中查找匹配的角色
+        const targetCharacter = actionStore.maxCharacter.find(char => {
+            const displayName = getCharacterDisplayName(char.character);
+            const id = getCharacterId(char.character);
+            return displayName === charName ||
+                char.character.characterName === charName ||
+                id === charName;
+        });
+
+        if (!targetCharacter?.spine?.state) {
+            console.warn(`[anim标签] 未在场景中找到角色: ${charName}`);
+            return;
+        }
+
+        const spine = targetCharacter.spine;
+        const characterId = getCharacterId(targetCharacter.character);
+
+        // 检查动画是否存在
+        if (!spine.state.data.skeletonData.findAnimation(animationName)) {
+            console.warn(`[anim标签] 角色 ${charName} 没有动画: ${animationName}`);
+            return;
+        }
+
+        // 与对话系统对齐：首次操作该角色时，为其所有动画对预设全局 mix（参考 animation-config.ts:192-202）
+        // 这样无论从哪个动画切到哪个动画都有平滑过渡
+        const ANIM_MIX_DURATION = 0.2;
+        if (!animMixInitialized.has(characterId)) {
+            const animations = spine.state.data.skeletonData.animations;
+            animations.forEach((anim: any) => {
+                animations.forEach((targetAnim: any) => {
+                    if (anim !== targetAnim && spine.state.data.setMix) {
+                        spine.state.data.setMix(anim.name, targetAnim.name, ANIM_MIX_DURATION);
+                    }
+                });
+            });
+            animMixInitialized.add(characterId);
+        }
+
+        // 实际播放动画的逻辑（与对话系统 ui-render.ts:932-957 同轨道同方式切换）
+        const playAnim = () => {
+            // 获取当前轨道0的动画（实时读取，不依赖过时记录）
+            const currentTrack = spine.state.tracks?.[0] as any;
+            const currentAnimation = currentTrack?.animation;
+            const currentAnimationName = currentAnimation?.name;
+
+            // 与对话系统一致：当前已经在播放该动画则不重复触发
+            if (currentAnimationName === animationName) {
+                return;
+            }
+
+            if (loop) {
+                // 循环播放：直接在轨道0设置（与对话系统 ui-render.ts:948 一致）
+                spine.state.setAnimation(0, animationName, true);
+                console.log(`[anim标签] 角色 ${charName} 循环播放动画: ${animationName}`);
+            } else {
+                // 非循环播放：播放一次后用 addAnimation 排队恢复
+                // 恢复目标优先级：prev 指定 > 标签触发前的当前动画 > idle
+                let baseAnim: string | undefined;
+                if (prevAnim) {
+                    // 用户指定了恢复动画，校验是否存在
+                    if (spine.state.data.skeletonData.findAnimation(prevAnim)) {
+                        baseAnim = prevAnim;
+                    } else {
+                        console.warn(`[anim标签] 角色 ${charName} 的 prev 动画不存在: ${prevAnim}，回退到当前动画`);
+                    }
+                }
+                if (!baseAnim) {
+                    baseAnim = currentAnimationName;
+                }
+                if (!baseAnim && spine.state.hasAnimation('idle')) {
+                    baseAnim = 'idle';
+                }
+
+                // 播放一次目标动画（与对话系统 ui-render.ts:950 一致）
+                spine.state.setAnimation(0, animationName, false);
+
+                if (baseAnim) {
+                    // 用 addAnimation 排队恢复：Spine 在非循环动画结束后自动切回
+                    // 关键：若期间对话系统在轨道0设了新动画，会自动清除这个排队——正好不打扰后续状态
+                    spine.state.addAnimation(0, baseAnim, true, 0);
+                    console.log(`[anim标签] 角色 ${charName} 播放一次动画: ${animationName}，结束后恢复 ${baseAnim}`);
+                } else {
+                    console.warn(`[anim标签] 角色 ${charName} 播放一次动画: ${animationName}，无基础动画可恢复且无 idle`);
+                }
+            }
+        };
+
+        // 异步执行：queue 等待上一个同角色 anim 动画完成 -> delay 延迟 -> 播放
+        // wait:false 时 handler 不阻塞对话文字显示，内部异步逻辑自行运转
+        const runAnimation = async (): Promise<void> => {
+            // 1. queue: 承接上一个同角色 anim 动画播放完毕
+            if (queue) {
+                const prevPromise = animChainPromise.get(characterId);
+                if (prevPromise) {
+                    await prevPromise;
+                }
+            }
+
+            // 2. delay: 延迟播放
+            if (delayMs > 0) {
+                await new Promise<void>(resolve => setTimeout(resolve, delayMs));
+            }
+
+            // 3. 播放动画
+            playAnim();
+
+            // 4. 非循环动画：等动画播完才算结束（用于下一个 queue 承接）
+            if (!loop) {
+                const duration = spine.state.data.skeletonData.findAnimation(animationName)?.duration || 1;
+                await new Promise<void>(resolve => setTimeout(resolve, duration * 1000));
+            }
+        };
+
+        // 启动并记录 chain promise（供下一个 queue:true 承接）
+        const chainPromise = runAnimation();
+        if (!loop) {
+            // 非循环动画记录完成 promise，下一个同角色 queue 会等待它
+            animChainPromise.set(characterId, chainPromise);
+        } else {
+            // 循环动画没有"播放完毕"概念，清除 chain（下一个 queue 不必等待）
+            animChainPromise.delete(characterId);
+        }
+    }
+};
+
+// 存储每个角色上一个非循环 anim 标签动画的完成 Promise（用于 queue 承接）
+const animChainPromise = new Map<string, Promise<void>>();
+// 记录哪些角色已预设过全局动画 mix（与对话系统 animation-config.ts 全局 mix 对齐）
+const animMixInitialized = new Set<string>();
+
+/**
  * 解析标签属性
  * 将 "key1:value1,key2:value2" 格式的字符串解析为 Map
  */
@@ -329,6 +522,7 @@ TextTagHandlerManager.registerHandler(RotateTagHandler);
 TextTagHandlerManager.registerHandler(SoundTagHandler);
 TextTagHandlerManager.registerHandler(PauseTagHandler);
 TextTagHandlerManager.registerHandler(WaitTagHandler);
+TextTagHandlerManager.registerHandler(AnimTagHandler);
 
 // 导出便捷函数
 export const executeTextTag = TextTagHandlerManager.executeTag;

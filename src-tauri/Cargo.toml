@@ -1,6 +1,6 @@
 [package]
 name = "doro-novel"
-version = "0.7.3"
+version = "0.7.4"
 description = "A visual novel editor designed for creating Nikke-style interactive visual novels"
 authors = ["ghost"]
 edition = "2021"
