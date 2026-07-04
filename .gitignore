@@ -26,3 +26,11 @@ dist-ssr
 *node_modules*/*
 *.psd
 .VsCodeCounter
+
+# 本地开发文档（不纳入版本控制）
+LOCAL_CHARACTER_UPDATE.md
+
+# 本地资源 patch 包（不纳入版本控制）
+resource_patch_*/
+resource_patch_*.zip
+*.baiduyun.uploading.cfg

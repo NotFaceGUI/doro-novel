@@ -36,7 +36,7 @@
                 </div>
             </div>
 
-            <div class="project-preview" v-show="activeTab == 'preview'">
+            <div class="project-preview" :class="{ 'panels-collapsed': panelsCollapsed }" v-show="activeTab == 'preview'">
                 <img ref="imgRef" src="" alt="" srcset="" v-show="showImage">
                 <video ref="videoRef" src="" v-show="showVideo" autoplay controls loop muted></video>
                 <span v-show="showText">{{ t('projectView.unsupportedPreview') }}</span>
@@ -129,7 +129,7 @@
                 </div>
 
                 <!-- 插槽控制组件 -->
-                <div>
+                <div class="slot-control-wrapper">
                     <SlotControl v-if="showCanvas && slotOptions.length > 0" :slots="slotOptions"
                         :active-hovered-slot="hoveredSlotName"
                         :selected-slots="selectedSlotNames"
@@ -419,6 +419,17 @@
                         </div>
                     </div>
                 </Transition>
+
+                <!-- 小屏面板收起/展开切换按钮 -->
+                <button
+                    v-show="showCanvas"
+                    class="preview-panels-toggle"
+                    :class="{ 'is-collapsed': panelsCollapsed }"
+                    @click="panelsCollapsed = !panelsCollapsed"
+                    title="展开/收起面板"
+                >
+                    <span class="preview-panels-toggle-icon">{{ panelsCollapsed ? '☰' : '✕' }}</span>
+                </button>
             </div>
 
             <div class="project-script" v-show="activeTab == 'script'">
@@ -492,6 +503,10 @@ const { t } = useI18n();
 const imgRef = ref<HTMLImageElement | null>(null);
 const videoRef = ref<HTMLVideoElement | null>(null);
 const projectView = ref<HTMLDivElement | null>(null)
+
+// 预览面板收起状态（默认收起，小屏自动收起）
+const panelsCollapsed = ref(true);
+let panelsResizeObserver: ResizeObserver | null = null;
 
 // 水印设置
 const wm = useWatermarkStore();
@@ -1456,6 +1471,19 @@ onMounted(() => {
     window.addEventListener('keydown', handleProjectShortcuts, true);
     window.addEventListener(OPERATION_EVENTS.toggleFullscreen, handleToggleFullscreenRequest);
     window.addEventListener(OPERATION_EVENTS.bulkSelect, handleBulkSelectRequest);
+
+    // 小屏自动收起预览面板（大屏保留用户手动状态）
+    const updatePanelsCollapsed = () => {
+        const w = projectView.value?.offsetWidth ?? window.innerWidth;
+        if (w < 760) {
+            panelsCollapsed.value = true;
+        }
+    };
+    updatePanelsCollapsed();
+    if (projectView.value && 'ResizeObserver' in window) {
+        panelsResizeObserver = new ResizeObserver(updatePanelsCollapsed);
+        panelsResizeObserver.observe(projectView.value);
+    }
 })
 
 watch(() => actionStore.isEditMode, () => {
@@ -1508,6 +1536,8 @@ onUnmounted(() => {
     window.removeEventListener('keydown', handleProjectShortcuts, true)
     window.removeEventListener(OPERATION_EVENTS.toggleFullscreen, handleToggleFullscreenRequest)
     window.removeEventListener(OPERATION_EVENTS.bulkSelect, handleBulkSelectRequest)
+    panelsResizeObserver?.disconnect();
+    panelsResizeObserver = null;
 });
 
 // 更新动画选项列表
@@ -2700,6 +2730,62 @@ const handleResetShader = () => {
     -webkit-backdrop-filter: blur(10px);
     border: 1px solid var(--floating-panel-border);
     box-shadow: var(--floating-panel-shadow);
+}
+
+/* === 预览面板小屏收起（新增，不改动已有结构与样式） === */
+.preview-panels-toggle {
+    position: absolute;
+    left: 10px;
+    top: 10px;
+    z-index: 20;
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    border: 1px solid var(--floating-panel-border);
+    background: var(--floating-panel-bg);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    box-shadow: var(--floating-panel-shadow);
+    color: var(--floating-panel-text);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    padding: 0;
+    transition: opacity .25s ease, transform .25s ease, background .2s ease;
+}
+
+.preview-panels-toggle:hover {
+    background: var(--high-hover-bg, rgba(255, 255, 255, 0.08));
+}
+
+.preview-panels-toggle-icon {
+    font-size: 16px;
+    line-height: 1;
+    pointer-events: none;
+}
+
+.project-preview .animation-selector,
+.project-preview .skin-selector,
+.project-preview .character-type-selector,
+.project-preview .slot-batch-panel,
+.project-preview .slot-control-wrapper {
+    transition: opacity .25s ease, transform .25s ease;
+}
+
+.project-preview.panels-collapsed .animation-selector,
+.project-preview.panels-collapsed .skin-selector,
+.project-preview.panels-collapsed .character-type-selector {
+    opacity: 0;
+    transform: translateX(calc(100% + 20px));
+    pointer-events: none;
+}
+
+.project-preview.panels-collapsed .slot-batch-panel,
+.project-preview.panels-collapsed .slot-control-wrapper {
+    opacity: 0;
+    transform: translateX(calc(-100% - 20px));
+    pointer-events: none;
 }
 
 .slot-batch-header {

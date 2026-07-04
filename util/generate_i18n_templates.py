@@ -34,26 +34,26 @@ for lang, filename in languages.items():
         except Exception as e:
             print(f"读取文件 {filename} 时出错: {e}")
     
-    # 创建新的数据字典，保留已有翻译
-    new_data = {}
-    for key in keys:
-        if key in existing_data and existing_data[key]:
-            # 保留已有的翻译
-            new_data[key] = existing_data[key]
-        else:
-            # 对于中文语言文件，使用key作为默认值
-            # 对于其他语言文件，如果值为空，则使用key作为默认值
-            if lang == "zh-CN" or (lang != "zh-CN" and (key not in existing_data or not existing_data[key])):
-                new_data[key] = key
-            else:
-                # 保留其他语言文件中的空值
-                new_data[key] = existing_data.get(key, "")
-    
-    # 写入更新后的数据
+    # 纯增量更新：只追加缺失的 key，保留已有内容（含嵌套 UI 翻译）与原格式不变
+    if not existing_data and os.path.exists(target_file_path):
+        continue
+
+    missing = [k for k in keys if k not in existing_data]
+    if not missing:
+        print(f"✅ 文件: {filename} (无新增 key)")
+        continue
+
+    # 文本级末尾追加，避免重新序列化破坏原格式
     try:
+        with open(target_file_path, 'r', encoding='utf-8') as f:
+            text = f.read()
+        end_idx = text.rstrip().rfind('}')
+        prefix = text[:end_idx].rstrip()
+        insert_lines = ',\n' + ',\n'.join(f'  "{k}": "{k}"' for k in missing)
+        new_text = prefix + insert_lines + '\n}\n'
         with open(target_file_path, 'w', encoding='utf-8') as f:
-            json.dump(new_data, f, ensure_ascii=False, indent=2)
-        print(f"✅ 更新文件: {filename}")
+            f.write(new_text)
+        print(f"✅ 更新文件: {filename} (新增 {len(missing)} 个 key)")
     except Exception as e:
         print(f"写入文件 {filename} 时出错: {e}")
 
