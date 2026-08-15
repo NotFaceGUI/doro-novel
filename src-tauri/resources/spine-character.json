@@ -1062,7 +1062,21 @@
         "company": "ELYSION",
         "path": {
             "name": "c103",
-            "skel": "c103_00.skel"
+            "skel": "c103_00.skel",
+            "aimSkel": "c103_aim_00.skel",
+            "coverSkel": "c103_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c103_01",
+        "characterName": "c103_01",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c103_01",
+            "skel": "c103_01_00.skel",
+            "aimSkel": "c103_01_aim_00.skel",
+            "coverSkel": "c103_01_cover_00.skel"
         }
     },
     {
@@ -1082,7 +1096,21 @@
         "company": "ELYSION",
         "path": {
             "name": "c105",
-            "skel": "c105_00.skel"
+            "skel": "c105_00.skel",
+            "aimSkel": "c105_aim_00.skel",
+            "coverSkel": "c105_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c105_01",
+        "characterName": "c105_01",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c105_01",
+            "skel": "c105_01_00.skel",
+            "aimSkel": "c105_01_aim_00.skel",
+            "coverSkel": "c105_01_cover_00.skel"
         }
     },
     {
@@ -3344,6 +3372,18 @@
         }
     },
     {
+        "dirName": "c411_01",
+        "characterName": "c411_01",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c411_01",
+            "skel": "c411_01_00.skel",
+            "aimSkel": "c411_01_aim_00.skel",
+            "coverSkel": "c411_01_cover_00.skel"
+        }
+    },
+    {
         "dirName": "c412",
         "characterName": "c412",
         "quality": "sr",
@@ -3603,6 +3643,26 @@
             "skel": "c471_00.skel",
             "aimSkel": "c471_aim_00.skel",
             "coverSkel": "c471_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c472",
+        "characterName": "c472",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c472",
+            "skel": "c472_00.skel"
+        }
+    },
+    {
+        "dirName": "c473",
+        "characterName": "c473",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c473",
+            "skel": "c473_00.skel"
         }
     },
     {
@@ -4043,6 +4103,18 @@
             "skel": "c580_00.skel",
             "aimSkel": "c580_aim_00.skel",
             "coverSkel": "c580_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c580_01",
+        "characterName": "c580_01",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c580_01",
+            "skel": "c580_01_00.skel",
+            "aimSkel": "c580_01_aim_00.skel",
+            "coverSkel": "c580_01_cover_00.skel"
         }
     },
     {
@@ -5014,6 +5086,90 @@
         }
     },
     {
+        "dirName": "c870",
+        "characterName": "c870",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c870",
+            "skel": "c870_00.skel",
+            "aimSkel": "c870_aim_00.skel",
+            "coverSkel": "c870_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c870_01",
+        "characterName": "c870_01",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c870_01",
+            "skel": "c870_01_00.skel",
+            "aimSkel": "c870_01_aim_00.skel",
+            "coverSkel": "c870_01_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c870_02",
+        "characterName": "c870_02",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c870_02",
+            "skel": "c870_02_00.skel",
+            "aimSkel": "c870_02_aim_00.skel",
+            "coverSkel": "c870_02_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c871",
+        "characterName": "c871",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c871",
+            "skel": "c871_00.skel",
+            "aimSkel": "c871_aim_00.skel",
+            "coverSkel": "c871_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c871_01",
+        "characterName": "c871_01",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c871_01",
+            "skel": "c871_01_00.skel",
+            "aimSkel": "c871_01_aim_00.skel",
+            "coverSkel": "c871_01_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c871_02",
+        "characterName": "c871_02",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c871_02",
+            "skel": "c871_02_00.skel",
+            "aimSkel": "c871_02_aim_00.skel",
+            "coverSkel": "c871_02_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c872",
+        "characterName": "c872",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c872",
+            "skel": "c872_00.skel",
+            "aimSkel": "c872_aim_00.skel",
+            "coverSkel": "c872_cover_00.skel"
+        }
+    },
+    {
         "dirName": "c900",
         "characterName": "c900",
         "quality": "sr",
@@ -5386,6 +5542,16 @@
         }
     },
     {
+        "dirName": "c9029",
+        "characterName": "c9029",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c9029",
+            "skel": "c9029_00.skel"
+        }
+    },
+    {
         "dirName": "c902_01",
         "characterName": "c902_01",
         "quality": "sr",
@@ -5403,6 +5569,36 @@
         "path": {
             "name": "c903",
             "skel": "c903_00.skel"
+        }
+    },
+    {
+        "dirName": "c9030",
+        "characterName": "c9030",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c9030",
+            "skel": "c9030_00.skel"
+        }
+    },
+    {
+        "dirName": "c9031",
+        "characterName": "c9031",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c9031",
+            "skel": "c9031_00.skel"
+        }
+    },
+    {
+        "dirName": "c9032",
+        "characterName": "c9032",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c9032",
+            "skel": "c9032_00.skel"
         }
     },
     {
@@ -5446,6 +5642,26 @@
         }
     },
     {
+        "dirName": "c9038",
+        "characterName": "c9038",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c9038",
+            "skel": "c9038_00.skel"
+        }
+    },
+    {
+        "dirName": "c9039",
+        "characterName": "c9039",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c9039",
+            "skel": "c9039_00.skel"
+        }
+    },
+    {
         "dirName": "c903_01",
         "characterName": "c903_01",
         "quality": "sr",
@@ -5463,6 +5679,16 @@
         "path": {
             "name": "c904",
             "skel": "c904_00.skel"
+        }
+    },
+    {
+        "dirName": "c9040",
+        "characterName": "c9040",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c9040",
+            "skel": "c9040_00.skel"
         }
     },
     {
