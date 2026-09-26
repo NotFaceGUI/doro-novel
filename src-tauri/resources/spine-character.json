@@ -1086,7 +1086,9 @@
         "company": "ELYSION",
         "path": {
             "name": "c104",
-            "skel": "c104_00.skel"
+            "skel": "c104_00.skel",
+            "aimSkel": "c104_aim_00.skel",
+            "coverSkel": "c104_cover_00.skel"
         }
     },
     {
@@ -1339,6 +1341,18 @@
             "skel": "c140_02_00.skel",
             "aimSkel": "c140_02_aim_00.skel",
             "coverSkel": "c140_02_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c140_03",
+        "characterName": "c140_03",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c140_03",
+            "skel": "c140_03_00.skel",
+            "aimSkel": "c140_03_aim_00.skel",
+            "coverSkel": "c140_03_cover_00.skel"
         }
     },
     {
@@ -2646,6 +2660,18 @@
         }
     },
     {
+        "dirName": "c290_01",
+        "characterName": "c290_01",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c290_01",
+            "skel": "c290_01_00.skel",
+            "aimSkel": "c290_01_aim_00.skel",
+            "coverSkel": "c290_01_cover_00.skel"
+        }
+    },
+    {
         "dirName": "c291",
         "characterName": "c291",
         "quality": "sr",
@@ -3360,6 +3386,30 @@
         }
     },
     {
+        "dirName": "c404",
+        "characterName": "c404",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c404",
+            "skel": "c404_00.skel",
+            "aimSkel": "c404_aim_00.skel",
+            "coverSkel": "c404_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c405",
+        "characterName": "c405",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c405",
+            "skel": "c405_00.skel",
+            "aimSkel": "c405_aim_00.skel",
+            "coverSkel": "c405_cover_00.skel"
+        }
+    },
+    {
         "dirName": "c411",
         "characterName": "c411",
         "quality": "sr",
@@ -3927,6 +3977,18 @@
             "skel": "c521_00.skel",
             "aimSkel": "c521_aim_00.skel",
             "coverSkel": "c521_cover_00.skel"
+        }
+    },
+    {
+        "dirName": "c521_01",
+        "characterName": "c521_01",
+        "quality": "sr",
+        "company": "ELYSION",
+        "path": {
+            "name": "c521_01",
+            "skel": "c521_01_00.skel",
+            "aimSkel": "c521_01_aim_00.skel",
+            "coverSkel": "c521_01_cover_00.skel"
         }
     },
     {
